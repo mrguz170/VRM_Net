@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Core/">
+    <Project Path="VRM_PluginDemo.Core.Abstractions/VRM_PluginDemo.Core.Abstractions.csproj" />
+    <Project Path="VRM_PluginDemo.Core.Domain/VRM_PluginDemo.Core.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Host/">
+    <Project Path="VRM_PluginDemo.Blazor.Server/VRM_PluginDemo.Blazor.Server.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/">
+    <Project Path="VRM_PluginDemo.Modules.Prospectos/VRM_PluginDemo.Modules.Prospectos.csproj" Id="2a5c0220-7f39-475b-84a4-322516c0ddb0" />
+  </Folder>
+</Solution>

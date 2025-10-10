@@ -1,0 +1,158 @@
+﻿@page "/prospectos"
+@rendermode InteractiveServer
+@inject IProspectoService ProspectoService
+
+<PageTitle>Gestión de Prospectos</PageTitle>
+
+<h1>🏢 Gestión de Prospectos</h1>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>➕ Crear Nuevo Prospecto</h5>
+            </div>
+            <div class="card-body">
+                <EditForm Model="nuevoProspecto" OnValidSubmit="CrearProspecto">
+                    <div class="mb-3">
+                        <label class="form-label">Razón Social</label>
+                        <InputText @bind-Value="nuevoProspecto.RazonSocial" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">RFC</label>
+                        <InputText @bind-Value="nuevoProspecto.RFC" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Correo Electrónico</label>
+                        <InputText @bind-Value="nuevoProspecto.CorreoElectronico" class="form-control" type="email" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        <InputText @bind-Value="nuevoProspecto.Telefono" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Representante Legal</label>
+                        <InputText @bind-Value="nuevoProspecto.RepresentanteLegal" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Crear Prospecto</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5>📋 Lista de Prospectos</h5>
+            </div>
+            <div class="card-body">
+                @if (prospectos == null)
+                {
+                    <p>Cargando...</p>
+                }
+                else if (!prospectos.Any())
+                {
+                    <div class="alert alert-info">
+                        No hay prospectos registrados. Crea uno usando el formulario de la izquierda.
+                    </div>
+                }
+                else
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Razón Social</th>
+                                <th>RFC</th>
+                                <th>Estado</th>
+                                <th>Fecha Solicitud</th>
+                                <th>Revisiones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var prospecto in prospectos)
+                            {
+                                <tr>
+                                    <td>@prospecto.RazonSocial</td>
+                                    <td><code>@prospecto.RFC</code></td>
+                                    <td>
+                                        <span class="badge @ObtenerBadgeEstado(prospecto.Estado)">
+                                            @prospecto.Estado
+                                        </span>
+                                    </td>
+                                    <td>@prospecto.FechaSolicitud.ToShortDateString()</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary"
+                                                @onclick="() => AgregarRevisionPrueba(prospecto.Id)">
+                                            ➕ Agregar Revisión
+                                        </button>
+                                        <span class="badge bg-secondary ms-2">
+                                            @prospecto.Revisiones.Count revisiones
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Prospecto>? prospectos;
+    private Prospecto nuevoProspecto = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarProspectos();
+    }
+
+    private async Task CargarProspectos()
+    {
+        prospectos = await ProspectoService.ObtenerTodosAsync();
+    }
+
+    private async Task CrearProspecto()
+    {
+        nuevoProspecto.GiroEmpresarial = "Sin especificar";
+        nuevoProspecto.CorreoRepresentante = nuevoProspecto.CorreoElectronico;
+        nuevoProspecto.CreadoPor = "Sistema Demo";
+
+        await ProspectoService.CrearProspectoAsync(nuevoProspecto);
+
+        // Limpiar formulario
+        nuevoProspecto = new Prospecto();
+
+        // Recargar lista
+        await CargarProspectos();
+    }
+
+    private async Task AgregarRevisionPrueba(Guid prospectoId)
+    {
+        var revision = new RevisionArea
+        {
+            Area = "Legal",
+            Estado = EstadoRevision.Aprobado,
+            Comentarios = "Revisión de prueba automática",
+            RevisadoPor = "Sistema Demo",
+            FechaRevision = DateTime.UtcNow
+        };
+
+        await ProspectoService.AgregarRevisionAsync(prospectoId, revision);
+        await CargarProspectos();
+    }
+
+    private string ObtenerBadgeEstado(EstadoProspecto estado)
+    {
+        return estado switch
+        {
+            EstadoProspecto.EnRevision => "bg-warning",
+            EstadoProspecto.Aprobado => "bg-success",
+            EstadoProspecto.Rechazado => "bg-danger",
+            EstadoProspecto.PendienteDocumentacion => "bg-info",
+            EstadoProspecto.ConvertidoProveedor => "bg-primary",
+            _ => "bg-secondary"
+        };
+    }
+}

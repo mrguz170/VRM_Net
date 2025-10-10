@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "VRM_PluginDemo.Core.Abstractions": {
+      "commandName": "Project"
+    },
+    "Perfil 1": {
+      "commandName": "Project"
+    }
+  }
+}

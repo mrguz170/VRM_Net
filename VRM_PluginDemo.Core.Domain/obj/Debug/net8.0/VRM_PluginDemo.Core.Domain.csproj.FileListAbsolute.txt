@@ -1,0 +1,11 @@
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\bin\Debug\net8.0\VRM_PluginDemo.Core.Domain.deps.json
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\bin\Debug\net8.0\VRM_PluginDemo.Core.Domain.dll
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\bin\Debug\net8.0\VRM_PluginDemo.Core.Domain.pdb
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\obj\Debug\net8.0\VRM_PluginDemo.Core.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\obj\Debug\net8.0\VRM_PluginDemo.Core.Domain.AssemblyInfoInputs.cache
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\obj\Debug\net8.0\VRM_PluginDemo.Core.Domain.AssemblyInfo.cs
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\obj\Debug\net8.0\VRM_PluginDemo.Core.Domain.csproj.CoreCompileInputs.cache
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\obj\Debug\net8.0\VRM_PluginDemo.Core.Domain.dll
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\obj\Debug\net8.0\refint\VRM_PluginDemo.Core.Domain.dll
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\obj\Debug\net8.0\VRM_PluginDemo.Core.Domain.pdb
+C:\Users\lobo_\Documents\VRM\VRM_PluginDemo\VRM_PluginDemo.Core.Domain\obj\Debug\net8.0\ref\VRM_PluginDemo.Core.Domain.dll

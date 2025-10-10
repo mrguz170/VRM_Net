@@ -1,0 +1,76 @@
+﻿@page "/modules"
+@inject IModuleManager ModuleManager
+
+<PageTitle>Módulos Cargados</PageTitle>
+
+<h1>📦 Información de Módulos Cargados</h1>
+
+<p class="lead">Total de módulos: <strong>@ModuleManager.GetAllModules().Count</strong></p>
+
+@foreach (var modulo in ModuleManager.GetAllModules())
+{
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h4>@modulo.DisplayName <span class="badge bg-light text-dark">v@modulo.Version</span></h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>ID del Módulo:</strong> @modulo.ModuleId</p>
+                    <p><strong>Categoría:</strong> <span class="badge bg-info">@modulo.Category</span></p>
+                    <p><strong>Autor:</strong> @modulo.Author</p>
+                    <p><strong>Descripción:</strong> @modulo.Description</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Permisos Requeridos:</strong></p>
+                    @if (modulo.RequiredPermissions.Any())
+                    {
+                        <ul>
+                            @foreach (var permiso in modulo.RequiredPermissions)
+                            {
+                                <li><code>@permiso</code></li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Sin permisos específicos</p>
+                    }
+
+                    <p><strong>Dependencias:</strong></p>
+                    @if (modulo.Dependencies.Any())
+                    {
+                        <ul>
+                            @foreach (var dep in modulo.Dependencies)
+                            {
+                                <li>
+                                    <code>@dep</code>
+                                    @if (ModuleManager.IsModuleLoaded(dep))
+                                    {
+                                        <span class="badge bg-success">✓ Cargado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">✗ No encontrado</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Sin dependencias</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!ModuleManager.GetAllModules().Any())
+{
+    <div class="alert alert-warning">
+        <h4>⚠️ No se encontraron módulos</h4>
+        <p>Asegúrate de que los DLLs de los módulos estén en la carpeta <code>Modules</code>.</p>
+    </div>
+}

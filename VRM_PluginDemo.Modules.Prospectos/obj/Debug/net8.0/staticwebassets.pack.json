@@ -1,0 +1,33 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\wwwroot\\background.png",
+      "PackagePath": "staticwebassets\\background.png"
+    },
+    {
+      "Id": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\wwwroot\\exampleJsInterop.js",
+      "PackagePath": "staticwebassets\\exampleJsInterop.js"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.VRM_PluginDemo.Modules.Prospectos.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.VRM_PluginDemo.Modules.Prospectos.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.VRM_PluginDemo.Modules.Prospectos.props",
+      "PackagePath": "build\\VRM_PluginDemo.Modules.Prospectos.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.VRM_PluginDemo.Modules.Prospectos.props",
+      "PackagePath": "buildMultiTargeting\\VRM_PluginDemo.Modules.Prospectos.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.VRM_PluginDemo.Modules.Prospectos.props",
+      "PackagePath": "buildTransitive\\VRM_PluginDemo.Modules.Prospectos.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

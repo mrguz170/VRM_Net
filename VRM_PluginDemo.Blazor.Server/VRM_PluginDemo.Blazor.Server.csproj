@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VRM_PluginDemo.Core.Abstractions\VRM_PluginDemo.Core.Abstractions.csproj" />
+  </ItemGroup>
+
+  <!-- 🔥 POSTBUILD: Compilar y copiar módulos automáticamente -->
+  <Target Name="CopyModulesToOutput" AfterTargets="Build">
+    <Message Text="🏗️ Compilando módulos..." Importance="high" />
+
+    <!-- Asegurar que el proyecto del módulo esté compilado en la misma Configuración -->
+    <MSBuild
+      Projects="..\VRM_PluginDemo.Modules.Prospectos\VRM_PluginDemo.Modules.Prospectos.csproj"
+      Targets="Build"
+      Properties="Configuration=$(Configuration)" />
+
+    <Message Text="📦 Copiando módulos a la carpeta de salida..." Importance="high" />
+
+    <!-- Ruta de carpeta Modules en la salida -->
+    <PropertyGroup>
+      <ModulesOutDir>$(OutDir)Modules\</ModulesOutDir>
+      <ModuleProspectosDir>..\VRM_PluginDemo.Modules.Prospectos\bin\$(Configuration)\net8.0\</ModuleProspectosDir>
+    </PropertyGroup>
+
+    <!-- Limpiar carpeta Modules para evitar DLLs viejas que rompan el binding -->
+    <ItemGroup>
+      <OldModuleFiles Include="$(ModulesOutDir)**\*.*" />
+    </ItemGroup>
+    <Delete Files="@(OldModuleFiles)" ContinueOnError="true" />
+    <MakeDir Directories="$(ModulesOutDir)" />
+
+    <!-- Copiar solo el DLL/PDB del módulo (sin dependencias) -->
+    <ItemGroup>
+      <ModuleProspectosFiles Include="$(ModuleProspectosDir)VRM_PluginDemo.Modules.Prospectos.dll" />
+      <ModuleProspectosFiles Include="$(ModuleProspectosDir)VRM_PluginDemo.Modules.Prospectos.pdb" />
+    </ItemGroup>
+
+    <Copy
+      SourceFiles="@(ModuleProspectosFiles)"
+      DestinationFolder="$(ModulesOutDir)"
+      SkipUnchangedFiles="true" />
+
+    <Message Text="✅ Módulos copiados exitosamente a $(ModulesOutDir)" Importance="high" />
+  </Target>
+  
+</Project>

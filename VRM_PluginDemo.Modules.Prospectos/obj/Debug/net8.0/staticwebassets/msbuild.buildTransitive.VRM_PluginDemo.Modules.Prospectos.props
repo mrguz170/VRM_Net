@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\VRM_PluginDemo.Modules.Prospectos.props" />
+</Project>

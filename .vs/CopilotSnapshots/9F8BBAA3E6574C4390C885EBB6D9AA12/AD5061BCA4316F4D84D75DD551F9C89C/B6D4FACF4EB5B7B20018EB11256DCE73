@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+  </PropertyGroup>
+
+  <!-- Usar las bibliotecas del framework de .NET 8 en lugar de referenciar paquetes 9.x -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.20" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VRM_PluginDemo.Core.Abstractions\VRM_PluginDemo.Core.Abstractions.csproj" />
+  </ItemGroup>
+
+  <!-- Copiar el módulo compilado a la carpeta Modules del host automáticamente -->
+  <Target Name="CopyModuleToHostModulesFolder" AfterTargets="Build">
+    <PropertyGroup>
+      <HostModulesDir>$(MSBuildThisFileDirectory)..\VRM_PluginDemo.Blazor.Server\bin\$(Configuration)\net8.0\Modules\</HostModulesDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(HostModulesDir)" />
+    <ItemGroup>
+      <ModuleOutputs Include="$(TargetDir)**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ModuleOutputs)" DestinationFolder="$(HostModulesDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

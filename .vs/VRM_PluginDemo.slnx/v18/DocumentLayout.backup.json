@@ -1,0 +1,437 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.blazor.server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|solutionrelative:vrm_plugindemo.blazor.server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.blazor.server\\services\\moduleloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|solutionrelative:vrm_plugindemo.blazor.server\\services\\moduleloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.core.domain\\configuracionfiscal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|solutionrelative:vrm_plugindemo.core.domain\\configuracionfiscal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.core.domain\\configuracionnegocio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|solutionrelative:vrm_plugindemo.core.domain\\configuracionnegocio.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.core.domain\\modulohabilitado.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|solutionrelative:vrm_plugindemo.core.domain\\modulohabilitado.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.core.domain\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|solutionrelative:vrm_plugindemo.core.domain\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\components\\prospectos.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\components\\prospectos.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\domain\\enums.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\domain\\enums.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\domain\\prospecto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\domain\\prospecto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\domain\\revisionarea.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\domain\\revisionarea.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\domain\\documentoprospecto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\domain\\documentoprospecto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\services\\iprospectoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\services\\iprospectoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\services\\prospectoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\services\\prospectoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\prospectosmodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\prospectosmodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.blazor.server\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|solutionrelative:vrm_plugindemo.blazor.server\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{060DB296-6A2C-77F5-2583-2DA05964E9B8}|VRM_PluginDemo.Core.Abstractions\\VRM_PluginDemo.Core.Abstractions.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.core.abstractions\\imodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{060DB296-6A2C-77F5-2583-2DA05964E9B8}|VRM_PluginDemo.Core.Abstractions\\VRM_PluginDemo.Core.Abstractions.csproj|solutionrelative:vrm_plugindemo.core.abstractions\\imodule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.core.domain\\vrm_plugindemo.core.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{2B0D08CE-FB94-4967-3120-200E61C0FF45}|VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj|solutionrelative:vrm_plugindemo.core.domain\\vrm_plugindemo.core.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\vrm_plugindemo.modules.prospectos.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\vrm_plugindemo.modules.prospectos.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.blazor.server\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|solutionrelative:vrm_plugindemo.blazor.server\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.blazor.server\\components\\pages\\modulesinfo.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|solutionrelative:vrm_plugindemo.blazor.server\\components\\pages\\modulesinfo.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.modules.prospectos\\components\\_imports.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2A5C0220-7F39-475B-84A4-322516C0DDB0}|VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj|solutionrelative:vrm_plugindemo.modules.prospectos\\components\\_imports.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.blazor.server\\vrm_plugindemo.blazor.server.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|solutionrelative:vrm_plugindemo.blazor.server\\vrm_plugindemo.blazor.server.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.blazor.server\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|solutionrelative:vrm_plugindemo.blazor.server\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.blazor.server\\components\\routes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{89BE2637-46C8-99B7-4D3E-89D8DFA4434B}|VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj|solutionrelative:vrm_plugindemo.blazor.server\\components\\routes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{060DB296-6A2C-77F5-2583-2DA05964E9B8}|VRM_PluginDemo.Core.Abstractions\\VRM_PluginDemo.Core.Abstractions.csproj|c:\\users\\lobo_\\documents\\vrm\\criteria\\vrm_plugindemo\\vrm_plugindemo.core.abstractions\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{060DB296-6A2C-77F5-2583-2DA05964E9B8}|VRM_PluginDemo.Core.Abstractions\\VRM_PluginDemo.Core.Abstractions.csproj|solutionrelative:vrm_plugindemo.core.abstractions\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 316,
+          "SelectedChildIndex": 7,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ConfiguracionNegocio.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\ConfiguracionNegocio.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Core.Domain\\ConfiguracionNegocio.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\ConfiguracionNegocio.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Core.Domain\\ConfiguracionNegocio.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAwwBUAAABLAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T00:03:48.747Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ModuloHabilitado.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\ModuloHabilitado.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Core.Domain\\ModuloHabilitado.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\ModuloHabilitado.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Core.Domain\\ModuloHabilitado.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T00:03:59.272Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "readme.txt",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\readme.txt",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Core.Domain\\readme.txt",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\readme.txt",
+              "RelativeToolTip": "VRM_PluginDemo.Core.Domain\\readme.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-10-09T21:55:50.189Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Prospecto.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Domain\\Prospecto.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\Domain\\Prospecto.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Domain\\Prospecto.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\Domain\\Prospecto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T06:39:28.617Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Prospectos.razor",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Components\\Prospectos.razor",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\Components\\Prospectos.razor",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Components\\Prospectos.razor",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\Components\\Prospectos.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJ0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-10T06:32:15.571Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ConfiguracionFiscal.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\ConfiguracionFiscal.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Core.Domain\\ConfiguracionFiscal.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\ConfiguracionFiscal.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Core.Domain\\ConfiguracionFiscal.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T00:03:44.361Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ModuleLoader.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Services\\ModuleLoader.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Blazor.Server\\Services\\ModuleLoader.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Services\\ModuleLoader.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Blazor.Server\\Services\\ModuleLoader.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAowE0AAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T05:52:04.458Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Program.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Blazor.Server\\Program.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Program.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Blazor.Server\\Program.cs",
+              "ViewState": "AgIAADsAAAAAAAAAAAAvwEcAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T00:18:57.925Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "RevisionArea.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Domain\\RevisionArea.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\Domain\\RevisionArea.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Domain\\RevisionArea.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\Domain\\RevisionArea.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T07:34:46.392Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Enums.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Domain\\Enums.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\Domain\\Enums.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Domain\\Enums.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\Domain\\Enums.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T07:34:48.47Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "IProspectoService.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Services\\IProspectoService.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\Services\\IProspectoService.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Services\\IProspectoService.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\Services\\IProspectoService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T06:19:05.68Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ProspectoService.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Services\\ProspectoService.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\Services\\ProspectoService.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Services\\ProspectoService.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\Services\\ProspectoService.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T06:18:14.054Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "ProspectosModule.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\ProspectosModule.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\ProspectosModule.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\ProspectosModule.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\ProspectosModule.cs",
+              "ViewState": "AgIAADwAAAAAAAAAAAAAAAwAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T06:23:16.789Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "DocumentoProspecto.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Domain\\DocumentoProspecto.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\Domain\\DocumentoProspecto.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Domain\\DocumentoProspecto.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\Domain\\DocumentoProspecto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T06:19:04.067Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\appsettings.json",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Blazor.Server\\appsettings.json",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\appsettings.json",
+              "RelativeToolTip": "VRM_PluginDemo.Blazor.Server\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-10T05:55:21.405Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "IModule.cs",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Abstractions\\IModule.cs",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Core.Abstractions\\IModule.cs",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Abstractions\\IModule.cs",
+              "RelativeToolTip": "VRM_PluginDemo.Core.Abstractions\\IModule.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T07:23:35.281Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "VRM_PluginDemo.Core.Domain.csproj",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj",
+              "RelativeToolTip": "VRM_PluginDemo.Core.Domain\\VRM_PluginDemo.Core.Domain.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-10T07:23:28.472Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "readme.txt",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\readme.txt",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\readme.txt",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\readme.txt",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\readme.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-10-10T06:52:25.526Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "VRM_PluginDemo.Modules.Prospectos.csproj",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-10T06:21:13.264Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "ModulesInfo.razor",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Components\\Pages\\ModulesInfo.razor",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Blazor.Server\\Components\\Pages\\ModulesInfo.razor",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Components\\Pages\\ModulesInfo.razor",
+              "RelativeToolTip": "VRM_PluginDemo.Blazor.Server\\Components\\Pages\\ModulesInfo.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-10T06:38:27.487Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "_Imports.razor",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Components\\_Imports.razor",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Modules.Prospectos\\Components\\_Imports.razor",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\Components\\_Imports.razor",
+              "RelativeToolTip": "VRM_PluginDemo.Modules.Prospectos\\Components\\_Imports.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-10T06:32:12.836Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "readme.txt",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\readme.txt",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Blazor.Server\\readme.txt",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\readme.txt",
+              "RelativeToolTip": "VRM_PluginDemo.Blazor.Server\\readme.txt",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAMwA0AAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-10-10T06:40:11.517Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "Home.razor",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Components\\Pages\\Home.razor",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Blazor.Server\\Components\\Pages\\Home.razor",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Components\\Pages\\Home.razor",
+              "RelativeToolTip": "VRM_PluginDemo.Blazor.Server\\Components\\Pages\\Home.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-10T06:08:56.672Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "VRM_PluginDemo.Blazor.Server.csproj",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj",
+              "RelativeToolTip": "VRM_PluginDemo.Blazor.Server\\VRM_PluginDemo.Blazor.Server.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-10T06:00:46.557Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "Routes.razor",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Components\\Routes.razor",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Blazor.Server\\Components\\Routes.razor",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Blazor.Server\\Components\\Routes.razor",
+              "RelativeToolTip": "VRM_PluginDemo.Blazor.Server\\Components\\Routes.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-10T01:02:41.699Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "readme.txt",
+              "DocumentMoniker": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Abstractions\\readme.txt",
+              "RelativeDocumentMoniker": "VRM_PluginDemo.Core.Abstractions\\readme.txt",
+              "ToolTip": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Core.Abstractions\\readme.txt",
+              "RelativeToolTip": "VRM_PluginDemo.Core.Abstractions\\readme.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-10-09T21:56:01.617Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

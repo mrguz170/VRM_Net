@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "dgSpecHash": "nPgHSVJ1Gac=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\lobo_\\Documents\\VRM\\Criteria\\VRM_PluginDemo\\VRM_PluginDemo.Modules.Prospectos\\VRM_PluginDemo.Modules.Prospectos.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.aspnetcore.authorization\\8.0.20\\microsoft.aspnetcore.authorization.8.0.20.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.aspnetcore.components\\8.0.20\\microsoft.aspnetcore.components.8.0.20.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.aspnetcore.components.analyzers\\8.0.20\\microsoft.aspnetcore.components.analyzers.8.0.20.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.aspnetcore.components.forms\\8.0.20\\microsoft.aspnetcore.components.forms.8.0.20.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.aspnetcore.components.web\\8.0.20\\microsoft.aspnetcore.components.web.8.0.20.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.aspnetcore.metadata\\8.0.20\\microsoft.aspnetcore.metadata.8.0.20.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.extensions.configuration\\9.0.9\\microsoft.extensions.configuration.9.0.9.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\9.0.9\\microsoft.extensions.configuration.abstractions.9.0.9.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\9.0.9\\microsoft.extensions.dependencyinjection.9.0.9.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\9.0.9\\microsoft.extensions.dependencyinjection.abstractions.9.0.9.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.3\\microsoft.extensions.logging.abstractions.8.0.3.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.extensions.options\\8.0.2\\microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.extensions.primitives\\9.0.9\\microsoft.extensions.primitives.9.0.9.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\microsoft.jsinterop\\8.0.20\\microsoft.jsinterop.8.0.20.nupkg.sha512",
+    "C:\\Users\\lobo_\\.nuget\\packages\\system.io.pipelines\\8.0.0\\system.io.pipelines.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
