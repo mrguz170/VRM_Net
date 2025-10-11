@@ -1,0 +1,140 @@
+﻿@page "/finanzas"
+@rendermode InteractiveServer
+@inject IFacturaService FacturaService
+@inject IPagoService PagoService
+
+<PageTitle>Gestión de Finanzas</PageTitle>
+
+<h1>💰 Gestión de Finanzas</h1>
+
+<div class="alert alert-info mt-4">
+    <h4>Módulo de Finanzas</h4>
+    <p>Este módulo permite gestionar:</p>
+    <ul>
+        <li>📄 Facturas</li>
+        <li>💳 Pagos</li>
+        <li>🏦 Conciliaciones bancarias</li>
+        <li>📊 Cuentas por pagar</li>
+    </ul>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header bg-primary text-white">
+        <h5>📊 Estadísticas Financieras</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h6>Facturas Pagadas</h6>
+                        <h3>@facturasPagadas</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <h6>Facturas Pendientes</h6>
+                        <h3>@facturasPendientes</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h6>Total Ingresos</h6>
+                        <h3>$@totalIngresos.ToString("N0")</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h6>Facturas Vencidas</h6>
+                        <h3>@facturasVencidas</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h5>📋 Últimas Facturas</h5>
+    </div>
+    <div class="card-body">
+        @if (facturas == null)
+        {
+            <p><em>Cargando facturas...</em></p>
+        }
+        else if (!facturas.Any())
+        {
+            <p>No hay facturas registradas.</p>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Cliente</th>
+                        <th>Fecha Emisión</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var factura in facturas)
+                    {
+                        <tr>
+                            <td>@factura.Numero</td>
+                            <td>@factura.NombreCliente</td>
+                            <td>@factura.FechaEmision.ToString("dd/MM/yyyy")</td>
+                            <td>$@factura.Total.ToString("N2")</td>
+                            <td>
+                                <span class="badge @GetEstadoBadgeClass(factura.Estado)">
+                                    @factura.Estado.ToString()
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    private List<Factura>? facturas;
+    private int facturasPagadas = 0;
+    private int facturasPendientes = 0;
+    private decimal totalIngresos = 0;
+    private int facturasVencidas = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargar facturas desde el servicio
+        facturas = await FacturaService.GetFacturasAsync();
+        
+        // Calcular estadísticas
+        facturasPagadas = facturas.Count(f => f.Estado == EstadoFactura.Pagada);
+        facturasPendientes = facturas.Count(f => f.Estado == EstadoFactura.Pendiente);
+        facturasVencidas = facturas.Count(f => f.Estado == EstadoFactura.Vencida);
+        totalIngresos = facturas.Where(f => f.Estado == EstadoFactura.Pagada).Sum(f => f.Total);
+    }
+    
+    private string GetEstadoBadgeClass(EstadoFactura estado)
+    {
+        return estado switch
+        {
+            EstadoFactura.Pagada => "bg-success",
+            EstadoFactura.Pendiente => "bg-warning",
+            EstadoFactura.Vencida => "bg-danger",
+            EstadoFactura.Cancelada => "bg-secondary",
+            EstadoFactura.PagoParcial => "bg-info",
+            _ => "bg-light"
+        };
+    }
+}

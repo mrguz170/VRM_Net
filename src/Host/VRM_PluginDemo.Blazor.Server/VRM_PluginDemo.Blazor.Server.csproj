@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Actualizar ruta: ahora Core está 2 niveles arriba -->
+    <ProjectReference Include="..\..\Core\VRM_PluginDemo.Core.Abstractions\VRM_PluginDemo.Core.Abstractions.csproj" />
+  </ItemGroup>
+
+  <!-- 🔥 POSTBUILD Y PUBLISH: Descubrimiento y copia automática de módulos -->
+  <Target Name="CopyModulesToOutput" AfterTargets="Build;Publish">
+    <Message Text="🏗️ Descubriendo y compilando módulos automáticamente..." Importance="high" />
+
+    <PropertyGroup>
+      <!-- Usar PublishDir si está publicando, OutDir si está compilando -->
+      <ModulesOutDir Condition="'$(PublishDir)' != ''">$(PublishDir)Modules\</ModulesOutDir>
+      <ModulesOutDir Condition="'$(PublishDir)' == ''">$(OutDir)Modules\</ModulesOutDir>
+      <!-- Ajustar SolutionDir: Host -> src -> raíz (3 niveles arriba) -->
+      <SolutionDir>$(MSBuildProjectDirectory)\..\..\..\</SolutionDir>
+    </PropertyGroup>
+
+    <!-- 🔍 Buscar TODOS los módulos recursivamente en src/Modules/** -->
+    <ItemGroup>
+      <ModuleProjects Include="$(SolutionDir)src\Modules\**\VRM_PluginDemo.Modules.*.csproj" />
+    </ItemGroup>
+
+    <Message Text="📦 Encontrados @(ModuleProjects->Count()) proyectos de módulos" Importance="high" />
+
+    <!-- Compilar todos los módulos en paralelo con la configuración correcta -->
+    <MSBuild
+      Projects="@(ModuleProjects)"
+      Targets="Build"
+      Properties="Configuration=$(Configuration);Platform=$(Platform)"
+      BuildInParallel="true" />
+
+    <!-- Limpiar carpeta Modules para evitar DLLs obsoletas -->
+    <ItemGroup>
+      <OldModuleFiles Include="$(ModulesOutDir)**\*.*" />
+    </ItemGroup>
+    <Delete Files="@(OldModuleFiles)" ContinueOnError="true" />
+    <MakeDir Directories="$(ModulesOutDir)" />
+
+    <!-- Copiar DLLs y PDBs de TODOS los módulos recursivamente -->
+    <ItemGroup>
+      <ModuleDlls Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_PluginDemo.Modules.*.dll" />
+      <ModulePdbs Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_PluginDemo.Modules.*.pdb" />
+    </ItemGroup>
+
+    <Copy
+      SourceFiles="@(ModuleDlls)"
+      DestinationFolder="$(ModulesOutDir)"
+      SkipUnchangedFiles="false" />
+
+    <Copy
+      SourceFiles="@(ModulePdbs)"
+      DestinationFolder="$(ModulesOutDir)"
+      SkipUnchangedFiles="false" />
+
+    <Message Text="✅ @(ModuleDlls->Count()) módulos copiados a $(ModulesOutDir)" Importance="high" />
+  </Target>
+  
+</Project>

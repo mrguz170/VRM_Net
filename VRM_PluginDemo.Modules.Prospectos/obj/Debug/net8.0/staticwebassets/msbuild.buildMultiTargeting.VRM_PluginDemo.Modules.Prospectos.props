@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\VRM_PluginDemo.Modules.Prospectos.props" />
-</Project>
