@@ -58,10 +58,26 @@ public interface IModule
     /// <summary>
     /// Lista de permisos/roles que el usuario necesita para acceder a este módulo.
     /// Ejemplo: ["Admin", "GestorProspectos", "Revisor"]
+    /// El usuario necesita AL MENOS UNO de estos roles para ver el módulo.
     /// </summary>
     List<string> RequiredPermissions { get; }
 
-    // ==================== COMPONENTES BLAZOR (NUEVO) ====================
+    /// <summary>
+    /// ⭐ NUEVO: Permisos granulares por acción dentro del módulo.
+    /// Permite control fino sobre qué usuarios pueden realizar acciones específicas.
+    /// 
+    /// Formato de la clave: "{ModuleId}.{Entidad}.{Acción}"
+    /// Ejemplos:
+    ///   - "Finanzas.Facturas.TimbrarSAT" → Solo gerentes
+    ///   - "Finanzas.Pagos.Autorizar" → Solo gerentes
+    ///   - "Finanzas.Facturas.Ver" → Gerentes, coordinadores, contadores
+    /// 
+    /// Valor: Array de roles permitidos para esa acción
+    /// </summary>
+    /// <returns>Diccionario de acciones y roles permitidos</returns>
+    Dictionary<string, string[]> GetActionPermissions();
+
+    // ==================== COMPONENTES BLAZOR ====================
 
     /// <summary>
     /// Obtiene la información de los componentes Blazor del módulo

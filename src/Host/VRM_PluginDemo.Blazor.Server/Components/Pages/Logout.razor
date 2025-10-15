@@ -1,0 +1,38 @@
+@page "/logout"
+@rendermode InteractiveServer
+@using VRM_PluginDemo.Blazor.Server.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Cerrando Sesión...</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Cerrando sesión...</span>
+                    </div>
+                    <h4>Cerrando sesión...</h4>
+                    <p class="text-muted">Serás redirigido al inicio en un momento.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authProvider = (DummyAuthenticationStateProvider)AuthStateProvider;
+        await authProvider.LogoutAsync();
+
+        // Esperar un momento para que el usuario vea el mensaje
+        await Task.Delay(500);
+
+        // Redirigir al login SIN forceLoad para mantener el estado
+        Navigation.NavigateTo("/login");
+    }
+}

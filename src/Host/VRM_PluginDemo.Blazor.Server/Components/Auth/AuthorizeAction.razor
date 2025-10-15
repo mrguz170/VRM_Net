@@ -1,0 +1,60 @@
+@using VRM_PluginDemo.Blazor.Server.Services
+@inject IModuleAuthorizationService AuthService
+
+@if (isAuthorized)
+{
+    @ChildContent
+}
+else if (ShowFallback && FallbackContent != null)
+{
+    @FallbackContent
+}
+
+@code {
+    /// <summary>
+    /// Clave de la acción a verificar (ej: "Finanzas.Facturas.TimbrarSAT")
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string ActionKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Contenido a mostrar si el usuario tiene permiso
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Contenido alternativo a mostrar si el usuario NO tiene permiso
+    /// </summary>
+    [Parameter]
+    public RenderFragment? FallbackContent { get; set; }
+
+    /// <summary>
+    /// Indica si se debe mostrar el contenido fallback cuando no tiene permiso
+    /// </summary>
+    [Parameter]
+    public bool ShowFallback { get; set; } = false;
+
+    private bool isAuthorized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckPermissionAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await CheckPermissionAsync();
+    }
+
+    private async Task CheckPermissionAsync()
+    {
+        if (string.IsNullOrEmpty(ActionKey))
+        {
+            isAuthorized = false;
+            return;
+        }
+
+        isAuthorized = await AuthService.CanExecuteActionAsync(ActionKey);
+    }
+}

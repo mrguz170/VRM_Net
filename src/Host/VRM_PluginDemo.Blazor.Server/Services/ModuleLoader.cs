@@ -177,7 +177,14 @@ public class ModuleLoader : IModuleManager
 
     public bool IsModuleLoaded(string moduleId)
     {
-        return _loadedModules.Any(m =>
+        return _loadedModules.Any(m => m.ModuleId.Equals(moduleId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public IModule? GetModule(string moduleId)
+    {
+        return _loadedModules.FirstOrDefault(m => 
             m.ModuleId.Equals(moduleId, StringComparison.OrdinalIgnoreCase));
     }
+
+    // ==================== PRIVATE METHODS ====================
 }

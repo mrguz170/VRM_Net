@@ -45,6 +45,53 @@ public class FinanzasModule : IModule
         "Contador"
     };
 
+    // ==================== PERMISOS GRANULARES POR ACCIÓN ====================
+
+    /// <summary>
+    /// Define permisos específicos para cada acción dentro del módulo.
+    /// Esto permite control fino: un coordinador puede crear facturas pero solo un gerente puede timbrarlas.
+    /// </summary>
+    public Dictionary<string, string[]> GetActionPermissions()
+    {
+        return new Dictionary<string, string[]>
+        {
+            // ===== GESTIÓN DE FACTURAS =====
+            ["Finanzas.Facturas.Ver"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas", "Contador" },
+            ["Finanzas.Facturas.Crear"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
+            ["Finanzas.Facturas.Editar"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
+            ["Finanzas.Facturas.Eliminar"] = new[] { "Admin", "GerenteFinanzas" },
+            
+            // ⭐ ACCIONES CRÍTICAS - SOLO GERENTES
+            ["Finanzas.Facturas.TimbrarSAT"] = new[] { "Admin", "GerenteFinanzas" },
+            ["Finanzas.Facturas.CancelarTimbrada"] = new[] { "Admin", "GerenteFinanzas" },
+            
+            // ===== GESTIÓN DE PAGOS =====
+            ["Finanzas.Pagos.Ver"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas", "Contador" },
+            ["Finanzas.Pagos.Crear"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
+            ["Finanzas.Pagos.Editar"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
+            
+            // ⭐ AUTORIZACIÓN DE PAGOS - SOLO GERENTES
+            ["Finanzas.Pagos.Autorizar"] = new[] { "Admin", "GerenteFinanzas" },
+            ["Finanzas.Pagos.Cancelar"] = new[] { "Admin", "GerenteFinanzas" },
+            
+            // ===== CONCILIACIONES BANCARIAS =====
+            ["Finanzas.Conciliacion.Ver"] = new[] { "Admin", "GerenteFinanzas", "Contador" },
+            ["Finanzas.Conciliacion.Ejecutar"] = new[] { "Admin", "GerenteFinanzas" },
+            ["Finanzas.Conciliacion.Aprobar"] = new[] { "Admin", "GerenteFinanzas" },
+            
+            // ===== REPORTES FINANCIEROS =====
+            ["Finanzas.Reportes.VerGenerales"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas", "Contador" },
+            
+            // ⭐ REPORTES CONFIDENCIALES - SOLO GERENTES
+            ["Finanzas.Reportes.VerSensibles"] = new[] { "Admin", "GerenteFinanzas" },
+            ["Finanzas.Reportes.ExportarSensibles"] = new[] { "Admin", "GerenteFinanzas" },
+            
+            // ===== CONFIGURACIÓN DEL MÓDULO =====
+            ["Finanzas.Configuracion.Ver"] = new[] { "Admin", "GerenteFinanzas" },
+            ["Finanzas.Configuracion.Modificar"] = new[] { "Admin" }
+        };
+    }
+
     // ==================== COMPONENTES BLAZOR ====================
 
     public List<ModuleComponentInfo> GetComponents()

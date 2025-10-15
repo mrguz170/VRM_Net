@@ -1,73 +1,77 @@
 ﻿@using VRM_PluginDemo.Blazor.Server.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @using System.Reflection
 @inject IModuleManager ModuleManager
 
-<Router AppAssembly="typeof(Program).Assembly" AdditionalAssemblies="@additionalAssemblies">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <PageTitle>No encontrado</PageTitle>
-        <LayoutView Layout="typeof(Layout.MainLayout)">
-            <div class="alert alert-warning m-4">
-                <h4>❌ Página no encontrada</h4>
-                <p>La ruta solicitada no existe.</p>
-                <hr />
-                <p><strong>Ensamblados cargados:</strong> @additionalAssemblies.Count</p>
-                @foreach (var asm in additionalAssemblies)
-                {
-                    <p><code>@asm.FullName</code></p>
-                }
-            </div>
-        </LayoutView>
-    </NotFound>
-</Router>
+<CascadingAuthenticationState>
+    <Router AppAssembly="typeof(Program).Assembly" AdditionalAssemblies="@additionalAssemblies">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        <div class="container mt-5">
+                            <div class="alert alert-warning">
+                                <h4>🔒 Acceso Restringido</h4>
+                                <p>Necesitas iniciar sesión para acceder a esta página.</p>
+                                <a href="/login" class="btn btn-primary">Ir a Login</a>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="container mt-5">
+                            <div class="alert alert-danger">
+                                <h4>⛔ Acceso Denegado</h4>
+                                <p>No tienes permisos suficientes para acceder a esta página.</p>
+                                <a href="/" class="btn btn-secondary">Volver al Inicio</a>
+                            </div>
+                        </div>
+                    }
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>No encontrado</PageTitle>
+            <LayoutView Layout="typeof(Layout.MainLayout)">
+                <div class="alert alert-warning m-4">
+                    <h4>❌ Página no encontrada</h4>
+                    <p>La ruta solicitada no existe.</p>
+                    <hr />
+                    <p><strong>Ensamblados cargados:</strong> @additionalAssemblies.Count</p>
+                    @foreach (var asm in additionalAssemblies)
+                    {
+                        <p><code>@asm.FullName</code></p>
+                    }
+                </div>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
 
 @code {
-    private List<Assembly> additionalAssemblies = new();
+    private static List<Assembly> additionalAssemblies = new();
+    private static bool isInitialized = false;
 
     protected override void OnInitialized()
     {
-        Console.WriteLine("🔍 Iniciando carga de ensamblados de módulos...");
-
-        // Cargar ensamblados de todos los módulos cargados
-        foreach (var module in ModuleManager.GetAllModules())
+        // Solo inicializar UNA VEZ (no en cada navegación)
+        if (!isInitialized)
         {
-            var assembly = module.GetType().Assembly;
-            if (!additionalAssemblies.Contains(assembly))
+            // Cargar ensamblados de todos los módulos cargados
+            foreach (var module in ModuleManager.GetAllModules())
             {
-                additionalAssemblies.Add(assembly);
-                Console.WriteLine($"✅ Ensamblado agregado: {assembly.FullName}");
-
-                // Listar todos los tipos en el ensamblado
-                var types = assembly.GetTypes();
-                Console.WriteLine($"   📦 Tipos encontrados: {types.Length}");
-
-                // 🔴 DEBUGGING: Listar TODOS los tipos
-                foreach (var type in types)
+                var assembly = module.GetType().Assembly;
+                if (!additionalAssemblies.Contains(assembly))
                 {
-                    Console.WriteLine($"      - {type.FullName}");
-                }
-
-                // Listar componentes Blazor (con atributo RouteAttribute)
-                var componentsWithRoutes = types.Where(t =>
-                    t.GetCustomAttributes(typeof(Microsoft.AspNetCore.Components.RouteAttribute), false).Any());
-
-                Console.WriteLine($"   🔗 Componentes con rutas: {componentsWithRoutes.Count()}");
-
-                foreach (var compType in componentsWithRoutes)
-                {
-                    var routes = compType.GetCustomAttributes(typeof(Microsoft.AspNetCore.Components.RouteAttribute), false)
-                        .Cast<Microsoft.AspNetCore.Components.RouteAttribute>();
-                    foreach (var route in routes)
-                    {
-                        Console.WriteLine($"   🔗 Ruta encontrada: {route.Template} → {compType.Name}");
-                    }
+                    additionalAssemblies.Add(assembly);
+                    Console.WriteLine($"✅ Módulo agregado: {assembly.GetName().Name}");
                 }
             }
-        }
 
-        Console.WriteLine($"📊 Total ensamblados adicionales: {additionalAssemblies.Count}");
+            Console.WriteLine($"📊 Total módulos cargados: {additionalAssemblies.Count}");
+            isInitialized = true;
+        }
     }
 }

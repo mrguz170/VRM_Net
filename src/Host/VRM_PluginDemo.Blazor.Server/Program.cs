@@ -1,5 +1,6 @@
 ﻿using VRM_PluginDemo.Blazor.Server.Components;
 using VRM_PluginDemo.Blazor.Server.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,32 @@ var builder = WebApplication.CreateBuilder(args);
 // ==================== SERVICIOS BÁSICOS DE BLAZOR ====================
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// ==================== CONFIGURACIÓN DE BLAZOR SERVER CIRCUITS ====================
+builder.Services.AddServerSideBlazor(options =>
+{
+    options.DetailedErrors = builder.Environment.IsDevelopment();
+    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
+    options.DisconnectedCircuitMaxRetained = 100;
+    options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
+});
+
+// ==================== AUTENTICACIÓN Y AUTORIZACIÓN ====================
+// ⚠️ AUTENTICACIÓN SIMULADA (SOLO DESARROLLO)
+// TODO: Reemplazar con ASP.NET Core Identity + SQL Server en producción
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
+// ⭐ CAMBIO CRÍTICO: Singleton en lugar de Scoped
+// Esto asegura que el cache en memoria persista entre requests
+builder.Services.AddSingleton<DummyAuthenticationStateProvider>();
+builder.Services.AddSingleton<AuthenticationStateProvider>(provider => 
+    provider.GetRequiredService<DummyAuthenticationStateProvider>());
+
+// ==================== AUTORIZACIÓN GRANULAR DE MÓDULOS ====================
+// ⭐ NUEVO: Servicio para verificar permisos por acción
+builder.Services.AddScoped<IModuleAuthorizationService, ModuleAuthorizationService>();
 
 // ==================== SISTEMA DE PLUGINS ====================
 

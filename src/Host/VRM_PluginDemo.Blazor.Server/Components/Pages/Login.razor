@@ -1,0 +1,220 @@
+@page "/login"
+@rendermode InteractiveServer
+@using VRM_PluginDemo.Blazor.Server.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Iniciar Sesión</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">?? Iniciar Sesión</h3>
+                    <small>Sistema de Autenticación Simulado (Desarrollo)</small>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>?? Error:</strong> @errorMessage
+                            <button type="button" class="btn-close" @onclick="ClearError"></button>
+                        </div>
+                    }
+
+                    @if (isLoggingIn)
+                    {
+                        <div class="alert alert-info">
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            Iniciando sesión como <strong>@username</strong>...
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label">Usuario:</label>
+                        <input @bind="username" 
+                               @bind:event="oninput"
+                               class="form-control" 
+                               placeholder="Ingresa tu usuario"
+                               disabled="@isLoggingIn"
+                               @onkeydown="OnKeyDown" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña:</label>
+                        <input @bind="password" 
+                               @bind:event="oninput"
+                               type="password" 
+                               class="form-control" 
+                               placeholder="Cualquier contraseña funciona (dummy)"
+                               disabled="@isLoggingIn"
+                               @onkeydown="OnKeyDown" />
+                        <small class="text-muted">?? Modo desarrollo: cualquier contraseña es válida</small>
+                    </div>
+
+                    <button @onclick="HandleLogin" 
+                            class="btn btn-primary w-100" 
+                            disabled="@isLoggingIn">
+                        @if (isLoggingIn)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <text>Iniciando sesión...</text>
+                        }
+                        else
+                        {
+                            <text>Ingresar</text>
+                        }
+                    </button>
+                </div>
+
+                <div class="card-footer">
+                    <h6 class="mb-3">?? Usuarios de Prueba Disponibles:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Nombre</th>
+                                    <th>Roles</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in DummyAuthenticationStateProvider.GetAllDummyUsers())
+                                {
+                                    <tr>
+                                        <td><code>@user.Username</code></td>
+                                        <td>@user.NombreCompleto</td>
+                                        <td>
+                                            @foreach (var rol in user.Roles)
+                                            {
+                                                <span class="badge bg-info me-1">@rol</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    @onclick="@(async () => await QuickLogin(user.Username))"
+                                                    disabled="@isLoggingIn">
+                                                @if (isLoggingIn && username == user.Username)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm"></span>
+                                                }
+                                                else
+                                                {
+                                                    <text>Login Rápido</text>
+                                                }
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-info mt-3 mb-0">
+                        <strong>?? Tip:</strong> Usa el "Login Rápido" para probar cada rol sin escribir credenciales.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-warning">
+                    <strong>?? Advertencia de Desarrollo</strong>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        Este es un sistema de autenticación <strong>simulado solo para desarrollo</strong>. 
+                        Cualquier contraseña es aceptada. En producción, esto será reemplazado con:
+                    </p>
+                    <ul class="mt-2 mb-0">
+                        <li>Conexión a SQL Server</li>
+                        <li>Contraseñas hasheadas (BCrypt/PBKDF2)</li>
+                        <li>ASP.NET Core Identity</li>
+                        <li>Autenticación de dos factores (opcional)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string username = string.Empty;
+    private string password = string.Empty;
+    private string? errorMessage;
+    private bool isLoggingIn = false;
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            errorMessage = "Por favor ingresa un usuario";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Por favor ingresa una contraseña";
+            return;
+        }
+
+        try
+        {
+            isLoggingIn = true;
+            await InvokeAsync(StateHasChanged);
+
+            var authProvider = (DummyAuthenticationStateProvider)AuthStateProvider;
+            var success = await authProvider.LoginAsync(username, password);
+
+            if (success)
+            {
+                // Pausa breve para asegurar que el estado se propague
+                await Task.Delay(200);
+                
+                // Redirigir a la página principal
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = $"Usuario '{username}' no encontrado. Usa uno de los usuarios de prueba.";
+                isLoggingIn = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al iniciar sesión: {ex.Message}";
+            isLoggingIn = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task QuickLogin(string user)
+    {
+        errorMessage = null;
+        username = user;
+        password = "dummy123";
+        
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(100);
+        
+        await HandleLogin();
+    }
+
+    private void ClearError()
+    {
+        errorMessage = null;
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !isLoggingIn)
+        {
+            await HandleLogin();
+        }
+    }
+}

@@ -32,4 +32,11 @@ public interface IModuleManager
     /// Verifica si un módulo está cargado
     /// </summary>
     bool IsModuleLoaded(string moduleId);
+
+    /// <summary>
+    /// Obtiene un módulo específico por su ID
+    /// </summary>
+    /// <param name="moduleId">ID del módulo a obtener</param>
+    /// <returns>El módulo si existe, null si no</returns>
+    IModule? GetModule(string moduleId);
 }

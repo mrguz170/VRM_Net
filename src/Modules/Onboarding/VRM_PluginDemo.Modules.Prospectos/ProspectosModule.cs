@@ -46,6 +46,52 @@ public class ProspectosModule : IModule
         "RevisorProspectos"
     };
 
+    // ==================== PERMISOS GRANULARES POR ACCIÓN ====================
+
+    /// <summary>
+    /// Define permisos específicos para revisiones especializadas y aprobaciones finales.
+    /// Permite que múltiples revisores trabajen en paralelo pero solo gestores aprueben finalmente.
+    /// </summary>
+    public Dictionary<string, string[]> GetActionPermissions()
+    {
+        return new Dictionary<string, string[]>
+        {
+            // ===== VISUALIZACIÓN Y GESTIÓN BÁSICA =====
+            ["Prospectos.Ver"] = new[] { "Admin", "GestorProspectos", "RevisorProspectos", "RevisorLegal", "RevisorFinanzas", "RevisorTecnico" },
+            ["Prospectos.Crear"] = new[] { "Admin", "GestorProspectos" },
+            ["Prospectos.Editar"] = new[] { "Admin", "GestorProspectos" },
+            ["Prospectos.Eliminar"] = new[] { "Admin", "GestorProspectos" },
+            
+            // ===== ASIGNACIÓN DE REVISORES =====
+            ["Prospectos.AsignarRevisor"] = new[] { "Admin", "GestorProspectos" },
+            ["Prospectos.ReasignarRevisor"] = new[] { "Admin", "GestorProspectos" },
+            
+            // ===== REVISIONES POR ÁREA (Cada revisor solo su área) =====
+            ["Prospectos.RevisionLegal"] = new[] { "Admin", "RevisorLegal" },
+            ["Prospectos.RevisionFinanciera"] = new[] { "Admin", "RevisorFinanzas" },
+            ["Prospectos.RevisionTecnica"] = new[] { "Admin", "RevisorTecnico" },
+            ["Prospectos.RevisionCalidad"] = new[] { "Admin", "RevisorCalidad" },
+            
+            // ⭐ APROBACIONES FINALES - SOLO GESTORES
+            ["Prospectos.AprobarFinal"] = new[] { "Admin", "GestorProspectos" },
+            ["Prospectos.RechazarFinal"] = new[] { "Admin", "GestorProspectos" },
+            ["Prospectos.ConvertirProveedor"] = new[] { "Admin", "GestorProspectos" },
+            
+            // ===== GESTIÓN DE DOCUMENTOS =====
+            ["Prospectos.VerDocumentos"] = new[] { "Admin", "GestorProspectos", "RevisorProspectos", "RevisorLegal", "RevisorFinanzas" },
+            ["Prospectos.SolicitarDocumentos"] = new[] { "Admin", "GestorProspectos", "RevisorLegal", "RevisorFinanzas" },
+            ["Prospectos.AprobarDocumentos"] = new[] { "Admin", "GestorProspectos", "RevisorLegal" },
+            
+            // ===== REPORTES Y ESTADÍSTICAS =====
+            ["Prospectos.VerEstadisticas"] = new[] { "Admin", "GestorProspectos" },
+            ["Prospectos.ExportarDatos"] = new[] { "Admin", "GestorProspectos" },
+            
+            // ===== CONFIGURACIÓN =====
+            ["Prospectos.ConfigurarAreas"] = new[] { "Admin", "GestorProspectos" },
+            ["Prospectos.ConfigurarFlujo"] = new[] { "Admin" }
+        };
+    }
+
     // ==================== COMPONENTES BLAZOR (NUEVO) ====================
 
     public List<ModuleComponentInfo> GetComponents()
