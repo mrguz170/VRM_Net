@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace VRM_PluginDemo.Blazor.Server.Services;
@@ -7,184 +10,230 @@ namespace VRM_PluginDemo.Blazor.Server.Services;
 /// Proveedor de autenticación simulado con usuarios dummy.
 /// ?? SOLO PARA DESARROLLO - Reemplazar con autenticación real en producción.
 /// 
-/// NOTA: Usa cache en memoria únicamente (no persistente entre recargas).
-/// Para producción, usar Cookies o ASP.NET Core Identity.
+/// ? ACTUALIZADO: Usa cookies HTTP para persistir autenticación entre requests.
 /// </summary>
 public class DummyAuthenticationStateProvider : AuthenticationStateProvider
 {
     private readonly ILogger<DummyAuthenticationStateProvider> _logger;
-    private ClaimsPrincipal _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-    
-    // Cache en memoria del usuario actual
-    private DummyUser? _cachedUser;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public DummyAuthenticationStateProvider(
-        ILogger<DummyAuthenticationStateProvider> logger)
+        ILogger<DummyAuthenticationStateProvider> logger,
+        IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    public override Task<AuthenticationState> GetAuthenticationStateAsync()
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         try
         {
-            // Usar solo el cache en memoria (evita problemas con JavaScript interop)
-            if (_cachedUser != null)
+ // ? Leer autenticación desde cookies (HttpContext)
+   var httpContext = _httpContextAccessor.HttpContext;
+         
+   if (httpContext?.User?.Identity?.IsAuthenticated ?? false)
             {
-                _logger.LogDebug("Usuario autenticado: {Username}", _cachedUser.Username);
-                return Task.FromResult(new AuthenticationState(CreateClaimsPrincipal(_cachedUser)));
+              _logger.LogDebug("? Usuario autenticado desde cookie: {Username}", 
+         httpContext.User.Identity.Name);
+        return new AuthenticationState(httpContext.User);
             }
 
-            return Task.FromResult(new AuthenticationState(_currentUser));
-        }
+            // Usuario no autenticado
+            _logger.LogDebug("? Usuario NO autenticado");
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+    }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al obtener estado de autenticación");
-            return Task.FromResult(new AuthenticationState(_currentUser));
+            _logger.LogError(ex, "? Error al obtener estado de autenticación");
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
     }
 
     /// <summary>
-    /// Simula un login con usuario y contraseña.
+  /// Simula un login con usuario y contraseña.
+    /// ? Crea cookie de autenticación persistente.
     /// ?? En producción, esto validaría contra una base de datos con contraseñas hasheadas.
     /// </summary>
-    public Task<bool> LoginAsync(string username, string password)
+ public async Task<bool> LoginAsync(string username, string password)
     {
-        try
+      try
         {
-            _logger.LogInformation("?? Intentando login para usuario: {Username}", username);
+ _logger.LogInformation("?? Intentando login para usuario: {Username}", username);
 
-            // Buscar usuario por username
-            var usuario = GetDummyUserByUsername(username);
+    // Buscar usuario por email
+            var usuario = GetDummyUserByEmail(username);
 
             if (usuario == null)
             {
-                _logger.LogWarning("? Intento de login fallido: usuario {Username} no existe", username);
-                return Task.FromResult(false);
+           _logger.LogWarning("? Intento de login fallido: usuario {Username} no existe", username);
+          return false;
             }
 
             // ?? VALIDACIÓN DUMMY - En producción, verificar hash de contraseña
             if (string.IsNullOrWhiteSpace(password))
+          {
+       _logger.LogWarning("? Intento de login fallido: contraseña vacía para {Username}", username);
+                return false;
+  }
+
+    // ? Crear claims
+        var claims = new List<Claim>
             {
-                _logger.LogWarning("? Intento de login fallido: contraseña vacía para {Username}", username);
-                return Task.FromResult(false);
+          new Claim(ClaimTypes.NameIdentifier, usuario.Id),
+                new Claim(ClaimTypes.Name, usuario.Username),
+       new Claim(ClaimTypes.Email, usuario.Email),
+    new Claim("NombreCompleto", usuario.NombreCompleto),
+       new Claim("ClienteId", usuario.ClienteId)
+       };
+
+   // Agregar roles como claims
+          foreach (var rol in usuario.Roles)
+       {
+        claims.Add(new Claim(ClaimTypes.Role, rol));
             }
 
-            // Cachear el usuario en memoria
-            _cachedUser = usuario;
-            _currentUser = CreateClaimsPrincipal(usuario);
+ // ? Crear identity y principal
+  var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
 
-            _logger.LogInformation("? Login exitoso para {Username} con roles: [{Roles}]", 
-                username, 
-                string.Join(", ", usuario.Roles));
-            
-            // Notificar cambio de autenticación
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
-
-            return Task.FromResult(true);
+            // ? CLAVE: Crear cookie de autenticación
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null)
+    {
+   // ? Verificar que la respuesta NO haya comenzado
+       if (httpContext.Response.HasStarted)
+     {
+           _logger.LogError("? PROBLEMA: Response ya comenzó. No se puede escribir cookie.");
+            return false;
         }
-        catch (Exception ex)
+
+  await httpContext.SignInAsync(
+        CookieAuthenticationDefaults.AuthenticationScheme,
+                    principal,
+  new AuthenticationProperties
+       {
+  IsPersistent = true, // Persistir entre sesiones del navegador
+     ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8),
+   AllowRefresh = true
+          });
+
+      _logger.LogInformation("? Login exitoso con cookie para {Username} con roles: [{Roles}]", 
+    username, 
+      string.Join(", ", usuario.Roles));
+      
+       // Notificar cambio de autenticación
+      NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(principal)));
+      
+                return true;
+  }
+
+       _logger.LogError("? HttpContext es null, no se puede crear cookie");
+      return false;
+    }
+ catch (Exception ex)
         {
-            _logger.LogError(ex, "?? Error durante login de {Username}", username);
-            return Task.FromResult(false);
-        }
+      _logger.LogError(ex, "? Error durante login de {Username}", username);
+      return false;
+}
     }
 
     /// <summary>
-    /// Cierra sesión del usuario actual.
+  /// Cierra sesión del usuario actual.
+    /// ? Elimina cookie de autenticación.
     /// </summary>
-    public Task LogoutAsync()
+    public async Task LogoutAsync()
     {
         try
         {
-            var username = _cachedUser?.Username ?? "desconocido";
-            
-            // Limpiar cache
-            _cachedUser = null;
-            _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
+      var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null)
+ {
+          var username = httpContext.User?.Identity?.Name ?? "desconocido";
+      
+     // ? Verificar que la respuesta NO haya comenzado
+      if (!httpContext.Response.HasStarted)
+         {
+          // ? Eliminar cookie de autenticación
+       await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            _logger.LogInformation("Logout exitoso para usuario: {Username}", username);
+               _logger.LogInformation("? Logout exitoso para usuario: {Username}", username);
+       }
+              else
+    {
+             _logger.LogWarning("?? No se puede eliminar cookie: Response ya comenzó");
+          }
 
-            // Notificar cambio
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
-
-            return Task.CompletedTask;
+       // Notificar cambio
+     NotifyAuthenticationStateChanged(Task.FromResult(
+        new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))));
+     }
+      else
+ {
+          _logger.LogWarning("?? HttpContext es null en LogoutAsync");
+}
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error durante logout");
-            return Task.CompletedTask;
+        _logger.LogError(ex, "? Error durante logout");
         }
-    }
-
-    /// <summary>
-    /// Crea un ClaimsPrincipal a partir de un DummyUser.
-    /// </summary>
-    private ClaimsPrincipal CreateClaimsPrincipal(DummyUser usuario)
-    {
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, usuario.Id),
-            new Claim(ClaimTypes.Name, usuario.Username),
-            new Claim(ClaimTypes.Email, usuario.Email),
-            new Claim("NombreCompleto", usuario.NombreCompleto),
-            new Claim("ClienteId", usuario.ClienteId)
-        };
-
-        // Agregar roles como claims
-        foreach (var rol in usuario.Roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, rol));
-        }
-
-        var identity = new ClaimsIdentity(claims, "DummyAuth");
-        return new ClaimsPrincipal(identity);
     }
 
     // ==================== DATOS DUMMY ====================
 
     /// <summary>
-    /// ? USUARIOS DE PRUEBA - Reemplazar con consulta a base de datos en producción
+    /// ?? USUARIOS DE PRUEBA - Reemplazar con consulta a base de datos en producción
     /// </summary>
     private static readonly List<DummyUser> DummyUsers = new()
     {
         // Usuario 1: Administrador (acceso completo a todo)
         new DummyUser
-        {
-            Id = "user-001",
+     {
+      Id = "user-001",
             Username = "admin",
             Email = "admin@vrm.com",
-            NombreCompleto = "Administrador del Sistema",
+         NombreCompleto = "Administrador del Sistema",
             ClienteId = "cliente-001",
-            Roles = new List<string> { "Admin" }
-        },
+         Roles = new List<string> { "Admin" }
+    },
 
-        // Usuario 2: Gerente de Finanzas (puede timbrar facturas y ver reportes sensibles)
+        // Usuario 1b: Usuario Regular (acceso limitado)
         new DummyUser
         {
-            Id = "user-002",
-            Username = "gerente.finanzas",
-            Email = "gerente.finanzas@vrm.com",
-            NombreCompleto = "Juan Gerente de Finanzas",
+            Id = "user-001b",
+          Username = "user",
+            Email = "user@vrm.com",
+     NombreCompleto = "Usuario Regular",
             ClienteId = "cliente-001",
-            Roles = new List<string> { "GerenteFinanzas" }
+ Roles = new List<string> { "User" }
+        },
+
+ // Usuario 2: Gerente de Finanzas (puede timbrar facturas y ver reportes sensibles)
+  new DummyUser
+        {
+       Id = "user-002",
+            Username = "gerente.finanzas",
+      Email = "gerente.finanzas@vrm.com",
+            NombreCompleto = "Juan Gerente de Finanzas",
+        ClienteId = "cliente-001",
+          Roles = new List<string> { "GerenteFinanzas" }
         },
 
         // Usuario 3: Coordinador de Finanzas (puede crear/editar pero NO timbrar)
         new DummyUser
-        {
+ {
             Id = "user-003",
             Username = "coordinador.finanzas",
-            Email = "coordinador.finanzas@vrm.com",
+    Email = "coordinador.finanzas@vrm.com",
             NombreCompleto = "María Coordinadora de Finanzas",
             ClienteId = "cliente-001",
-            Roles = new List<string> { "CoordinadorFinanzas" }
+  Roles = new List<string> { "CoordinadorFinanzas" }
         },
 
         // Usuario 4: Contador (solo lectura de finanzas)
         new DummyUser
         {
-            Id = "user-004",
+         Id = "user-004",
             Username = "contador",
             Email = "contador@vrm.com",
             NombreCompleto = "Pedro Contador",
@@ -193,25 +242,25 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider
         },
 
         // Usuario 5: Gestor de Prospectos
-        new DummyUser
+ new DummyUser
         {
-            Id = "user-005",
+          Id = "user-005",
             Username = "gestor.prospectos",
-            Email = "gestor.prospectos@vrm.com",
+       Email = "gestor.prospectos@vrm.com",
             NombreCompleto = "Ana Gestora de Prospectos",
             ClienteId = "cliente-001",
             Roles = new List<string> { "GestorProspectos" }
-        },
+    },
 
         // Usuario 6: Revisor Legal
-        new DummyUser
+     new DummyUser
         {
             Id = "user-006",
             Username = "revisor.legal",
-            Email = "revisor.legal@vrm.com",
-            NombreCompleto = "Carlos Revisor Legal",
-            ClienteId = "cliente-001",
-            Roles = new List<string> { "RevisorLegal" }
+    Email = "revisor.legal@vrm.com",
+ NombreCompleto = "Carlos Revisor Legal",
+       ClienteId = "cliente-001",
+ Roles = new List<string> { "RevisorLegal" }
         },
 
         // Usuario 7: Revisor Financiero (solo revisa área financiera de prospectos)
@@ -220,21 +269,16 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider
             Id = "user-007",
             Username = "revisor.finanzas",
             Email = "revisor.finanzas@vrm.com",
-            NombreCompleto = "Laura Revisora Financiera",
+   NombreCompleto = "Laura Revisora Financiera",
             ClienteId = "cliente-001",
-            Roles = new List<string> { "RevisorFinanzas" }
-        }
+       Roles = new List<string> { "RevisorFinanzas" }
+     }
     };
 
-    private DummyUser? GetDummyUser(string userId)
+    private DummyUser? GetDummyUserByEmail(string email)
     {
-        return DummyUsers.FirstOrDefault(u => u.Id == userId);
-    }
-
-    private DummyUser? GetDummyUserByUsername(string username)
-    {
-        return DummyUsers.FirstOrDefault(u =>
-            u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+return DummyUsers.FirstOrDefault(u =>
+            u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -243,7 +287,7 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider
     public static List<DummyUser> GetAllDummyUsers()
     {
         return DummyUsers;
-    }
+}
 }
 
 /// <summary>

@@ -8,6 +8,9 @@
 
 <PageTitle>Gestión de Finanzas</PageTitle>
 
+@* ✅ Proteger TODO el módulo con AuthorizeModule *@
+<AuthorizeModule ModuleId="Finanzas">
+
 <h1>💰 Gestión de Finanzas</h1>
 
 <div class="alert alert-info mt-4">
@@ -15,7 +18,7 @@
     <p>Este módulo permite gestionar:</p>
     <ul>
         <li>📄 Facturas</li>
-        <li>💳 Pagos</li>
+      <li>💳 Pagos</li>
         <li>🏦 Conciliaciones bancarias</li>
         <li>📊 Cuentas por pagar</li>
     </ul>
@@ -23,193 +26,186 @@
 
 <div class="card mt-3">
     <div class="card-header bg-primary text-white">
-        <h5>📊 Estadísticas Financieras</h5>
+  <h5>📊 Estadísticas Financieras</h5>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <h6>Facturas Pagadas</h6>
-                        <h3>@facturasPagadas</h3>
-                    </div>
+    <div class="row">
+        <div class="col-md-3">
+       <div class="card bg-success text-white">
+            <div class="card-body">
+              <h6>Facturas Pagadas</h6>
+        <h3>@facturasPagadas</h3>
+          </div>
                 </div>
-            </div>
-            <div class="col-md-3">
+       </div>
+<div class="col-md-3">
                 <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <h6>Facturas Pendientes</h6>
-                        <h3>@facturasPendientes</h3>
-                    </div>
-                </div>
+         <div class="card-body">
+     <h6>Facturas Pendientes</h6>
+              <h3>@facturasPendientes</h3>
+         </div>
+    </div>
+       </div>
+   <div class="col-md-3">
+    <div class="card bg-info text-white">
+     <div class="card-body">
+  <h6>Total Ingresos</h6>
+    <h3>$@totalIngresos.ToString("N0")</h3>
+         </div>
+ </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <h6>Total Ingresos</h6>
-                        <h3>$@totalIngresos.ToString("N0")</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-danger text-white">
-                    <div class="card-body">
-                        <h6>Facturas Vencidas</h6>
-                        <h3>@facturasVencidas</h3>
-                    </div>
-                </div>
-            </div>
+<div class="col-md-3">
+     <div class="card bg-danger text-white">
+           <div class="card-body">
+             <h6>Facturas Vencidas</h6>
+      <h3>@facturasVencidas</h3>
+      </div>
+        </div>
+    </div>
         </div>
     </div>
 </div>
 
 <div class="card mt-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">📋 Últimas Facturas</h5>
+ <h5 class="mb-0">📋 Últimas Facturas</h5>
         
         @* Botón crear - Gerentes y coordinadores *@
         <AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas">
-            <Authorized>
-                <button class="btn btn-primary btn-sm" @onclick="CrearFactura">
-                    <span class="bi bi-plus-circle"></span> Nueva Factura
-                </button>
-            </Authorized>
-        </AuthorizeView>
+<Authorized>
+        <button class="btn btn-primary btn-sm" @onclick="CrearFactura">
+     <span class="bi bi-plus-circle"></span> Nueva Factura
+            </button>
+     </Authorized>
+     </AuthorizeView>
     </div>
     <div class="card-body">
-        @if (facturas == null)
+     @if (facturas == null)
         {
             <p><em>Cargando facturas...</em></p>
-        }
+      }
         else if (!facturas.Any())
         {
-            <p>No hay facturas registradas.</p>
+        <p>No hay facturas registradas.</p>
         }
         else
-        {
-            <table class="table table-striped">
-                <thead>
+  {
+   <table class="table table-striped">
+  <thead>
                     <tr>
-                        <th>Número</th>
-                        <th>Cliente</th>
-                        <th>Fecha Emisión</th>
-                        <th>Total</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var factura in facturas)
-                    {
-                        <tr>
-                            <td>@factura.Numero</td>
-                            <td>@factura.NombreCliente</td>
-                            <td>@factura.FechaEmision.ToString("dd/MM/yyyy")</td>
-                            <td>$@factura.Total.ToString("N2")</td>
-                            <td>
-                                <span class="badge @GetEstadoBadgeClass(factura.Estado)">
-                                    @factura.Estado.ToString()
-                                </span>
-                            </td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    @* Ver - Todos *@
-                                    <AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas,Contador">
-                                        <Authorized>
-                                            <button class="btn btn-outline-info" title="Ver detalles">
-                                                <span class="bi bi-eye"></span>
-                                            </button>
-                                        </Authorized>
-                                    </AuthorizeView>
-                                    
-                                    @* Editar - Gerentes y coordinadores *@
-                                    <AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas">
-                                        <Authorized>
-                                            <button class="btn btn-outline-warning" title="Editar">
-                                                <span class="bi bi-pencil"></span>
-                                            </button>
-                                        </Authorized>
-                                    </AuthorizeView>
-                                    
-                                    @* ⭐ TIMBRAR SAT - SOLO GERENTES *@
-                                    <AuthorizeView Roles="Admin,GerenteFinanzas">
-                                        <Authorized>
-                                            <button class="btn btn-success" 
-                                                    @onclick="() => TimbrarFactura(factura.Id)"
-                                                    disabled="@(factura.Estado != EstadoFactura.Pendiente)"
-                                                    title="Timbrar en SAT (Solo Gerente)">
-                                                <span class="bi bi-check-circle"></span> SAT
-                                            </button>
-                                        </Authorized>
-                                    </AuthorizeView>
-                                    
-                                    @* Eliminar - Solo gerentes *@
-                                    <AuthorizeView Roles="Admin,GerenteFinanzas">
-                                        <Authorized>
-                                            <button class="btn btn-outline-danger" title="Eliminar">
-                                                <span class="bi bi-trash"></span>
-                                            </button>
-                                        </Authorized>
-                                    </AuthorizeView>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                <th>Número</th>
+   <th>Cliente</th>
+      <th>Fecha Emisión</th>
+<th>Total</th>
+    <th>Estado</th>
+                     <th>Acciones</th>
+        </tr>
+     </thead>
+      <tbody>
+            @foreach (var factura in facturas)
+         {
+          <tr>
+            <td>@factura.Numero</td>
+     <td>@factura.NombreCliente</td>
+           <td>@factura.FechaEmision.ToString("dd/MM/yyyy")</td>
+       <td>$@factura.Total.ToString("N2")</td>
+       <td>
+       <span class="badge @GetEstadoBadgeClass(factura.Estado)">
+   @factura.Estado.ToString()
+   </span>
+     </td>
+   <td>
+    <div class="btn-group btn-group-sm" role="group">
+  @* Ver - Todos *@
+     <AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas,Contador">
+         <Authorized>
+    <button class="btn btn-outline-info" title="Ver detalles">
+            <span class="bi bi-eye"></span>
+            </button>
+          </Authorized>
+    </AuthorizeView>
+    
+     @* Editar - Gerentes y coordinadores *@
+        <AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas">
+        <Authorized>
+          <button class="btn btn-outline-warning" title="Editar">
+           <span class="bi bi-pencil"></span>
+           </button>
+      </Authorized>
+           </AuthorizeView>
+            
+  @* ⭐ TIMBRAR SAT - SOLO GERENTES - Usa AuthorizeAction *@
+       <AuthorizeAction Action="Finanzas.Facturas.TimbrarSAT">
+       <button class="btn btn-success" 
+         @onclick="() => TimbrarFactura(factura.Id)"
+              disabled="@(factura.Estado != EstadoFactura.Pendiente)"
+           title="Timbrar en SAT (Solo Gerente)">
+         <span class="bi bi-check-circle"></span> SAT
+    </button>
+   </AuthorizeAction>
+         
+           @* Eliminar - Solo gerentes *@
+   <AuthorizeAction Action="Finanzas.Facturas.Eliminar">
+             <button class="btn btn-outline-danger" title="Eliminar">
+       <span class="bi bi-trash"></span>
+        </button>
+         </AuthorizeAction>
+     </div>
+         </td>
+      </tr>
         }
+          </tbody>
+         </table>
+  }
     </div>
 </div>
 
-@* ⭐ SECCIÓN DE REPORTES SENSIBLES - SOLO GERENTES *@
-<AuthorizeView Roles="Admin,GerenteFinanzas">
-    <Authorized>
-        <div class="card mt-3 border-danger">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0">🔒 Reportes Confidenciales (Solo Gerente)</h5>
-            </div>
-            <div class="card-body">
-                <p>Información financiera confidencial disponible solo para gerentes de finanzas.</p>
-                <div class="btn-group">
-                    <button class="btn btn-light">
-                        <span class="bi bi-file-earmark-pdf"></span> Reporte de Utilidades
-                    </button>
-                    <button class="btn btn-light">
-                        <span class="bi bi-file-earmark-excel"></span> Flujo de Efectivo Detallado
-                    </button>
-                    <button class="btn btn-warning">
-                        <span class="bi bi-download"></span> Exportar Todo
-                    </button>
-                </div>
-            </div>
-        </div>
-    </Authorized>
-    <NotAuthorized>
-        <div class="alert alert-warning mt-3">
-            <strong>🔒 Acceso Restringido:</strong> Los reportes confidenciales solo están disponibles para gerentes de finanzas.
-        </div>
-    </NotAuthorized>
-</AuthorizeView>
+@* ⭐ SECCIÓN DE REPORTES SENSIBLES - SOLO GERENTES con AuthorizeAction *@
+<AuthorizeAction Action="Finanzas.Reportes.VerSensibles">
+    <div class="card mt-3 border-danger">
+        <div class="card-header bg-danger text-white">
+          <h5 class="mb-0">🔒 Reportes Confidenciales (Solo Gerente)</h5>
+   </div>
+        <div class="card-body">
+          <p>Información financiera confidencial disponible solo para gerentes de finanzas.</p>
+            <div class="btn-group">
+            <button class="btn btn-light">
+   <span class="bi bi-file-earmark-pdf"></span> Reporte de Utilidades
+          </button>
+       <button class="btn btn-light">
+   <span class="bi bi-file-earmark-excel"></span> Flujo de Efectivo Detallado
+           </button>
+     
+       @* Exportar reportes sensibles - Acción aún más restringida *@
+                <AuthorizeAction Action="Finanzas.Reportes.ExportarSensibles">
+         <button class="btn btn-warning">
+      <span class="bi bi-download"></span> Exportar Todo
+          </button>
+       </AuthorizeAction>
+     </div>
+      </div>
+    </div>
+</AuthorizeAction>
 
 @* Sección de reportes generales - Todos pueden ver *@
-<AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas,Contador">
-    <Authorized>
-        <div class="card mt-3">
-            <div class="card-header">
-                <h5 class="mb-0">📊 Reportes Generales</h5>
-            </div>
-            <div class="card-body">
-                <p>Reportes disponibles para todo el equipo de finanzas.</p>
-                <button class="btn btn-primary btn-sm">
-                    <span class="bi bi-file-earmark-bar-graph"></span> Resumen Mensual
-                </button>
-                <button class="btn btn-primary btn-sm">
-                    <span class="bi bi-file-earmark-text"></span> Estado de Cuenta
-                </button>
-            </div>
+<AuthorizeAction Action="Finanzas.Reportes.VerGenerales">
+    <div class="card mt-3">
+        <div class="card-header">
+            <h5 class="mb-0">📊 Reportes Generales</h5>
+     </div>
+        <div class="card-body">
+    <p>Reportes disponibles para todo el equipo de finanzas.</p>
+     <button class="btn btn-primary btn-sm">
+        <span class="bi bi-file-earmark-bar-graph"></span> Resumen Mensual
+            </button>
+  <button class="btn btn-primary btn-sm">
+       <span class="bi bi-file-earmark-text"></span> Estado de Cuenta
+  </button>
         </div>
-    </Authorized>
-</AuthorizeView>
+    </div>
+</AuthorizeAction>
+
+</AuthorizeModule>
 
 @code {
     private List<Factura>? facturas;
@@ -218,29 +214,29 @@
     private decimal totalIngresos = 0;
     private int facturasVencidas = 0;
 
-    protected override async Task OnInitializedAsync()
+ protected override async Task OnInitializedAsync()
     {
-        // Cargar facturas desde el servicio
-        facturas = await FacturaService.GetFacturasAsync();
-        
-        // Calcular estadísticas
+   // Cargar facturas desde el servicio
+      facturas = await FacturaService.GetFacturasAsync();
+      
+   // Calcular estadísticas
         facturasPagadas = facturas.Count(f => f.Estado == EstadoFactura.Pagada);
         facturasPendientes = facturas.Count(f => f.Estado == EstadoFactura.Pendiente);
         facturasVencidas = facturas.Count(f => f.Estado == EstadoFactura.Vencida);
-        totalIngresos = facturas.Where(f => f.Estado == EstadoFactura.Pagada).Sum(f => f.Total);
+   totalIngresos = facturas.Where(f => f.Estado == EstadoFactura.Pagada).Sum(f => f.Total);
     }
-    
+  
     private string GetEstadoBadgeClass(EstadoFactura estado)
     {
         return estado switch
         {
-            EstadoFactura.Pagada => "bg-success",
-            EstadoFactura.Pendiente => "bg-warning",
-            EstadoFactura.Vencida => "bg-danger",
-            EstadoFactura.Cancelada => "bg-secondary",
+       EstadoFactura.Pagada => "bg-success",
+  EstadoFactura.Pendiente => "bg-warning",
+     EstadoFactura.Vencida => "bg-danger",
+   EstadoFactura.Cancelada => "bg-secondary",
             EstadoFactura.PagoParcial => "bg-info",
-            _ => "bg-light text-dark"
-        };
+      _ => "bg-light text-dark"
+      };
     }
     
     private void CrearFactura()

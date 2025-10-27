@@ -1,0 +1,15 @@
+@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized()
+    {
+   // Redirigir a la página de login
+        var returnUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
+        
+        if (returnUrl != "login")
+  {
+    // Guardar la URL de retorno para redirigir después del login
+      Navigation.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+        }
+  }
+}

@@ -1,6 +1,8 @@
 ﻿using VRM_PluginDemo.Blazor.Server.Components;
 using VRM_PluginDemo.Blazor.Server.Services;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.Circuits;
+using MudBlazor.Services;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,12 +20,33 @@ builder.Services.AddServerSideBlazor(options =>
     options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
 });
 
+// ==================== MUDBLAZOR ====================
+// ⭐ NUEVO: Servicios de MudBlazor para componentes de UI
+builder.Services.AddMudServices();
+
 // ==================== AUTENTICACIÓN Y AUTORIZACIÓN ====================
 // ⚠️ AUTENTICACIÓN SIMULADA (SOLO DESARROLLO)
-// TODO: Reemplazar con ASP.NET Core Identity + SQL Server en producción
-builder.Services.AddAuthentication();
+// Configurar esquema de autenticación por defecto para Blazor Server
+builder.Services.AddAuthentication(options =>
+{
+    // Blazor Server usa cookies para mantener la sesión
+    options.DefaultScheme = "Cookies";
+    options.DefaultChallengeScheme = "Cookies";
+})
+.AddCookie("Cookies", options =>
+{
+    options.LoginPath = "/login";
+    options.LogoutPath = "/logout";
+    options.AccessDeniedPath = "/access-denied";
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.SlidingExpiration = true;
+});
+
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
+
+// ✅ NUEVO: HttpContextAccessor para acceder a cookies
+builder.Services.AddHttpContextAccessor();
 
 // ⭐ CAMBIO CRÍTICO: Singleton en lugar de Scoped
 // Esto asegura que el cache en memoria persista entre requests
@@ -86,6 +109,10 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+// ⭐ IMPORTANTE: Agregar autenticación y autorización al pipeline
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Obtener ensamblados de módulos para habilitar interactividad
 var moduleAssemblies = todosLosModulos

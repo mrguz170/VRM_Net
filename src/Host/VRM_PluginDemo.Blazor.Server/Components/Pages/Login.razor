@@ -1,220 +1,159 @@
-@page "/login"
-@rendermode InteractiveServer
-@using VRM_PluginDemo.Blazor.Server.Services
+Ôªø@page "/login"
+@* ‚ö†Ô∏è SSR EST√ÅTICO - Login NO usa InteractiveServer para soportar cookies HTTP *@
+@* El formulario necesita un POST HTTP real para que SignInAsync pueda escribir cookies *@
+@using VRM_PluginDemo.Blazor.Server.Components.Layout
+@layout AuthLayout
 @using Microsoft.AspNetCore.Components.Authorization
-@inject AuthenticationStateProvider AuthStateProvider
+@using VRM_PluginDemo.Blazor.Server.Services
+@using System.ComponentModel.DataAnnotations
+@inject DummyAuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
 
-<PageTitle>Iniciar SesiÛn</PageTitle>
+<PageTitle>Sign In - VRM</PageTitle>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">?? Iniciar SesiÛn</h3>
-                    <small>Sistema de AutenticaciÛn Simulado (Desarrollo)</small>
-                </div>
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <strong>?? Error:</strong> @errorMessage
-                            <button type="button" class="btn-close" @onclick="ClearError"></button>
-                        </div>
-                    }
+<!-- Login Page - UI de Sliced integrada con autenticaci√≥n VRM -->
+<div class="min-h-[calc(100vh-134px)] py-4 px-4 sm:px-12 flex justify-center items-center max-w-[1440px] mx-auto">
+<div class="max-w-[550px] flex-none w-full bg-white border border-black/10 p-6 sm:p-10 lg:px-10 lg:py-14 rounded-2xl loginform dark:bg-darklight dark:border-darkborder">
+    
+ <!-- T√≠tulo -->
+   <MudText Typo="Typo.h1" Class="mb-2 text-2xl font-semibold text-center dark:text-white">
+ Sign In to VRM
+  </MudText>
+ <MudText Class="text-center text-muted mb-7 dark:text-darkmuted">
+    Enter your credentials to access the system
+ </MudText>
 
-                    @if (isLoggingIn)
-                    {
-                        <div class="alert alert-info">
-                            <span class="spinner-border spinner-border-sm me-2"></span>
-                            Iniciando sesiÛn como <strong>@username</strong>...
-                        </div>
-                    }
+        @if (!string.IsNullOrEmpty(errorMessage))
+   {
+     <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+ <p class="text-sm text-red-600">@errorMessage</p>
+ </div>
+}
 
-                    <div class="mb-3">
-                        <label class="form-label">Usuario:</label>
-                        <input @bind="username" 
-                               @bind:event="oninput"
-                               class="form-control" 
-                               placeholder="Ingresa tu usuario"
-                               disabled="@isLoggingIn"
-                               @onkeydown="OnKeyDown" />
-                    </div>
+     <!-- Formulario de Login -->
+      <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin" FormName="LoginForm">
+    <DataAnnotationsValidator />
 
-                    <div class="mb-3">
-                        <label class="form-label">ContraseÒa:</label>
-                        <input @bind="password" 
-                               @bind:event="oninput"
-                               type="password" 
-                               class="form-control" 
-                               placeholder="Cualquier contraseÒa funciona (dummy)"
-                               disabled="@isLoggingIn"
-                               @onkeydown="OnKeyDown" />
-                        <small class="text-muted">?? Modo desarrollo: cualquier contraseÒa es v·lida</small>
-                    </div>
+<div class="space-y-4">
+      <!-- Email -->
+ <div>
+ <label class="block text-sm font-medium mb-2 dark:text-white">Email</label>
+ <InputText @bind-Value="loginModel.Email" 
+  placeholder="Enter your email" 
+ class="form-input w-full px-4 py-3 border border-black/10 dark:border-darkborder rounded-lg focus:ring-2 focus:ring-purple focus:border-transparent dark:bg-dark dark:text-white" />
+  <ValidationMessage For="@(() => loginModel.Email)" class="text-red-500 text-sm mt-1" />
+       </div>
 
-                    <button @onclick="HandleLogin" 
-                            class="btn btn-primary w-100" 
-                            disabled="@isLoggingIn">
-                        @if (isLoggingIn)
-                        {
-                            <span class="spinner-border spinner-border-sm me-2"></span>
-                            <text>Iniciando sesiÛn...</text>
-                        }
-                        else
-                        {
-                            <text>Ingresar</text>
-                        }
-                    </button>
-                </div>
+    <!-- Password -->
+   <div>
+<label class="block text-sm font-medium mb-2 dark:text-white">Password</label>
+  <InputText @bind-Value="loginModel.Password" 
+   type="password"
+      placeholder="Enter your password" 
+   class="form-input w-full px-4 py-3 border border-black/10 dark:border-darkborder rounded-lg focus:ring-2 focus:ring-purple focus:border-transparent dark:bg-dark dark:text-white" />
+        <ValidationMessage For="@(() => loginModel.Password)" class="text-red-500 text-sm mt-1" />
+     </div>
 
-                <div class="card-footer">
-                    <h6 class="mb-3">?? Usuarios de Prueba Disponibles:</h6>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Usuario</th>
-                                    <th>Nombre</th>
-                                    <th>Roles</th>
-                                    <th>AcciÛn</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var user in DummyAuthenticationStateProvider.GetAllDummyUsers())
-                                {
-                                    <tr>
-                                        <td><code>@user.Username</code></td>
-                                        <td>@user.NombreCompleto</td>
-                                        <td>
-                                            @foreach (var rol in user.Roles)
-                                            {
-                                                <span class="badge bg-info me-1">@rol</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary" 
-                                                    @onclick="@(async () => await QuickLogin(user.Username))"
-                                                    disabled="@isLoggingIn">
-                                                @if (isLoggingIn && username == user.Username)
-                                                {
-                                                    <span class="spinner-border spinner-border-sm"></span>
-                                                }
-                                                else
-                                                {
-                                                    <text>Login R·pido</text>
-                                                }
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+     <div class="ltr:text-right rtl:text-left">
+    <MudLink Href="/forgot-password" Class="text-black dark:text-white">Forgot Password?</MudLink>
+</div>
 
-                    <div class="alert alert-info mt-3 mb-0">
-                        <strong>?? Tip:</strong> Usa el "Login R·pido" para probar cada rol sin escribir credenciales.
-                    </div>
-                </div>
-            </div>
+<!-- Submit Button -->
+<button type="submit" 
+   disabled="@isLoading"
+ class="btn w-full py-3.5 text-base bg-purple border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85] disabled:opacity-50">
+  @if (isLoading)
+  {
+   <span>Signing in...</span>
+  }
+      else
+ {
+     <span>Sign In</span>
+        }
+   </button>
+      </div>
+  </EditForm>
 
-            <div class="card mt-3">
-                <div class="card-header bg-warning">
-                    <strong>?? Advertencia de Desarrollo</strong>
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">
-                        Este es un sistema de autenticaciÛn <strong>simulado solo para desarrollo</strong>. 
-                        Cualquier contraseÒa es aceptada. En producciÛn, esto ser· reemplazado con:
-                    </p>
-                    <ul class="mt-2 mb-0">
-                        <li>ConexiÛn a SQL Server</li>
-                        <li>ContraseÒas hasheadas (BCrypt/PBKDF2)</li>
-                        <li>ASP.NET Core Identity</li>
-                        <li>AutenticaciÛn de dos factores (opcional)</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+        <!-- Demo Credentials -->
+        <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+    <p class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">Demo Credentials:</p>
+  <div class="space-y-1 text-sm text-blue-700 dark:text-blue-300">
+    <p><strong>Admin:</strong> admin@vrm.com / admin123</p>
+   <p><strong>User:</strong> user@vrm.com / user123</p>
+        <p><strong>Contador:</strong> contador@vrm.com / contador123</p>
+</div>
+ </div>
+
+<MudText Class="mt-5 text-center text-muted dark:text-darkmuted">
+  Not a Member yet? <MudLink Href="/signup" Class="text-black dark:text-white">Create an Account</MudLink>
+     </MudText>
+  </div>
 </div>
 
 @code {
-    private string username = string.Empty;
-    private string password = string.Empty;
+  [SupplyParameterFromQuery]
+public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromForm]
+    private LoginModel loginModel { get; set; } = new();
+    
     private string? errorMessage;
-    private bool isLoggingIn = false;
+    private bool isLoading = false;
 
     private async Task HandleLogin()
     {
-        errorMessage = null;
-
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            errorMessage = "Por favor ingresa un usuario";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            errorMessage = "Por favor ingresa una contraseÒa";
-            return;
-        }
+        isLoading = true;
+   errorMessage = null;
 
         try
         {
-            isLoggingIn = true;
-            await InvokeAsync(StateHasChanged);
+            Console.WriteLine("üîµ Iniciando login...");
+  
+  // Intentar login con DummyAuthenticationStateProvider
+            var success = await AuthProvider.LoginAsync(loginModel.Email ?? "", loginModel.Password ?? "");
 
-            var authProvider = (DummyAuthenticationStateProvider)AuthStateProvider;
-            var success = await authProvider.LoginAsync(username, password);
+            Console.WriteLine($"üîµ Login resultado: {success}");
 
             if (success)
-            {
-                // Pausa breve para asegurar que el estado se propague
-                await Task.Delay(200);
-                
-                // Redirigir a la p·gina principal
-                Navigation.NavigateTo("/");
-            }
-            else
-            {
-                errorMessage = $"Usuario '{username}' no encontrado. Usa uno de los usuarios de prueba.";
-                isLoggingIn = false;
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-        catch (Exception ex)
         {
-            errorMessage = $"Error al iniciar sesiÛn: {ex.Message}";
-            isLoggingIn = false;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async Task QuickLogin(string user)
-    {
-        errorMessage = null;
-        username = user;
-        password = "dummy123";
-        
-        await InvokeAsync(StateHasChanged);
-        await Task.Delay(100);
-        
-        await HandleLogin();
-    }
-
-    private void ClearError()
-    {
-        errorMessage = null;
-    }
-
-    private async Task OnKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" && !isLoggingIn)
+                // ‚úÖ Determinar URL de redirecci√≥n
+                var redirectUrl = string.IsNullOrEmpty(ReturnUrl) ? "/index" : ReturnUrl;
+    
+    Console.WriteLine($"üîµ Navegando a: {redirectUrl}");
+   
+              // ‚úÖ CR√çTICO: forceLoad=true es NECESARIO aqu√≠ porque:
+            // 1. Login.razor es SSR est√°tico (sin @rendermode)
+    // 2. Index.razor requiere @rendermode InteractiveServer
+        // 3. Debe crear un nuevo Blazor Server Circuit para leer las cookies
+         // 4. NavigationException es el comportamiento esperado de Blazor
+         // 
+                // ‚ö†Ô∏è NO capturar NavigationException - es intencional
+                Navigation.NavigateTo(redirectUrl, forceLoad: true);
+ }
+        else
+     {
+         Console.WriteLine("üî¥ Login fall√≥ - credenciales inv√°lidas");
+    errorMessage = "Invalid email or password. Please try again.";
+      isLoading = false;
+            }
+     }
+        catch (Exception ex) when (ex is not NavigationException)
         {
-            await HandleLogin();
-        }
+            // Solo capturar excepciones reales, NO NavigationException
+     Console.WriteLine($"üî¥ Error: {ex.Message}");
+            errorMessage = $"An error occurred: {ex.Message}";
+            isLoading = false;
+}
+    }
+
+    public class LoginModel
+    {
+ [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+   public string? Email { get; set; }
+
+[Required(ErrorMessage = "Password is required")]
+[MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+        public string? Password { get; set; }
     }
 }

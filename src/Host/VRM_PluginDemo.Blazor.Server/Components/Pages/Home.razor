@@ -1,143 +1,23 @@
-﻿@page "/"
-@inject IModuleManager ModuleManager
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims
+@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>Inicio - VRM Plugin Demo</PageTitle>
-
-<h1>🔌 Sistema de Plugins - VRM Demo</h1>
-
-<div class="alert alert-info mt-4">
-    <h4>✅ Sistema de Plugins Activo</h4>
-    <p>Esta es una demostración de arquitectura de plugins con .NET 8 y Blazor Server.</p>
-</div>
-
-<AuthorizeView>
-    <Authorized>
-        <div class="alert alert-success mt-4">
-            <h4>✅ Sesión Activa</h4>
-            <p class="mb-0">
-                <strong>Usuario:</strong> @context.User.FindFirst(ClaimTypes.Name)?.Value <br />
-                <strong>Email:</strong> @context.User.FindFirst(ClaimTypes.Email)?.Value <br />
-                <strong>Nombre Completo:</strong> @context.User.FindFirst("NombreCompleto")?.Value <br />
-                <strong>Roles:</strong> 
-                @foreach (var rol in context.User.FindAll(ClaimTypes.Role))
-                {
-                    <span class="badge bg-primary me-1">@rol.Value</span>
-                }
-            </p>
-        </div>
-
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">📦 Módulos Cargados</h5>
-                        <p class="card-text display-4">@ModuleManager.GetAllModules().Count</p>
-                        <a href="/modules" class="btn btn-primary">Ver Módulos</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">🎯 Componentes Totales</h5>
-                        <p class="card-text display-4">@totalComponentes</p>
-                        <small class="text-muted">Componentes registrados</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">⚙️ Arquitectura</h5>
-                        <p class="card-text">Plugin Architecture Pattern</p>
-                        <span class="badge bg-success">Activo</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-5">
-            <h3>🎯 Módulos y Componentes Disponibles</h3>
-
-            @foreach (var modulo in ModuleManager.GetAllModules())
-            {
-                <div class="card mb-3">
-                    <div class="card-header bg-primary text-white">
-                        <strong>@modulo.DisplayName</strong>
-                        <span class="badge bg-light text-dark ms-2">v@modulo.Version</span>
-                        <span class="badge bg-info ms-1">@modulo.Category</span>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted">@modulo.Description</p>
-
-                        @if (modulo.GetComponents().Any())
-                        {
-                            <h6>Componentes:</h6>
-                            <ul class="list-group list-group-flush">
-                                @foreach (var comp in modulo.GetComponents())
-                                {
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <span class="@comp.Icon me-2"></span>
-                                            <strong>@comp.Name</strong>
-                                            <br />
-                                            <small class="text-muted">Ruta: <code>@comp.Route</code></small>
-                                        </div>
-                                        <a href="@comp.Route" class="btn btn-sm btn-outline-primary">Abrir</a>
-                                    </li>
-                                }
-                            </ul>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-
-        <div class="alert alert-warning mt-4">
-            <strong>⚠️ Modo de Desarrollo:</strong> Estás usando autenticación simulada. 
-            Los datos se perderán al reiniciar la aplicación.
-        </div>
-    </Authorized>
-    <NotAuthorized>
-        <div class="alert alert-warning mt-4">
-            <h4>🔒 Acceso Restringido</h4>
-            <p>Por favor <a href="/login" class="alert-link">inicia sesión</a> para acceder a los módulos del sistema.</p>
-        </div>
-
-        <div class="card mt-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Acerca de VRM Plugin Demo</h5>
-            </div>
-            <div class="card-body">
-                <p>
-                    VRM Plugin Demo es una aplicación modular basada en <strong>Blazor Server</strong> 
-                    que implementa una arquitectura de plugins con:
-                </p>
-                <ul>
-                    <li>✅ Carga dinámica de módulos</li>
-                    <li>✅ Sistema de permisos granulares</li>
-                    <li>✅ Autorización por rol y acción</li>
-                    <li>✅ Multi-tenancy</li>
-                    <li>✅ Componentes interactivos</li>
-                </ul>
-                <a href="/login" class="btn btn-primary">Iniciar Sesión</a>
-            </div>
-        </div>
-    </NotAuthorized>
-</AuthorizeView>
-
 @code {
-    private int totalComponentes = 0;
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        totalComponentes = ModuleManager.GetAllModules()
-            .SelectMany(m => m.GetComponents())
-            .Count();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            // ? Usuario autenticado ? Redirigir a Dashboard
+            Navigation.NavigateTo("/index", replace: true);
+        }
+        else
+        {
+            // ? Usuario NO autenticado ? Redirigir a Login
+            Navigation.NavigateTo("/login", replace: true);
+        }
     }
 }

@@ -1,8 +1,8 @@
 @page "/logout"
-@rendermode InteractiveServer
+@* ?? SSR ESTÁTICO - Logout necesita acceso a HttpContext para eliminar cookies *@
 @using VRM_PluginDemo.Blazor.Server.Services
 @using Microsoft.AspNetCore.Components.Authorization
-@inject AuthenticationStateProvider AuthStateProvider
+@inject DummyAuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
 
 <PageTitle>Cerrando Sesión...</PageTitle>
@@ -10,29 +10,53 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body text-center">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">Cerrando sesión...</span>
-                    </div>
-                    <h4>Cerrando sesión...</h4>
-                    <p class="text-muted">Serás redirigido al inicio en un momento.</p>
-                </div>
-            </div>
-        </div>
+     <div class="card">
+    <div class="card-body text-center">
+             @if (!_logoutCompleted)
+           {
+          <div class="spinner-border text-primary mb-3" role="status">
+           <span class="visually-hidden">Cerrando sesión...</span>
+  </div>
+             <h4>Cerrando sesión...</h4>
+      <p class="text-muted">Serás redirigido al login en un momento.</p>
+            }
+     else
+         {
+       <div class="text-success mb-3">
+       <span class="bi bi-check-circle" style="font-size: 3rem;"></span>
+      </div>
+               <h4>Sesión cerrada exitosamente</h4>
+                   <p class="text-muted">Redirigiendo...</p>
+        }
+      </div>
+       </div>
+ </div>
     </div>
 </div>
 
 @code {
+    private bool _logoutCompleted = false;
+
     protected override async Task OnInitializedAsync()
     {
-        var authProvider = (DummyAuthenticationStateProvider)AuthStateProvider;
-        await authProvider.LogoutAsync();
+        try
+        {
+        // ? Ejecutar logout (elimina cookie HTTP)
+        await AuthProvider.LogoutAsync();
+   
+            _logoutCompleted = true;
 
-        // Esperar un momento para que el usuario vea el mensaje
-        await Task.Delay(500);
+         // Pequeño delay para feedback visual
+      await Task.Delay(1000);
 
-        // Redirigir al login SIN forceLoad para mantener el estado
-        Navigation.NavigateTo("/login");
+            // ? CLAVE: forceLoad=true limpia completamente el estado de Blazor
+            Navigation.NavigateTo("/login", forceLoad: true);
     }
+        catch (Exception ex)
+      {
+    Console.WriteLine($"? Error durante logout: {ex.Message}");
+ // Redirigir de todas formas
+    Navigation.NavigateTo("/login", forceLoad: true);
+   }
+  }
 }
