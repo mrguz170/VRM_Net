@@ -1,4 +1,4 @@
-﻿namespace VRM_PluginDemo.Modules.Prospectos.Domain;
+﻿namespace VRM_Plugin.Modules.Prospectos.Domain;
 
 /// <summary>
 /// Representa una empresa que solicita ser proveedor

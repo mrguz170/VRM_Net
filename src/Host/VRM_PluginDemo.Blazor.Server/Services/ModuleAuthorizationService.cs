@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 
-namespace VRM_PluginDemo.Blazor.Server.Services;
+namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
 /// Implementación del servicio de autorización granular de módulos.

@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
-using VRM_PluginDemo.Core.Abstractions;
+using VRM_Plugin.Core.Abstractions;
 
-namespace VRM_PluginDemo.Blazor.Server.Services;
+namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
 /// Carga dinámicamente módulos desde ensamblados
@@ -36,7 +36,7 @@ public class ModuleLoader : IModuleManager
         }
 
         // Buscar todos los DLLs que coincidan con el patrón de módulos
-        var moduleFiles = Directory.GetFiles(fullPath, "VRM_PluginDemo.Modules.*.dll", SearchOption.AllDirectories);
+        var moduleFiles = Directory.GetFiles(fullPath, "VRM_Plugin.*.dll", SearchOption.AllDirectories);
 
         _logger.LogInformation("📦 Encontrados {Count} archivos de módulos potenciales", moduleFiles.Length);
 

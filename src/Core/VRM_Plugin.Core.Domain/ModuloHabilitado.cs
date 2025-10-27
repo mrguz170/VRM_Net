@@ -1,4 +1,4 @@
-﻿namespace VRM_PluginDemo.Core.Domain;
+﻿namespace VRM_Plugin.Core.Domain;
 
 /// <summary>
 /// Representa un módulo habilitado para un cliente específico

@@ -6,7 +6,7 @@ módulo Prospectos tendrá:
 3.	Implementación de servicios: ProspectoService (lógica de negocio)
 4.	Clase del módulo: ProspectosModule (implementa IModule)
 
-📁 VRM_PluginDemo.Modules.Prospectos
+📁 VRM_Plugin.Modules.Prospectos
 ├── 📁 Domain                    # Entidades del módulo
 │   ├── Prospecto.cs
 │   ├── RevisionArea.cs

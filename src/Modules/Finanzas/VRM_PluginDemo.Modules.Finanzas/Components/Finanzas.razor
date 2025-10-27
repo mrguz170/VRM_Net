@@ -1,8 +1,9 @@
 ﻿@page "/finanzas"
 @rendermode InteractiveServer
+@namespace VRM_Plugin.Modules.Finanzas.Components
 @using Microsoft.AspNetCore.Components.Authorization
-@using VRM_PluginDemo.Modules.Finanzas.Services
-@using VRM_PluginDemo.Modules.Finanzas.Domain
+@using VRM_Plugin.Modules.Finanzas.Services
+@using VRM_Plugin.Modules.Finanzas.Domain
 @inject IFacturaService FacturaService
 @inject IPagoService PagoService
 
@@ -234,7 +235,7 @@
   EstadoFactura.Pendiente => "bg-warning",
      EstadoFactura.Vencida => "bg-danger",
    EstadoFactura.Cancelada => "bg-secondary",
-            EstadoFactura.PagoParcial => "bg-info",
+     EstadoFactura.PagoParcial => "bg-info",
       _ => "bg-light text-dark"
       };
     }

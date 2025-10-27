@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <!-- Actualizar ruta: ahora Core está 2 niveles arriba -->
-    <ProjectReference Include="..\..\Core\VRM_PluginDemo.Core.Abstractions\VRM_PluginDemo.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,7 +26,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ModuleProjects Include="$(SolutionDir)src\Modules\**\VRM_PluginDemo.Modules.*.csproj" />
+      <ModuleProjects Include="$(SolutionDir)src\Modules\**\VRM_Plugin.*.csproj" />
     </ItemGroup>
 
     <Message Text="📦 Encontrados @(ModuleProjects-&gt;Count()) proyectos de módulos" Importance="high" />
@@ -40,8 +40,8 @@
     <MakeDir Directories="$(ModulesOutDir)" />
 
     <ItemGroup>
-      <ModuleDlls Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_PluginDemo.Modules.*.dll" />
-      <ModulePdbs Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_PluginDemo.Modules.*.pdb" />
+      <ModuleDlls Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_Plugin.*.dll" />
+      <ModulePdbs Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_Plugin.*.pdb" />
     </ItemGroup>
 
     <Copy SourceFiles="@(ModuleDlls)" DestinationFolder="$(ModulesOutDir)" SkipUnchangedFiles="false" />
@@ -62,7 +62,7 @@
 
     <!-- Compilar módulos si no están compilados -->
     <ItemGroup>
-      <ModuleProjects Include="$(SolutionDir)src\Modules\**\VRM_PluginDemo.Modules.*.csproj" />
+      <ModuleProjects Include="$(SolutionDir)src\Modules\**\VRM_Plugin.*.csproj" />
     </ItemGroup>
 
     <Message Text="📦 Compilando @(ModuleProjects-&gt;Count()) módulos para publicación..." Importance="high" />
@@ -74,8 +74,8 @@
 
     <!-- Buscar y copiar DLLs y PDBs de módulos -->
     <ItemGroup>
-      <ModuleDlls Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_PluginDemo.Modules.*.dll" />
-      <ModulePdbs Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_PluginDemo.Modules.*.pdb" />
+      <ModuleDlls Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_Plugin.*.dll" />
+      <ModulePdbs Include="$(SolutionDir)src\Modules\**\bin\$(Configuration)\net8.0\VRM_Plugin.*.pdb" />
     </ItemGroup>
 
     <Message Text="📋 Archivos a copiar:" Importance="high" />

@@ -739,7 +739,7 @@ public interface IModule
 **Estructura:**
 
 ```
-VRM_PluginDemo.Modules.Finanzas/
+VRM_Plugin.Modules.Finanzas/
 ??? FinanzasModule.cs            # Implementa IModule
 ??? Components/
 ?   ??? Finanzas.razor           # UI del modulo
@@ -752,7 +752,7 @@ VRM_PluginDemo.Modules.Finanzas/
 ?   ??? Factura.cs
 ?   ??? Pago.cs
 ?   ??? Enums.cs
-??? VRM_PluginDemo.Modules.Finanzas.csproj
+??? VRM_Plugin.Modules.Finanzas.csproj
 ```
 
 **Implementacion:**

@@ -1,6 +1,6 @@
-using VRM_PluginDemo.Modules.Finanzas.Domain;
+using VRM_Plugin.Modules.Finanzas.Domain;
 
-namespace VRM_PluginDemo.Modules.Finanzas.Services;
+namespace VRM_Plugin.Modules.Finanzas.Services;
 
 /// <summary>
 /// Servicio para gestionar facturas.

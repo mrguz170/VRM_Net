@@ -4,7 +4,7 @@ Esta carpeta contiene los proyectos compartidos que definen las interfaces y mod
 
 ## Proyectos
 
-### VRM_PluginDemo.Core.Abstractions
+### VRM_Plugin.Core.Abstractions
 
 Define las interfaces base del sistema de plugins.
 
@@ -32,7 +32,7 @@ public interface IModule
 - `ComponentInfo.cs` - Metadata de componentes Blazor
 - `DependencyInfo.cs` - Informacion de dependencias entre modulos
 
-### VRM_PluginDemo.Core.Domain
+### VRM_Plugin.Core.Domain
 
 Modelos del dominio compartidos entre modulos.
 

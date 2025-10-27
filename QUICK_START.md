@@ -5,7 +5,7 @@
 ### 1. Ejecutar el Proyecto
 
 ```bash
-cd src/Host/VRM_PluginDemo.Blazor.Server
+cd src/Host/VRM_Plugin.Blazor.Server
 dotnet run
 ```
 
@@ -165,14 +165,14 @@ Agregar al inicio del componente `.razor`:
 dotnet build
 
 # Ejecutar
-dotnet run --project src/Host/VRM_PluginDemo.Blazor.Server/
+dotnet run --project src/Host/VRM_Plugin.Blazor.Server/
 
 # Limpiar y recompilar
 dotnet clean
 dotnet build
 
 # Ver logs en tiempo real
-dotnet run --project src/Host/VRM_PluginDemo.Blazor.Server/ | Select-String "módulo"
+dotnet run --project src/Host/VRM_Plugin.Blazor.Server/ | Select-String "módulo"
 ```
 
 ---

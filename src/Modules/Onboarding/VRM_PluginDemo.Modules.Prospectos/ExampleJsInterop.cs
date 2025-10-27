@@ -1,6 +1,6 @@
 using Microsoft.JSInterop;
 
-namespace VRM_PluginDemo.Modules.Prospectos
+namespace VRM_Plugin.Modules.Prospectos
 {
     // This class provides an example of how JavaScript functionality can be wrapped
     // in a .NET class for easy consumption. The associated JavaScript module is
@@ -16,7 +16,7 @@ namespace VRM_PluginDemo.Modules.Prospectos
         public ExampleJsInterop(IJSRuntime jsRuntime)
         {
             moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/VRM_PluginDemo.Modules.Prospectos/exampleJsInterop.js").AsTask());
+                "import", "./_content/VRM_Plugin.Modules.Prospectos/exampleJsInterop.js").AsTask());
         }
 
         public async ValueTask<string> Prompt(string message)

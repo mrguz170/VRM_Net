@@ -4,7 +4,7 @@ El "contrato" que todos los plugins deben cumplir
 Piénsalo como un manual de instrucciones universal
 
 ┌─────────────────────────────────────────┐
-│    VRM_PluginDemo.Blazor.Server         │
+│    VRM_Plugin.Blazor.Server         │
 │    (Tu aplicación principal)            │
 │                                         │
 │  Solo sabe: "Dame algo que sea IModule" │

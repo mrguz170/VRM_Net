@@ -21,8 +21,8 @@ Comandos y scripts listos para copiar y ejecutar en el desarrollo del proyecto V
 ### Clonar Repositorio
 
 ```bash
-git clone https://github.com/mrguz170/VRM_PluginDemo.git
-cd VRM_PluginDemo
+git clone https://github.com/mrguz170/VRM_Plugin.git
+cd VRM_Plugin
 ```
 
 ### Verificar .NET SDK
@@ -42,7 +42,7 @@ dotnet build
 ### Ejecutar Aplicacion
 
 ```bash
-cd src/Host/VRM_PluginDemo.Blazor.Server
+cd src/Host/VRM_Plugin.Blazor.Server
 dotnet run
 ```
 
@@ -56,40 +56,40 @@ Abrir navegador en: `https://localhost:XXXX/login`
 
 ```bash
 # Asegurate de estar en la raiz del proyecto
-cd C:\Users\lobo_\Documents\VRM\Criteria\VRM_PluginDemo
+cd C:\Users\lobo_\Documents\VRM\Criteria\VRM_Plugin
 
 # Crear carpeta Shared
 mkdir src\Shared
 
 # Crear proyectos Core
-dotnet new classlib -n VRM_PluginDemo.Core.Application -o src\Core\VRM_PluginDemo.Core.Application --framework net8.0
-dotnet new classlib -n VRM_PluginDemo.Core.Infrastructure -o src\Core\VRM_PluginDemo.Core.Infrastructure --framework net8.0
+dotnet new classlib -n VRM_Plugin.Core.Application -o src\Core\VRM_Plugin.Core.Application --framework net8.0
+dotnet new classlib -n VRM_Plugin.Core.Infrastructure -o src\Core\VRM_Plugin.Core.Infrastructure --framework net8.0
 
 # Crear proyectos Shared
-dotnet new classlib -n VRM_PluginDemo.Shared.DTOs -o src\Shared\VRM_PluginDemo.Shared.DTOs --framework net8.0
-dotnet new classlib -n VRM_PluginDemo.Shared.Contracts -o src\Shared\VRM_PluginDemo.Shared.Contracts --framework net8.0
-dotnet new classlib -n VRM_PluginDemo.Shared.Common -o src\Shared\VRM_PluginDemo.Shared.Common --framework net8.0
+dotnet new classlib -n VRM_Plugin.Shared.DTOs -o src\Shared\VRM_Plugin.Shared.DTOs --framework net8.0
+dotnet new classlib -n VRM_Plugin.Shared.Contracts -o src\Shared\VRM_Plugin.Shared.Contracts --framework net8.0
+dotnet new classlib -n VRM_Plugin.Shared.Common -o src\Shared\VRM_Plugin.Shared.Common --framework net8.0
 
 # Crear proyectos de pruebas
 mkdir tests
-dotnet new xunit -n VRM_PluginDemo.UnitTests -o tests\VRM_PluginDemo.UnitTests --framework net8.0
-dotnet new xunit -n VRM_PluginDemo.IntegrationTests -o tests\VRM_PluginDemo.IntegrationTests --framework net8.0
+dotnet new xunit -n VRM_Plugin.UnitTests -o tests\VRM_Plugin.UnitTests --framework net8.0
+dotnet new xunit -n VRM_Plugin.IntegrationTests -o tests\VRM_Plugin.IntegrationTests --framework net8.0
 
 # Agregar proyectos a la solucion
-dotnet sln add src\Core\VRM_PluginDemo.Core.Application\VRM_PluginDemo.Core.Application.csproj
-dotnet sln add src\Core\VRM_PluginDemo.Core.Infrastructure\VRM_PluginDemo.Core.Infrastructure.csproj
-dotnet sln add src\Shared\VRM_PluginDemo.Shared.DTOs\VRM_PluginDemo.Shared.DTOs.csproj
-dotnet sln add src\Shared\VRM_PluginDemo.Shared.Contracts\VRM_PluginDemo.Shared.Contracts.csproj
-dotnet sln add src\Shared\VRM_PluginDemo.Shared.Common\VRM_PluginDemo.Shared.Common.csproj
-dotnet sln add tests\VRM_PluginDemo.UnitTests\VRM_PluginDemo.UnitTests.csproj
-dotnet sln add tests\VRM_PluginDemo.IntegrationTests\VRM_PluginDemo.IntegrationTests.csproj
+dotnet sln add src\Core\VRM_Plugin.Core.Application\VRM_Plugin.Core.Application.csproj
+dotnet sln add src\Core\VRM_Plugin.Core.Infrastructure\VRM_Plugin.Core.Infrastructure.csproj
+dotnet sln add src\Shared\VRM_Plugin.Shared.DTOs\VRM_Plugin.Shared.DTOs.csproj
+dotnet sln add src\Shared\VRM_Plugin.Shared.Contracts\VRM_Plugin.Shared.Contracts.csproj
+dotnet sln add src\Shared\VRM_Plugin.Shared.Common\VRM_Plugin.Shared.Common.csproj
+dotnet sln add tests\VRM_Plugin.UnitTests\VRM_Plugin.UnitTests.csproj
+dotnet sln add tests\VRM_Plugin.IntegrationTests\VRM_Plugin.IntegrationTests.csproj
 ```
 
 ### Instalar Paquetes de Logging (Serilog)
 
 ```bash
 # Navegar al proyecto Host
-cd src\Host\VRM_PluginDemo.Blazor.Server
+cd src\Host\VRM_Plugin.Blazor.Server
 
 # Instalar Serilog
 dotnet add package Serilog.AspNetCore --version 8.0.3
@@ -124,7 +124,7 @@ mkdir scripts\maintenance
 
 ```bash
 # Navegar al proyecto Infrastructure
-cd src\Core\VRM_PluginDemo.Core.Infrastructure
+cd src\Core\VRM_Plugin.Core.Infrastructure
 
 # Instalar paquetes de EF Core
 dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 8.0.11
@@ -153,7 +153,7 @@ Agregar a `appsettings.Development.json`:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=VRM_PluginDemo_Dev;Trusted_Connection=True;MultipleActiveResultSets=true"
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=VRM_Plugin_Dev;Trusted_Connection=True;MultipleActiveResultSets=true"
   }
 }
 ```
@@ -163,8 +163,8 @@ Agregar a `appsettings.Development.json`:
 ```bash
 # Desde la raiz del proyecto
 dotnet ef migrations add InitialCreate ^
-  --project src\Core\VRM_PluginDemo.Core.Infrastructure ^
-  --startup-project src\Host\VRM_PluginDemo.Blazor.Server ^
+  --project src\Core\VRM_Plugin.Core.Infrastructure ^
+  --startup-project src\Host\VRM_Plugin.Blazor.Server ^
   --context ApplicationDbContext ^
   --output-dir Migrations
 ```
@@ -173,8 +173,8 @@ dotnet ef migrations add InitialCreate ^
 
 ```bash
 dotnet ef database update ^
-  --project src\Core\VRM_PluginDemo.Core.Infrastructure ^
-  --startup-project src\Host\VRM_PluginDemo.Blazor.Server ^
+  --project src\Core\VRM_Plugin.Core.Infrastructure ^
+  --startup-project src\Host\VRM_Plugin.Blazor.Server ^
   --context ApplicationDbContext
 ```
 
@@ -182,8 +182,8 @@ dotnet ef database update ^
 
 ```bash
 dotnet ef migrations list ^
-  --project src\Core\VRM_PluginDemo.Core.Infrastructure ^
-  --startup-project src\Host\VRM_PluginDemo.Blazor.Server ^
+  --project src\Core\VRM_Plugin.Core.Infrastructure ^
+  --startup-project src\Host\VRM_Plugin.Blazor.Server ^
   --context ApplicationDbContext
 ```
 
@@ -192,8 +192,8 @@ dotnet ef migrations list ^
 ```bash
 # Generar script SQL de todas las migraciones
 dotnet ef migrations script ^
-  --project src\Core\VRM_PluginDemo.Core.Infrastructure ^
-  --startup-project src\Host\VRM_PluginDemo.Blazor.Server ^
+  --project src\Core\VRM_Plugin.Core.Infrastructure ^
+  --startup-project src\Host\VRM_Plugin.Blazor.Server ^
   --context ApplicationDbContext ^
   --output scripts\db\migration.sql
 ```
@@ -202,8 +202,8 @@ dotnet ef migrations script ^
 
 ```bash
 dotnet ef migrations remove ^
-  --project src\Core\VRM_PluginDemo.Core.Infrastructure ^
-  --startup-project src\Host\VRM_PluginDemo.Blazor.Server ^
+  --project src\Core\VRM_Plugin.Core.Infrastructure ^
+  --startup-project src\Host\VRM_Plugin.Blazor.Server ^
   --context ApplicationDbContext
 ```
 
@@ -215,8 +215,8 @@ dotnet ef migrations list
 
 # Rollback a una migracion especifica
 dotnet ef database update NombreDeLaMigracion ^
-  --project src\Core\VRM_PluginDemo.Core.Infrastructure ^
-  --startup-project src\Host\VRM_PluginDemo.Blazor.Server ^
+  --project src\Core\VRM_Plugin.Core.Infrastructure ^
+  --startup-project src\Host\VRM_Plugin.Blazor.Server ^
   --context ApplicationDbContext
 ```
 
@@ -242,25 +242,25 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copiar archivos de proyecto
-COPY ["src/Host/VRM_PluginDemo.Blazor.Server/VRM_PluginDemo.Blazor.Server.csproj", "Host/"]
-COPY ["src/Core/VRM_PluginDemo.Core.Abstractions/VRM_PluginDemo.Core.Abstractions.csproj", "Core/Abstractions/"]
-COPY ["src/Core/VRM_PluginDemo.Core.Domain/VRM_PluginDemo.Core.Domain.csproj", "Core/Domain/"]
-COPY ["src/Core/VRM_PluginDemo.Core.Infrastructure/VRM_PluginDemo.Core.Infrastructure.csproj", "Core/Infrastructure/"]
-COPY ["src/Core/VRM_PluginDemo.Core.Application/VRM_PluginDemo.Core.Application.csproj", "Core/Application/"]
+COPY ["src/Host/VRM_Plugin.Blazor.Server/VRM_Plugin.Blazor.Server.csproj", "Host/"]
+COPY ["src/Core/VRM_Plugin.Core.Abstractions/VRM_Plugin.Core.Abstractions.csproj", "Core/Abstractions/"]
+COPY ["src/Core/VRM_Plugin.Core.Domain/VRM_Plugin.Core.Domain.csproj", "Core/Domain/"]
+COPY ["src/Core/VRM_Plugin.Core.Infrastructure/VRM_Plugin.Core.Infrastructure.csproj", "Core/Infrastructure/"]
+COPY ["src/Core/VRM_Plugin.Core.Application/VRM_Plugin.Core.Application.csproj", "Core/Application/"]
 
 # Restaurar dependencias
-RUN dotnet restore "Host/VRM_PluginDemo.Blazor.Server.csproj"
+RUN dotnet restore "Host/VRM_Plugin.Blazor.Server.csproj"
 
 # Copiar todo el codigo
 COPY src/ .
 
 # Build
 WORKDIR "/src/Host"
-RUN dotnet build "VRM_PluginDemo.Blazor.Server.csproj" -c Release -o /app/build
+RUN dotnet build "VRM_Plugin.Blazor.Server.csproj" -c Release -o /app/build
 
 # Publish
 FROM build AS publish
-RUN dotnet publish "VRM_PluginDemo.Blazor.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "VRM_Plugin.Blazor.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Final
 FROM base AS final
@@ -268,7 +268,7 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 RUN mkdir -p /app/Modules
 
-ENTRYPOINT ["dotnet", "VRM_PluginDemo.Blazor.Server.dll"]
+ENTRYPOINT ["dotnet", "VRM_Plugin.Blazor.Server.dll"]
 ```
 
 ### Crear docker-compose.yml
@@ -290,7 +290,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=db;Database=VRM_PluginDemo;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Server=db;Database=VRM_Plugin;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;
       - Serilog__WriteTo__1__Name=Seq
       - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
     depends_on:
@@ -394,19 +394,19 @@ Guardar como: `scripts/maintenance/backup-database.ps1`
 
 ```powershell
 param(
-    [string]$ConnectionString = "Server=localhost;Database=VRM_PluginDemo;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True",
-    [string]$BackupPath = "C:\Backups\VRM_PluginDemo"
+    [string]$ConnectionString = "Server=localhost;Database=VRM_Plugin;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True",
+    [string]$BackupPath = "C:\Backups\VRM_Plugin"
 )
 
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$backupFile = Join-Path $BackupPath "VRM_PluginDemo_$timestamp.bak"
+$backupFile = Join-Path $BackupPath "VRM_Plugin_$timestamp.bak"
 
 if (!(Test-Path $BackupPath)) {
     New-Item -ItemType Directory -Path $BackupPath | Out-Null
 }
 
 $query = @"
-BACKUP DATABASE [VRM_PluginDemo]
+BACKUP DATABASE [VRM_Plugin]
 TO DISK = '$backupFile'
 WITH FORMAT, COMPRESSION, STATS = 10;
 "@
@@ -418,7 +418,7 @@ try {
     Write-Host "Backup completado exitosamente" -ForegroundColor Green
     
     # Limpiar backups viejos (mantener ultimos 7 dias)
-    Get-ChildItem $BackupPath -Filter "VRM_PluginDemo_*.bak" |
+    Get-ChildItem $BackupPath -Filter "VRM_Plugin_*.bak" |
         Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) } |
         Remove-Item -Force
         
@@ -501,7 +501,7 @@ if (Test-Path $publishPath) {
     Remove-Item $publishPath -Recurse -Force
 }
 
-dotnet publish src\Host\VRM_PluginDemo.Blazor.Server\VRM_PluginDemo.Blazor.Server.csproj `
+dotnet publish src\Host\VRM_Plugin.Blazor.Server\VRM_Plugin.Blazor.Server.csproj `
     --configuration Release `
     --output $publishPath `
     --no-build
@@ -522,7 +522,7 @@ if (!(Test-Path $modulesDestination)) {
 
 $moduleCount = 0
 Get-ChildItem -Path $modulesSource -Recurse -Filter "*.dll" |
-    Where-Object { $_.FullName -like "*\bin\Release\net8.0\VRM_PluginDemo.Modules.*.dll" } |
+    Where-Object { $_.FullName -like "*\bin\Release\net8.0\VRM_Plugin.Modules.*.dll" } |
     ForEach-Object {
         Copy-Item $_.FullName -Destination $modulesDestination -Force
         Write-Host "  Copiado: $($_.Name)" -ForegroundColor Gray
@@ -533,7 +533,7 @@ Write-Host "  Total modulos copiados: $moduleCount" -ForegroundColor Green
 
 # 7. Copiar archivo de configuracion
 Write-Host "[7/7] Copiando configuracion..." -ForegroundColor Yellow
-$configSource = "src\Host\VRM_PluginDemo.Blazor.Server\appsettings.$Environment.json"
+$configSource = "src\Host\VRM_Plugin.Blazor.Server\appsettings.$Environment.json"
 
 if (Test-Path $configSource) {
     Copy-Item $configSource -Destination "$publishPath\appsettings.json" -Force
@@ -575,7 +575,7 @@ Guardar como: `scripts/build-modules.ps1`
 Write-Host "Compilando modulos..." -ForegroundColor Cyan
 
 $modulesPath = "src\Modules"
-$outputPath = "src\Host\VRM_PluginDemo.Blazor.Server\Modules"
+$outputPath = "src\Host\VRM_Plugin.Blazor.Server\Modules"
 
 # Crear carpeta de salida si no existe
 if (!(Test-Path $outputPath)) {
@@ -583,7 +583,7 @@ if (!(Test-Path $outputPath)) {
 }
 
 # Buscar todos los .csproj de modulos
-Get-ChildItem -Path $modulesPath -Recurse -Filter "VRM_PluginDemo.Modules.*.csproj" | ForEach-Object {
+Get-ChildItem -Path $modulesPath -Recurse -Filter "VRM_Plugin.Modules.*.csproj" | ForEach-Object {
     $projectPath = $_.FullName
     $projectName = $_.BaseName
     
@@ -642,13 +642,13 @@ dotnet clean && dotnet build
 
 ```bash
 # Ejecutar aplicacion
-dotnet run --project src\Host\VRM_PluginDemo.Blazor.Server
+dotnet run --project src\Host\VRM_Plugin.Blazor.Server
 
 # Ejecutar con ambiente especifico
-dotnet run --project src\Host\VRM_PluginDemo.Blazor.Server --environment Production
+dotnet run --project src\Host\VRM_Plugin.Blazor.Server --environment Production
 
 # Watch mode (recompila automaticamente)
-dotnet watch run --project src\Host\VRM_PluginDemo.Blazor.Server
+dotnet watch run --project src\Host\VRM_Plugin.Blazor.Server
 ```
 
 ### Pruebas
@@ -664,7 +664,7 @@ dotnet test --verbosity normal
 dotnet test --collect:"XPlat Code Coverage"
 
 # Ejecutar pruebas de un proyecto especifico
-dotnet test tests\VRM_PluginDemo.UnitTests\VRM_PluginDemo.UnitTests.csproj
+dotnet test tests\VRM_Plugin.UnitTests\VRM_Plugin.UnitTests.csproj
 ```
 
 ### NuGet
@@ -782,7 +782,7 @@ jobs:
     
     - name: Publish artifacts
       if: github.ref == 'refs/heads/main'
-      run: dotnet publish src/Host/VRM_PluginDemo.Blazor.Server/VRM_PluginDemo.Blazor.Server.csproj -c Release -o ./publish
+      run: dotnet publish src/Host/VRM_Plugin.Blazor.Server/VRM_Plugin.Blazor.Server.csproj -c Release -o ./publish
     
     - name: Upload artifacts
       if: github.ref == 'refs/heads/main'
@@ -858,7 +858,7 @@ Agregar a tu perfil de PowerShell (`$PROFILE`):
 ```powershell
 # VRM Plugin Demo aliases
 function vrm-build { dotnet build }
-function vrm-run { dotnet run --project src\Host\VRM_PluginDemo.Blazor.Server }
+function vrm-run { dotnet run --project src\Host\VRM_Plugin.Blazor.Server }
 function vrm-test { dotnet test }
 function vrm-clean { dotnet clean }
 function vrm-modules { .\scripts\build-modules.ps1 }
@@ -894,7 +894,7 @@ $env:ASPNETCORE_ENVIRONMENT
 .\scripts\build-modules.ps1
 
 # Verificar que existan
-dir src\Host\VRM_PluginDemo.Blazor.Server\Modules
+dir src\Host\VRM_Plugin.Blazor.Server\Modules
 ```
 
 ### Problema: Error al aplicar migraciones

@@ -1,4 +1,4 @@
-namespace VRM_PluginDemo.Blazor.Server.Services;
+namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
 /// Servicio para verificar permisos granulares de acciones dentro de módulos.

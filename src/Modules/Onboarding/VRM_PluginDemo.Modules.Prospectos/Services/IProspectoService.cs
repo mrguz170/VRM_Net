@@ -1,6 +1,6 @@
-﻿using VRM_PluginDemo.Modules.Prospectos.Domain;
+﻿using VRM_Plugin.Modules.Prospectos.Domain;
 
-namespace VRM_PluginDemo.Modules.Prospectos.Services;
+namespace VRM_Plugin.Modules.Prospectos.Services;
 
 /// <summary>
 /// Contrato de servicio para gestión de prospectos

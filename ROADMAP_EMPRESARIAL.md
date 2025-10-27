@@ -118,28 +118,28 @@ Establecer la estructura de proyecto profesional y configuracion base para desar
 **Crear nuevos proyectos:**
 
 ```
-VRM_PluginDemo/
+VRM_Plugin/
 ??? src/
 ?   ??? Core/
-?   ?   ??? VRM_PluginDemo.Core.Abstractions/         (Existe)
-?   ?   ??? VRM_PluginDemo.Core.Domain/               (Existe)
-?   ?   ??? VRM_PluginDemo.Core.Application/          (NUEVO - CQRS, Handlers)
-?   ?   ??? VRM_PluginDemo.Core.Infrastructure/       (NUEVO - BD, Repos)
+?   ?   ??? VRM_Plugin.Core.Abstractions/         (Existe)
+?   ?   ??? VRM_Plugin.Core.Domain/               (Existe)
+?   ?   ??? VRM_Plugin.Core.Application/          (NUEVO - CQRS, Handlers)
+?   ?   ??? VRM_Plugin.Core.Infrastructure/       (NUEVO - BD, Repos)
 ?   ?
 ?   ??? Host/
-?   ?   ??? VRM_PluginDemo.Blazor.Server/             (Existe)
+?   ?   ??? VRM_Plugin.Blazor.Server/             (Existe)
 ?   ?
 ?   ??? Modules/                                       (Existe)
 ?   ?
 ?   ??? Shared/                                        (NUEVO)
-?       ??? VRM_PluginDemo.Shared.DTOs/
-?       ??? VRM_PluginDemo.Shared.Contracts/
-?       ??? VRM_PluginDemo.Shared.Common/
+?       ??? VRM_Plugin.Shared.DTOs/
+?       ??? VRM_Plugin.Shared.Contracts/
+?       ??? VRM_Plugin.Shared.Common/
 ?
 ??? tests/                                             (NUEVO)
-?   ??? VRM_PluginDemo.UnitTests/
-?   ??? VRM_PluginDemo.IntegrationTests/
-?   ??? VRM_PluginDemo.E2ETests/
+?   ??? VRM_Plugin.UnitTests/
+?   ??? VRM_Plugin.IntegrationTests/
+?   ??? VRM_Plugin.E2ETests/
 ?
 ??? docs/                                              (NUEVO)
 ?   ??? architecture/
@@ -305,8 +305,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 #### 2.2 Crear Migraciones Iniciales
 
 ```bash
-dotnet ef migrations add InitialCreate --project src/Core/VRM_PluginDemo.Core.Infrastructure
-dotnet ef database update --project src/Core/VRM_PluginDemo.Core.Infrastructure
+dotnet ef migrations add InitialCreate --project src/Core/VRM_Plugin.Core.Infrastructure
+dotnet ef database update --project src/Core/VRM_Plugin.Core.Infrastructure
 ```
 
 **Entregables:**

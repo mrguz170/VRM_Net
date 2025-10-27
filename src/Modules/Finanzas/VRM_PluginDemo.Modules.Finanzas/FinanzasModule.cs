@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VRM_PluginDemo.Core.Abstractions;
-using VRM_PluginDemo.Modules.Finanzas.Services;
+using VRM_Plugin.Core.Abstractions;
+using VRM_Plugin.Modules.Finanzas.Services;
+using VRM_Plugin.Modules.Finanzas.Components;
 
-namespace VRM_PluginDemo.Modules.Finanzas;
+namespace VRM_Plugin.Modules.Finanzas;
 
 /// <summary>
 /// Módulo de gestión financiera.
@@ -102,7 +103,7 @@ public class FinanzasModule : IModule
             {
                 Name = "Finanzas",
                 Route = "/finanzas",
-                ComponentType = typeof(VRM_PluginDemo.Modules.Finanzas.Components.Finanzas),
+                ComponentType = typeof(Components.Finanzas),
                 Icon = "bi-currency-dollar",
                 ShowInMenu = true,
                 MenuOrder = 20

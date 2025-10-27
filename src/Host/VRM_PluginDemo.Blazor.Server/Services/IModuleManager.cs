@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using VRM_PluginDemo.Core.Abstractions;
+using VRM_Plugin.Core.Abstractions;
 
-namespace VRM_PluginDemo.Blazor.Server.Services;
+namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
 /// Interfaz para gestionar módulos cargados en el sistema

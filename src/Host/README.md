@@ -2,12 +2,12 @@
 
 Esta carpeta contiene la aplicacion host que carga los modulos dinamicamente.
 
-## Proyecto: VRM_PluginDemo.Blazor.Server
+## Proyecto: VRM_Plugin.Blazor.Server
 
 ### Estructura
 
 ```
-VRM_PluginDemo.Blazor.Server/
+VRM_Plugin.Blazor.Server/
 ??? Components/
 ?   ??? Layout/
 ?   ?   ??? MainLayout.razor
@@ -44,7 +44,7 @@ public class ModuleLoader : IModuleManager
         // 1. Buscar DLLs
         var dllFiles = Directory.GetFiles(
             modulesPath, 
-            "VRM_PluginDemo.Modules.*.dll");
+            "VRM_Plugin.Modules.*.dll");
         
         // 2. Cargar cada ensamblado
         foreach (var dllPath in dllFiles)

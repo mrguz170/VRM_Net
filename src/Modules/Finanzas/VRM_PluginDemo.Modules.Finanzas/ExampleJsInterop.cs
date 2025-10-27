@@ -1,6 +1,6 @@
 using Microsoft.JSInterop;
 
-namespace VRM_PluginDemo.Modules.Finanzas;
+namespace VRM_Plugin.Modules.Finanzas;
 
 // This class provides an example of how JavaScript functionality can be wrapped
 // in a .NET class for easy consumption. The associated JavaScript module is
@@ -12,7 +12,7 @@ namespace VRM_PluginDemo.Modules.Finanzas;
 public class ExampleJsInterop(IJSRuntime jsRuntime) : IAsyncDisposable
 {
     private readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
-            "import", "./_content/VRM_PluginDemo.Modules.Finanzas/exampleJsInterop.js").AsTask());
+            "import", "./_content/VRM_Plugin.Modules.Finanzas/exampleJsInterop.js").AsTask());
 
     public async ValueTask<string> Prompt(string message)
     {

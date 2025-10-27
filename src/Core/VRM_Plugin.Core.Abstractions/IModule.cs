@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace VRM_PluginDemo.Core.Abstractions;
+namespace VRM_Plugin.Core.Abstractions;
 
 /// <summary>
 /// Interfaz base que todos los módulos/plugins deben implementar.

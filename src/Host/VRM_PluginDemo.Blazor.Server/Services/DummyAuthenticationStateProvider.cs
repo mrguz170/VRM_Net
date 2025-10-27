@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace VRM_PluginDemo.Blazor.Server.Services;
+namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
 /// Proveedor de autenticación simulado con usuarios dummy.

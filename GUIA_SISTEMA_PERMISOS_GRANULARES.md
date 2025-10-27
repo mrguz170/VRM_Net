@@ -64,7 +64,7 @@ Has implementado un **sistema de autorización granular a nivel de acción** para 
 
 ### 1. **Interfaz Actualizada: `IModule`**
 
-**Ubicación:** `src/Core/VRM_PluginDemo.Core.Abstractions/IModule.cs`
+**Ubicación:** `src/Core/VRM_Plugin.Core.Abstractions/IModule.cs`
 
 **Nuevo método:**
 ```csharp
@@ -318,7 +318,7 @@ private async Task AutorizarPago(Pago pago)
 ### Paso 2: Ejecutar y Probar
 
 ```bash
-dotnet run --project src/Host/VRM_PluginDemo.Blazor.Server/
+dotnet run --project src/Host/VRM_Plugin.Blazor.Server/
 ```
 
 **Navega a:** `https://localhost:XXXX/finanzas`

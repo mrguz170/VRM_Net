@@ -1,5 +1,5 @@
-﻿using VRM_PluginDemo.Blazor.Server.Components;
-using VRM_PluginDemo.Blazor.Server.Services;
+﻿using VRM_Plugin.Blazor.Server.Components;
+using VRM_Plugin.Blazor.Server.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using MudBlazor.Services;

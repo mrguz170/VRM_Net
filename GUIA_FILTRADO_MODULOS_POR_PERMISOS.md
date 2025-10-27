@@ -52,7 +52,7 @@ _userRoles = user.Claims
 
 ### **2. `AuthorizeModule.razor` - Nuevo Componente** ?
 
-**Ubicación:** `src\Host\VRM_PluginDemo.Blazor.Server\Components\Auth\AuthorizeModule.razor`
+**Ubicación:** `src\Host\VRM_Plugin.Blazor.Server\Components\Auth\AuthorizeModule.razor`
 
 **Propósito:** Proteger componentes completos de módulos basándose en `RequiredPermissions`.
 
@@ -116,7 +116,7 @@ _userRoles = user.Claims
 ### **5. `_Imports.razor` - Referencias Globales**
 
 **Cambios:**
-- ? Agregado `@using VRM_PluginDemo.Blazor.Server.Components.Auth`
+- ? Agregado `@using VRM_Plugin.Blazor.Server.Components.Auth`
 - ? Ahora `<AuthorizeModule>` y `<AuthorizeAction>` están disponibles globalmente
 
 ---

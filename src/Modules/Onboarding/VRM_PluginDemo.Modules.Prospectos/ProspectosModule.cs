@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VRM_PluginDemo.Core.Abstractions;
-using VRM_PluginDemo.Modules.Prospectos.Services;
-using VRM_PluginDemo.Modules.Prospectos.Components;
+using VRM_Plugin.Core.Abstractions;
+using VRM_Plugin.Modules.Prospectos.Services;
+using VRM_Plugin.Modules.Prospectos.Components;
 
-namespace VRM_PluginDemo.Modules.Prospectos;
+
+namespace VRM_Plugin.Modules.Prospectos;
 
 /// <summary>
 /// Módulo de gestión de prospectos.
@@ -102,7 +103,7 @@ public class ProspectosModule : IModule
             {
                 Name = "Prospectos",
                 Route = "/prospectos",
-                ComponentType = typeof(VRM_PluginDemo.Modules.Prospectos.Components.Prospectos),
+                ComponentType = typeof(VRM_Plugin.Modules.Prospectos.Components.Prospectos),
                 Icon = "bi-people-fill",
                 ShowInMenu = true,
                 MenuOrder = 10

@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>VRM_Plugin.Modules.Finanzas</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +14,7 @@
 
   <ItemGroup>
     <!-- Ruta: Finanzas -> Modules -> src -> Core (3 niveles arriba) -->
-    <ProjectReference Include="..\..\..\Core\VRM_PluginDemo.Core.Abstractions\VRM_PluginDemo.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

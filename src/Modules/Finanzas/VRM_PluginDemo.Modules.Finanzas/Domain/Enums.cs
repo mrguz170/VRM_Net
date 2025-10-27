@@ -1,4 +1,4 @@
-namespace VRM_PluginDemo.Modules.Finanzas.Domain;
+namespace VRM_Plugin.Modules.Finanzas.Domain;
 
 /// <summary>
 /// Métodos de pago disponibles.

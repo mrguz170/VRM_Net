@@ -1,6 +1,6 @@
 ﻿Blazor.Server: La aplicación web principal que "descubre" y carga los plugins
 
-📁 VRM_PluginDemo.Blazor.Server
+📁 VRM_Plugin.Blazor.Server
 └── 📁 Components
     ├── App.razor                    ✅
     ├── Routes.razor                 ✅

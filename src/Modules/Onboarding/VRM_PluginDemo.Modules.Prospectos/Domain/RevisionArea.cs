@@ -1,4 +1,4 @@
-﻿namespace VRM_PluginDemo.Modules.Prospectos.Domain;
+﻿namespace VRM_Plugin.Modules.Prospectos.Domain;
 
 /// <summary>
 /// Representa la revisión de un prospecto por un área específica

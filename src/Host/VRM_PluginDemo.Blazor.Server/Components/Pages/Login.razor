@@ -1,10 +1,10 @@
 ﻿@page "/login"
 @* ⚠️ SSR ESTÁTICO - Login NO usa InteractiveServer para soportar cookies HTTP *@
 @* El formulario necesita un POST HTTP real para que SignInAsync pueda escribir cookies *@
-@using VRM_PluginDemo.Blazor.Server.Components.Layout
+@using VRM_Plugin.Blazor.Server.Components.Layout
 @layout AuthLayout
 @using Microsoft.AspNetCore.Components.Authorization
-@using VRM_PluginDemo.Blazor.Server.Services
+@using VRM_Plugin.Blazor.Server.Services
 @using System.ComponentModel.DataAnnotations
 @inject DummyAuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation

@@ -1,4 +1,4 @@
-﻿namespace VRM_PluginDemo.Core.Domain;
+﻿namespace VRM_Plugin.Core.Domain;
 
 /// <summary>
 /// Configuración fiscal de un cliente para servicios del SAT

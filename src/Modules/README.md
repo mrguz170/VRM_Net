@@ -6,7 +6,7 @@ Esta carpeta contiene los modulos de negocio que se cargan dinamicamente.
 
 ### 1. Modulo Finanzas
 
-**Ubicacion:** `src/Modules/Finanzas/VRM_PluginDemo.Modules.Finanzas/`
+**Ubicacion:** `src/Modules/Finanzas/VRM_Plugin.Modules.Finanzas/`
 
 **Proposito:** Gestion de facturas, pagos y finanzas.
 
@@ -31,7 +31,7 @@ Esta carpeta contiene los modulos de negocio que se cargan dinamicamente.
 
 ### 2. Modulo Prospectos
 
-**Ubicacion:** `src/Modules/Onboarding/VRM_PluginDemo.Modules.Prospectos/`
+**Ubicacion:** `src/Modules/Onboarding/VRM_Plugin.Modules.Prospectos/`
 
 **Proposito:** Gestion de onboarding de clientes potenciales.
 
@@ -59,7 +59,7 @@ Esta carpeta contiene los modulos de negocio que se cargan dinamicamente.
 ### Paso 1: Crear Proyecto
 
 ```bash
-dotnet new razorclasslib -n VRM_PluginDemo.Modules.Inventario -o src/Modules/Inventario/VRM_PluginDemo.Modules.Inventario
+dotnet new razorclasslib -n VRM_Plugin.Modules.Inventario -o src/Modules/Inventario/VRM_Plugin.Modules.Inventario
 ```
 
 ### Paso 2: Agregar Referencias
@@ -67,7 +67,7 @@ dotnet new razorclasslib -n VRM_PluginDemo.Modules.Inventario -o src/Modules/Inv
 ```xml
 <!-- Inventario.csproj -->
 <ItemGroup>
-  <ProjectReference Include="..\..\..\Core\VRM_PluginDemo.Core.Abstractions\VRM_PluginDemo.Core.Abstractions.csproj" />
+  <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
   <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.20" />
   <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.20" />
 </ItemGroup>
@@ -77,9 +77,9 @@ dotnet new razorclasslib -n VRM_PluginDemo.Modules.Inventario -o src/Modules/Inv
 
 ```csharp
 // InventarioModule.cs
-using VRM_PluginDemo.Core.Abstractions;
+using VRM_Plugin.Core.Abstractions;
 
-namespace VRM_PluginDemo.Modules.Inventario;
+namespace VRM_Plugin.Modules.Inventario;
 
 public class InventarioModule : IModule
 {
@@ -246,13 +246,13 @@ public class ProductoService : IProductoService
 
 ```bash
 # Compilar
-dotnet build src/Modules/Inventario/VRM_PluginDemo.Modules.Inventario/
+dotnet build src/Modules/Inventario/VRM_Plugin.Modules.Inventario/
 
 # Copiar DLL
-copy "src/Modules/Inventario/VRM_PluginDemo.Modules.Inventario/bin/Debug/net8.0/VRM_PluginDemo.Modules.Inventario.dll" "src/Host/VRM_PluginDemo.Blazor.Server/Modules/"
+copy "src/Modules/Inventario/VRM_Plugin.Modules.Inventario/bin/Debug/net8.0/VRM_Plugin.Modules.Inventario.dll" "src/Host/VRM_Plugin.Blazor.Server/Modules/"
 
 # Reiniciar aplicacion
-cd src/Host/VRM_PluginDemo.Blazor.Server
+cd src/Host/VRM_Plugin.Blazor.Server
 dotnet run
 ```
 
@@ -261,7 +261,7 @@ dotnet run
 ## Estructura de un Modulo
 
 ```
-VRM_PluginDemo.Modules.Inventario/
+VRM_Plugin.Modules.Inventario/
 ??? Components/
 ?   ??? Inventario.razor       # Componente UI con @page
 ??? Domain/
