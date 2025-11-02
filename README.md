@@ -21,7 +21,7 @@ Para comenzar rápidamente, consulta:
 - ✅ Sesión persistente entre recargas del navegador
 - ✅ Autenticación robusta con ASP.NET Core Authentication
 - ✅ Preparado para migración a ASP.NET Core Identity
-- 📖 **Ver:** [docs/GUIA_INTEGRACION_COOKIES.md](docs/GUIA_INTEGRACION_COOKIES.md)
+- 📖 **Ver:** [docs/AUTENTICACION_Y_COOKIES.md](docs/AUTENTICACION_Y_COOKIES.md)
 
 ### 🔄 Renderizado Condicional (SSR + Interactive Server)
 - ✅ Login/Logout con SSR estático (escribe cookies correctamente)
@@ -37,7 +37,7 @@ Para comenzar rápidamente, consulta:
 ### Para Desarrolladores
 - **[docs/QUICK_START.md](docs/QUICK_START.md)** - Guía de inicio en 5 minutos
 - **[docs/GUIA_AUTENTICACION_SIMULADA.md](docs/GUIA_AUTENTICACION_SIMULADA.md)** - Sistema de autenticación
-- **[docs/GUIA_INTEGRACION_COOKIES.md](docs/GUIA_INTEGRACION_COOKIES.md)** - Cookies persistentes 🍪
+- **[docs/AUTENTICACION_Y_COOKIES.md](docs/AUTENTICACION_Y_COOKIES.md)** - Autenticación y cookies persistentes 🍪
 - **[docs/GUIA_SISTEMA_PERMISOS_GRANULARES.md](docs/GUIA_SISTEMA_PERMISOS_GRANULARES.md)** - Permisos avanzados
 - **[src/Core/README.md](src/Core/README.md)** - Abstracciones y dominio
 - **[src/Host/README.md](src/Host/README.md)** - Aplicación host
@@ -50,7 +50,7 @@ Para comenzar rápidamente, consulta:
 
 ### Para DevOps
 - **[docs/COMANDOS_SCRIPTS.md](docs/COMANDOS_SCRIPTS.md)** - Scripts y comandos útiles
-- **[docs/CAMBIOS_APLICADOS_COOKIES_Y_NAVIGATION.md](docs/CAMBIOS_APLICADOS_COOKIES_Y_NAVIGATION.md)** - Historial de cambios 📝
+- **[docs/VERSION_HISTORY.md](docs/VERSION_HISTORY.md)** - Historial de versiones y changelog
 
 ### Índice Completo
 - **[docs/INDICE_DOCUMENTACION.md](docs/INDICE_DOCUMENTACION.md)** - Índice maestro de toda la documentación
@@ -88,27 +88,27 @@ Para comenzar rápidamente, consulta:
 
 ```
 VRM_Net/
-├── README.md         # Este archivo
-├── QUICK_START.md  # Guía de inicio rápido
-├── docs/     # 📚 Documentación completa
+├── README.md          ← Este archivo (ÚNICO en raíz)
+├── docs/          ← 📚 Toda la documentación
+│├── QUICK_START.md
 │   ├── INDICE_DOCUMENTACION.md
 │   ├── VERSION_HISTORY.md
+│   ├── ESTRUCTURA_PROYECTO.md
+│   ├── AUTENTICACION_Y_COOKIES.md
 │   ├── GUIA_AUTENTICACION_SIMULADA.md
-│   ├── GUIA_INTEGRACION_COOKIES.md
 │   ├── GUIA_SISTEMA_PERMISOS_GRANULARES.md
 │   ├── GUIA_DISENO_ARQUITECTURA.md
 │   ├── SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md
-│   ├── CAMBIOS_APLICADOS_COOKIES_Y_NAVIGATION.md
 │   ├── COMANDOS_SCRIPTS.md
 │   └── ROADMAP_EMPRESARIAL.md
 ├── src/
-│   ├── Core/# Núcleo del sistema
+│   ├── Core/          # Núcleo del sistema
 │   │   ├── VRM_Plugin.Core.Abstractions/
 │   │   └── VRM_Plugin.Core.Domain/
-│   ├── Host/       # Aplicación host Blazor
+│   ├── Host/   # Aplicación host Blazor
 │   │   ├── Sliced_web_app/
 │   │   └── VRM_Plugin.Blazor.Server/
-│   └── Modules/                # Módulos de negocio
+│   └── Modules/       # Módulos de negocio
 │       ├── Finanzas/
 │       └── Onboarding/Prospectos/
 └── scripts/           # Scripts de automatización
@@ -213,7 +213,7 @@ Ver roadmap completo: **[docs/ROADMAP_EMPRESARIAL.md](docs/ROADMAP_EMPRESARIAL.m
 
 ### Preguntas Frecuentes
 - **"¿Por qué Login no es Interactive Server?"** → Ver [docs/SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md](docs/SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md)
-- **"¿Cómo funcionan las cookies?"** → Ver [docs/GUIA_INTEGRACION_COOKIES.md](docs/GUIA_INTEGRACION_COOKIES.md)
+- **"¿Cómo funcionan las cookies?"** → Ver [docs/AUTENTICACION_Y_COOKIES.md](docs/AUTENTICACION_Y_COOKIES.md)
 - **"¿Cómo crear un módulo?"** → Ver [src/Modules/README.md](src/Modules/README.md)
 
 ---

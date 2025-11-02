@@ -18,7 +18,7 @@ VRM_Net/
 ??
 ?   ??? ?? Autenticación y Seguridad
 ?   ??? ?? GUIA_AUTENTICACION_SIMULADA.md       # Sistema de autenticación dummy
-?   ??? ?? GUIA_INTEGRACION_COOKIES.md          # Cookies HTTP persistentes
+?   ??? ?? AUTENTICACION_Y_COOKIES.md          # Cookies HTTP persistentes
 ?   ??? ?? GUIA_SISTEMA_PERMISOS_GRANULARES.md  # Permisos por acción
 ?   ??? ?? GUIA_FILTRADO_MODULOS_POR_PERMISOS.md# Filtrado dinámico de módulos
 ?   ?
@@ -28,7 +28,7 @@ VRM_Net/
 ?   ?
 ?   ??? ?? Desarrollo y Operaciones
 ?   ??? ?? COMANDOS_SCRIPTS.md  # Scripts y comandos útiles
-?   ??? ?? CAMBIOS_APLICADOS_COOKIES_Y_NAVIGATION.md # Historial de cambios técnicos
+?   ??? ?? (eliminado - consolidado) # Historial de cambios técnicos
 ?   ??? ?? ROADMAP_EMPRESARIAL.md               # Planificación por fases
 ?   ?
 ?   ??? ?? Resúmenes
@@ -188,7 +188,7 @@ VRM_Net/
 2. `docs/COMANDOS_SCRIPTS.md` ? Scripts útiles
 3. `scripts/` ? Scripts de automatización
 4. `docs/VERSION_HISTORY.md` ? Historial de versiones
-5. `docs/CAMBIOS_APLICADOS_COOKIES_Y_NAVIGATION.md` ? Cambios recientes
+5. `docs/(eliminado - consolidado)` ? Cambios recientes
 
 ### ?? QA/Tester
 1. `QUICK_START.md` ? Ejecutar la app
@@ -252,7 +252,7 @@ src/
 - Login UI: `src/Host/VRM_Plugin.Blazor.Server/Components/Pages/Login.razor`
 
 **Cookies:**
-- Guía: `docs/GUIA_INTEGRACION_COOKIES.md`
+- Guía: `docs/AUTENTICACION_Y_COOKIES.md`
 - Configuración: `src/Host/VRM_Plugin.Blazor.Server/Program.cs`
 - Uso: `DummyAuthenticationStateProvider.cs`
 
@@ -364,3 +364,5 @@ Cuando explores el proyecto, sigue este orden:
 **?? Última actualización:** Enero 2025  
 **?? Versión:** 2.0  
 **?? Mantenedor:** Equipo VRM
+
+
