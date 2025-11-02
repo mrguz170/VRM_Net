@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+  
+    <!-- ⭐ CRÍTICO: Deshabilita excepciones de navegación (como Sliced_web_app) -->
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
+    <!-- ❌ ELIMINADO: Paquete obsoleto de .NET Core 2.1 - .NET 8 ya incluye autenticación de cookies -->
+    <!-- <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" /> -->
+    
     <PackageReference Include="MudBlazor" Version="7.6.0" />
   </ItemGroup>
 

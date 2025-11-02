@@ -1,208 +1,377 @@
-﻿<!DOCTYPE html>
-<html lang="en" :dir="$store.app.direction" x-data :data-mode="$store.app.mode" :data-sidebar="$store.app.sidebarMode" class="group/item">
+﻿@using Microsoft.AspNetCore.Components.Web
+
+<!DOCTYPE html>
+@* <html lang="en" dir="ltr" class="group/item"> *@
+<html lang="en" dir="ltr" x-data="{ direction: $store.app.direction }" class="group/item" :data-mode="$store.app.mode" :data-sidebar="$store.app.sidebarMode">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+    <meta name="description" content="VRM Net" />
+    <meta name="author" content="VRM Team" />
+ 
+    <title>VRM net</title>
+    
+    @* <link rel="shortcut icon" href="assets/images/favicon.ico"> *@
+    
+    <!-- Favicon Icon -->
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
 
-    <!-- ==================== SLICED CSS ==================== -->
     <!-- Plugins CSS -->
     <link rel="stylesheet" href="assets/css/plugins.css">
-    <!-- Icons CSS (Remix Icons) -->
+
+    <!-- Icons CSS -->
     <link rel="stylesheet" href="assets/css/remixicon.css">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
+
+    <!-- MudBlazor CSS -->
+    @* <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" /> *@
+    
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="assets/css/tailwind.css">
-    <!-- Custom Sliced Styles -->
     <link rel="stylesheet" href="assets/css/style.css">
-    
-    <!-- ==================== MUDBLAZOR CSS ==================== -->
-    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <link href="/assets/css/site.css" rel="stylesheet" />
 
-    <!-- ==================== APP CSS ==================== -->
-    <link rel="stylesheet" href="app.css" />
-    <link rel="stylesheet" href="VRM_Plugin.Blazor.Server.styles.css" />
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="favicon.png" />
-    
-    <!-- ==================== ALPINE.JS CORE & PLUGINS (EN HEAD) ==================== -->
-    <!-- ✅ CRÍTICO: Cargar Alpine ANTES de que el DOM se procese -->
-    <script src="assets/js/pages/alpine.min.js"></script>
-    <script src="assets/js/pages/alpine-collaspe.min.js"></script>
-  <script src="assets/js/pages/alpine-persist.min.js"></script>
-    
-    <!-- ✅ CRÍTICO: Registrar store 'app' ANTES de Alpine.start() -->
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/vrm-init.js"></script>
-    
-  <HeadOutlet />
+    <!-- Tippy.js -->
+    <link href="assets/libs/tippy.js/tippy.css" rel="stylesheet" />
+    <link href="assets/libs/tippy.js/border.css" rel="stylesheet" />
+
+    <!-- Fancybox & Magnific Popup -->
+    <link href="assets/libs/fancybox/css/jquery.fancybox.css" rel="stylesheet" />
+    <link href="assets/libs/magnific-popup/magnific-popup.css" rel="stylesheet" />
+
+    <!-- ✅ Estilos para x-cloak (ocultar hasta que Alpine esté listo) -->
+    <style>
+      [x-cloak] { display: none !important; }
+    </style>
+
+    <HeadOutlet />
+
 </head>
 
-<body x-data="main" :class="[$store.app.sidebar ? 'toggle-sidebar' : '', $store.app.layout]" class="relative overflow-x-hidden text-sm antialiased font-normal text-black font-cerebri dark:text-white vertical">
-    <Routes />
-    
-    <!-- ==================== VERIFICACIÓN DE INICIALIZACIÓN ==================== -->
-    <script>
-      // Verificar que los stores estén registrados después de la inicialización
-        setTimeout(() => {
-          if (typeof Alpine !== 'undefined' && Alpine.store) {
-       const appStore = Alpine.store('app');
-       if (appStore) {
-     console.log('✅ Store "app" registrado correctamente:', {
-   mode: appStore.mode,
-          sidebar: appStore.sidebar,
-    direction: appStore.direction,
-   sidebarMode: appStore.sidebarMode,
-          layout: appStore.layout
-      });
-             } else {
-         console.error('❌ Store "app" NO está registrado');
-      }
-            } else {
-      console.error('❌ Alpine no está disponible');
-  }
-        }, 500);
-    </script>
 
-    <!-- ==================== BLAZOR FRAMEWORK ==================== -->
-    <script src="_framework/blazor.web.js"></script>
-    
-    <!-- ==================== MUDBLAZOR JS ==================== -->
+
+
+<body x-data="{ main: true, modals: true, hasCreative: window.location.href.includes('/creative'), hasdetached: window.location.href.includes('/detached') }" 
+x-init="$store.app.hasCreative = hasCreative; $store.app.hasdetached = hasdetached" 
+:class="[ $store.app.sidebar ? 'toggle-sidebar' : '', $store.app.fullscreen ? 'full' : '' , hasCreative ? 'detached ' : '' , hasdetached ? 'detached detached-simple ' : '' , $store.app.layout  ]" 
+class="relative overflow-x-hidden text-sm antialiased font-normal text-black font-cerebri dark:text-white vertical">
+
+    <Routes />
+        
+    <!-- MudBlazor JS -->
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+
+    <!-- ✅ ORDEN CRÍTICO DE CARGA -->
+    <!-- 1️⃣ Plugins de Alpine (SIN defer) -->
+    <script src="assets/js/pages/alpine-collaspe.min.js"></script>
+    <script src="assets/js/pages/alpine-persist.min.js"></script>
+
+    <!-- 2️⃣ INICIALIZACIÓN DEL STORE (SIN defer - ANTES de Alpine) -->
+    @* <script src="assets/js/alpine-init.js"></script> *@
+
+    <script src="/assets/js/main.js"></script>
+
+
+    <!-- 3️⃣ Alpine.js (SIN defer - DESPUÉS del init) -->
+    <script src="assets/js/pages/alpine.min.js" ></script>
+
+    <!-- Blazor -->
+    <script src="_framework/blazor.web.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+
+    <!-- ApexCharts -->
+    <script src="assets/libs/apexcharts/apexcharts.js"></script>
+
+    <!-- Other Scripts -->
+    <script src="assets/js/pages/contact.js"></script>
+    <script src="assets/js/pages/clipboard.init.js"></script>
+    <script src="assets/js/pages/clipboard.js"></script>
+    <script src="assets/js/swiper.js"></script>
+    <script src="assets/js/site.js"></script>
+    <script src="assets/js/fancybox.umd.js"></script>
+    @* <script src="assets/js/pages/dropdown.js"></script> *@
+    <script src="assets/js/pages/countdown.init.js"></script>
+    <script src="assets/js/pages/form-editor.js"></script>
+
+    <!-- Sortable -->
+    <script src="assets/libs/sortablejs/sortable.js"></script>
+
+    <!-- Popper & Tippy -->
+    <script src="assets/libs/@@popperjs/core/umd/popper.min.js"></script>
+    <script src="assets/libs/tippy.js/tippy-bundle.umd.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <!-- Magnific Popup -->
+    <script src="assets/libs/magnific-popup/jquery.magnific-popup.min.js"></script>
+
+    <!-- Fancybox -->
+    <script src="assets/libs/fancybox/js/jquery.fancybox.js"></script>
+
+    <!-- Flatpickr -->
+    <script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+    <script src="assets/libs/flatpickr/flatpickr.js"></script>
+
+    <!-- FullCalendar -->
+    <script src='assets/js/pages/index.global.min.js'></script>
+       
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
-    <!-- ==================== GLOBAL FUNCTIONS FOR BLAZOR ==================== -->
+    
+    <!-- ✅ Global Functions - Compatible con Alpine.js Store -->
     <script>
-        // ✅ FIX: Función segura para setAttribute (evita Illegal Invocation)
-     function safeSetAttribute(element, name, value) {
-            try {
-     Element.prototype.setAttribute.call(element, name, value);
-  } catch (error) {
-                console.error('❌ Error al setear atributo ' + name + ':', error);
-  element.setAttribute(name, value);
-    }
+            // ✅ Esperar a que Blazor esté completamente iniciado
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('[App] 🚀 DOM Completamente Cargado');
+
+            // Dar tiempo a MudBlazor para inicializarse
+            setTimeout(function() {
+                console.log('[App] ✅ Inicializando wrappers...');
+
+                window.toggleFullScreen = function() {
+                    console.log('[Global] toggleFullScreen() LLAMADA desde Blazor');
+
+                    if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
+                        console.log('[Global] ✅ Usando Alpine.store("app").toggleFullScreen()');
+                        window.Alpine.store('app').toggleFullScreen();
+                    } else {
+                        console.warn('[Global] ⚠️ Alpine no listo, usando fallback');
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen();
+                        } else {
+                            document.documentElement.requestFullscreen();
+                        }
+                    }
+                };
+
+                window.toggleSidebar = function () {
+                    console.log('[Global] toggleSidebar() LLAMADA desde Blazor');
+
+                    if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
+                        console.log('[Global] ✅ Usando Alpine.store("app").toggleSidebar()');
+                        window.Alpine.store('app').toggleSidebar();
+                    } else {
+                        console.warn('[Global] ⚠️ Alpine no listo, usando fallback');
+                        const body = document.querySelector('body');
+                        body.classList.toggle('toggle-sidebar');
+                    }
+                };
+
+                console.log('[Global] ✅ Funciones wrapper registradas');
+            }, 500); // Esperar 500ms a que MudBlazor se inicialice
+        });
+
+        window.DocumentClickHandler = {
+            callbacks: [],
+            subscribe: function () {
+                document.addEventListener('click', this.handleDocumentClick);
+            },
+            unsubscribe: function () {
+                document.removeEventListener('click', this.handleDocumentClick);
+            },
+            handleDocumentClick: function () {
+                DocumentClickHandler.callbacks.forEach(function (callback) {
+                    callback();
+                });
+            },
+            register: function (callback) {
+                this.callbacks.push(callback);
+            }
+        };
+
+        window.initializeFancybox = () => {
+            Fancybox.bind('[data-fancybox="gallery"]');
+        };
+
+        function initializeFullCalendar() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    right: 'today prev,next',
+                }
+            });
+            calendar.render();
         }
-        
-      // ✅ FIX CRÍTICO: Verificar que Alpine store esté disponible ANTES de usar toggleMode
-function safeToggleMode(mode) {
-       if (typeof Alpine === 'undefined' || !Alpine.store || !Alpine.store('app')) {
-   console.warn('⚠️ Alpine store no disponible, reintentando en 100ms...');
-    setTimeout(() => safeToggleMode(mode), 100);
-       return;
-         }
-   
-        const store = Alpine.store('app');
-  if (typeof store.toggleMode === 'function') {
-     store.toggleMode(mode);
-   console.log('✅ toggleMode aplicado:', mode);
-} else {
- console.error('❌ toggleMode no es una función en el store');
-        }
-    }
-        
-    // Funciones globales de JavaScript para Blazor
+              
+
+        window.initializeFlatpickr = () => {
+            flatpickr("#basicExample", {
+                enableTime: true,
+                dateFormat: "d-m-Y",
+            });
+        };
+
+        // ✅ NUEVO: Wrapper que llama al store de Alpine cuando esté listo
+        window.toggleFullScreen = function() {
+            console.log('[Global] toggleFullScreen() LLAMADA desde Blazor');
+
+            // Intentar usar Alpine store primero
+            if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
+                console.log('[Global] ✅ Usando Alpine.store("app").toggleFullScreen()');
+                window.Alpine.store('app').toggleFullScreen();
+            } else {
+                // Fallback si Alpine no está listo
+                console.warn('[Global] ⚠️ Alpine no listo, usando fallback');
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    document.documentElement.requestFullscreen();
+                }
+            }
+        };
+
         window.toggleSidebar = function () {
- if (typeof Alpine !== 'undefined' && Alpine.store && Alpine.store('app')) {
-             Alpine.store('app').toggleSidebar();
+            console.log('[Global] toggleSidebar() LLAMADA desde Blazor');
+
+            if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
+                console.log('[Global] ✅ Usando Alpine.store("app").toggleSidebar()');
+                window.Alpine.store('app').toggleSidebar();
+            } else {
+                console.warn('[Global] ⚠️ Alpine no listo, usando fallback');
+                const body = document.querySelector('body');
+                body.classList.toggle('toggle-sidebar');
             }
-   };
-        
-        window.toggleFullScreen = function () {
-  if (typeof Alpine !== 'undefined' && Alpine.store && Alpine.store('app')) {
-     Alpine.store('app').toggleFullScreen();
-            }
+        };
+
+        window.removeToggleSidebarClass = function () {
+            const body = document.querySelector('body');
+            body.classList.remove('toggle-sidebar');
         };
 
         window.changeDirection = function (direction) {
-            if (typeof Alpine !== 'undefined' && Alpine.store && Alpine.store('app')) {
-        Alpine.store('app').direction = direction;
-          safeSetAttribute(document.documentElement, 'dir', direction);
-     localStorage.setItem('_x_direction', direction);
-         }
-   };
-        
-        window.setBodyClass = function (mode) {
-       safeToggleMode(mode); // ✅ Usar versión segura
-        };
-        
-      // ✅ Forzar actualización de Alpine después de navegación Blazor
-  window.refreshAlpineState = function() {
-     console.log('🔄 refreshAlpineState llamado desde Blazor');
-            
-    try {
-     if (typeof Alpine !== 'undefined' && Alpine.store && Alpine.store('app')) {
-        const store = Alpine.store('app');
-          
- // Leer valores de localStorage
-         const savedMode = localStorage.getItem('_x_mode');
-   const savedSidebarMode = localStorage.getItem('_x_sidebarMode');
-           const savedLayout = localStorage.getItem('_x_layout');
-           const savedDirection = localStorage.getItem('_x_direction');
-         
-     console.log('📖 Leyendo localStorage:', {
-          mode: savedMode,
-     sidebarMode: savedSidebarMode,
-     layout: savedLayout,
-        direction: savedDirection
-});
-        
-          // Aplicar modo usando versión segura
-       if (savedMode && store.mode !== savedMode) {
-         console.log('  → Aplicando modo: ' + savedMode);
-             safeToggleMode(savedMode);
-       }
-    
-       // Aplicar sidebar mode
-   if (savedSidebarMode && store.sidebarMode !== savedSidebarMode) {
-             console.log('  → Aplicando sidebar mode: ' + savedSidebarMode);
-        store.sidebarMode = savedSidebarMode;
-         safeSetAttribute(document.documentElement, 'data-sidebar', savedSidebarMode);
-    }
-               
-           // Aplicar layout
-        if (savedLayout && store.layout !== savedLayout) {
-          console.log('  → Aplicando layout: ' + savedLayout);
-    store.layout = savedLayout;
- }
-               
-  // Aplicar dirección
-                if (savedDirection && store.direction !== savedDirection) {
-            console.log('  → Aplicando dirección: ' + savedDirection);
-           store.direction = savedDirection;
-            safeSetAttribute(document.documentElement, 'dir', savedDirection);
-     }
- 
-                console.log('✅ Estado Alpine actualizado');
-    } else {
-          console.warn('⚠️ Alpine store no disponible');
-    }
-            } catch (error) {
-    console.error('❌ Error en refreshAlpineState:', error);
-     }
-        };
-        
- // ✅ Forzar modo dark/light programáticamente
-        window.setDarkMode = function(isDark) {
-            try {
-      const mode = isDark ? 'dark' : 'light';
-   safeToggleMode(mode); // ✅ Usar versión segura
-    console.log('🌓 Modo forzado a: ' + mode);
-            } catch (error) {
-              console.error('❌ Error en setDarkMode:', error);
-     }
-        };
-    
-        // ✅ Escuchar eventos de navegación de Blazor
-        Blazor.addEventListener('enhancedload', () => {
-         console.log('🚀 Blazor enhancedload - Reaplicando modo...');
-  
-            if (typeof Alpine !== 'undefined' && Alpine.store && Alpine.store('app')) {
-        const savedMode = localStorage.getItem('_x_mode');
-          if (savedMode) {
-     safeToggleMode(savedMode); // ✅ Usar versión segura
+            document.documentElement.setAttribute('dir', direction);
         }
+
+        window.setBodyClass = (className) => {
+            document.body.classList.remove('light', 'dark');
+            document.body.classList.add(className);
+        };
+
+        window.addClickListener = function (dotNetObject) {
+            document.body.addEventListener("click", function () {
+                dotNetObject.invokeMethodAsync("HandleClickEvent");
+            });
+        };
+
+        window.addClass = (element, className) => {
+            document.querySelector(element).classList.add(className);
+        };
+
+        window.removeClass = (element, className) => {
+            document.querySelector(element).classList.remove(className);
+        };
+
+        window.toggleDropdown = () => {
+            const dropdown = document.querySelector('.dropdown ul');
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            } else {
+                dropdown.style.display = 'block';
             }
-  });
+        };
+
+        window.consoleLog = (message) => {
+            console.log(message);
+        };
+
+        console.log('[Global] ✅ Funciones wrapper registradas para Alpine.js');
     </script>
+
+    <!-- Custom Scripts -->
+    <script src='/assets/js/pages/index.global.min.js'></script>
+    <script src="/assets/js/pages/form-editor.js"></script>
+    
+
+
+    <!-- ✅ INTERCEPTOR GLOBAL DE ERRORES DE CIRCUIT -->
+    <script>
+        (function() {
+            // Sobrescribir el método global de invocación de .NET
+            if (window.DotNet && window.DotNet.invokeMethodAsync) {
+                const originalInvokeMethodAsync = window.DotNet.invokeMethodAsync;
+
+                window.DotNet.invokeMethodAsync = async function(...args) {
+                    try {
+                        return await originalInvokeMethodAsync.apply(this, args);
+                    } catch (error) {
+                        // Silenciar errores de circuit desechado
+                        if (error.message && error.message.includes('circuit')) {
+                            console.debug('[Circuit] Invocación ignorada - circuit desechado');
+                            return null;
+                        }
+                        // Re-lanzar otros errores
+                        throw error;
+                    }
+                };
+
+                console.log('[Circuit Guard] ✅ Interceptor global de circuit activado');
+            }
+
+            // También interceptar errores no capturados
+            window.addEventListener('error', function(event) {
+                if (event.error && event.error.message && event.error.message.includes('circuit')) {
+                    console.debug('[Circuit] Error de circuit capturado y suprimido');
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            window.addEventListener('unhandledrejection', function(event) {
+                if (event.reason && event.reason.message && event.reason.message.includes('circuit')) {
+                    console.debug('[Circuit] Promise rejection de circuit capturado y suprimido');
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        })();
+    </script>
+
+    <!-- ✅ SOLUCIÓN: Cleanup automático de event listeners -->
+    <script>
+        window.addClickListener = function (dotNetObject) {
+            // Definir el handler como función nombrada para poder removerlo
+            const clickHandler = async function () {
+                try {
+                    // Verificar si el dotNetObject aún es válido antes de invocar
+                    if (dotNetObject && dotNetObject._id !== undefined) {
+                        await dotNetObject.invokeMethodAsync("HandleClickEvent");
+                    }
+                } catch (error) {
+                    // Si falla, remover el listener automáticamente
+                    if (error.message && error.message.includes('circuit')) {
+                        console.debug('[Cleanup] Removiendo listener - circuit desechado');
+                        document.body.removeEventListener("click", clickHandler);
+                    } else {
+                        console.error('[HandleClickEvent] Error:', error);
+                    }
+                }
+            };
+
+            document.body.addEventListener("click", clickHandler);
+
+            // ✅ IMPORTANTE: Retornar objeto con método dispose para cleanup manual
+            return {
+                dispose: () => {
+                    document.body.removeEventListener("click", clickHandler);
+                    console.debug('[Cleanup] Listener removido manualmente');
+                }
+            };
+        };
+    </script>
+
 </body>
+
 </html>

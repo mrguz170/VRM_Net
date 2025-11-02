@@ -41,10 +41,6 @@
     </div>
 </div>
 
-<!-- RTL/LTR Toggle Button -->
-<button type="button" class="fixed z-50 px-4 text-white border-gray-200 shadow-lg h-11 ltr:right-0 rtl:left-0 bg-purple ltr:rounded-l-md rtl:rounded-r-md top-1/3" @click="$store.app.direction === 'ltr' ? $store.app.direction = 'rtl' : $store.app.direction = 'ltr'">
-    <span x-text="$store.app.direction === 'ltr' ? 'RTL' : 'LTR'"></span>
-</button>
 
 <!-- Blazor Error UI -->
 <div id="blazor-error-ui">

@@ -5,6 +5,7 @@
     <Project Path="src/Core/VRM_Plugin.Core.Domain/VRM_Plugin.Core.Domain.csproj" />
   </Folder>
   <Folder Name="/src/Host/">
+    <Project Path="src/Host/Sliced_web_app/Sliced_web_app.csproj" />
     <Project Path="src/Host/VRM_PluginDemo.Blazor.Server/VRM_Plugin.Blazor.Server.csproj" />
   </Folder>
   <Folder Name="/src/Modules/">

@@ -1,5 +1,7 @@
 @page "/logout"
+@layout AuthLayout
 @* ?? SSR ESTÁTICO - Logout necesita acceso a HttpContext para eliminar cookies *@
+@using VRM_Plugin.Blazor.Server.Components.Layout
 @using VRM_Plugin.Blazor.Server.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject DummyAuthenticationStateProvider AuthProvider
@@ -9,28 +11,28 @@
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-     <div class="card">
-    <div class="card-body text-center">
-             @if (!_logoutCompleted)
-           {
-          <div class="spinner-border text-primary mb-3" role="status">
-           <span class="visually-hidden">Cerrando sesión...</span>
-  </div>
-             <h4>Cerrando sesión...</h4>
-      <p class="text-muted">Serás redirigido al login en un momento.</p>
-            }
-     else
-         {
-       <div class="text-success mb-3">
-       <span class="bi bi-check-circle" style="font-size: 3rem;"></span>
-      </div>
-               <h4>Sesión cerrada exitosamente</h4>
-                   <p class="text-muted">Redirigiendo...</p>
-        }
-      </div>
-       </div>
+    <div class="col-md-6">
+            <div class="card">
+  <div class="card-body text-center">
+     @if (!_logoutCompleted)
+        {
+<div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Cerrando sesión...</span>
+         </div>
+            <h4>Cerrando sesión...</h4>
+   <p class="text-muted">Serás redirigido al login en un momento.</p>
+      }
+    else
+  {
+   <div class="text-success mb-3">
+            <span class="bi bi-check-circle" style="font-size: 3rem;"></span>
  </div>
+ <h4>Sesión cerrada exitosamente</h4>
+       <p class="text-muted">Redirigiendo...</p>
+}
+       </div>
+  </div>
+  </div>
     </div>
 </div>
 
@@ -39,24 +41,24 @@
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-        // ? Ejecutar logout (elimina cookie HTTP)
-        await AuthProvider.LogoutAsync();
-   
-            _logoutCompleted = true;
+    try
+  {
+            // ? Ejecutar logout (elimina cookie HTTP)
+  await AuthProvider.LogoutAsync();
+ 
+         _logoutCompleted = true;
 
-         // Pequeño delay para feedback visual
-      await Task.Delay(1000);
+  // Pequeño delay para feedback visual
+ await Task.Delay(1000);
 
             // ? CLAVE: forceLoad=true limpia completamente el estado de Blazor
-            Navigation.NavigateTo("/login", forceLoad: true);
-    }
-        catch (Exception ex)
-      {
-    Console.WriteLine($"? Error durante logout: {ex.Message}");
- // Redirigir de todas formas
     Navigation.NavigateTo("/login", forceLoad: true);
-   }
-  }
+        }
+  catch (Exception ex)
+  {
+ Console.WriteLine($"?? Error durante logout: {ex.Message}");
+   // Redirigir de todas formas
+   Navigation.NavigateTo("/login", forceLoad: true);
+        }
+    }
 }

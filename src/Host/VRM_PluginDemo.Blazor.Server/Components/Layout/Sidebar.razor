@@ -36,9 +36,16 @@
      <AuthorizeView>
          <Authorized>
      <!-- Section header for modules -->
-    <MudText Typo="Typo.h6" Class="my-2 text-sm text-black/50 dark:text-white/30 group-data-[sidebar=dark]/item:text-white/30 group-data-[sidebar=brand]/item:text-sky-200/50">
-  <span>Modules</span>
-      </MudText>
+
+        @* <h2 Class="my-2  !font-normal text-black/50 dark:text-white/30 group-data-[sidebar=dark]/item:text-white/30 group-data-[sidebar=brand]/item:text-sky-200/50">
+            <span>Modulos</span>
+        </h2> *@
+
+        <h2 class="my-2 text-base font-bold text-black/50 dark:text-white/30 group-data-[sidebar=dark]/item:text-white/30 group-data-[sidebar=brand]/item:text-sky-200/50">
+            <span>Modulos</span>
+        </h2>
+
+
     
        <!-- Dynamic module menu items -->
        @foreach (var module in ModuleManager.GetAllModules())
@@ -68,9 +75,13 @@
      }
 
          <!-- Module Info (for debugging/admin) -->
-        <MudText Typo="Typo.h6" Class="my-2 text-sm text-black/50 dark:text-white/30 group-data-[sidebar=dark]/item:text-white/30 group-data-[sidebar=brand]/item:text-sky-200/50">
-         <span>System</span>
-      </MudText>
+        @* <h2 Class="my-2 text-black/50 dark:text-white/30 group-data-[sidebar=dark]/item:text-white/30 group-data-[sidebar=brand]/item:text-sky-200/50">
+            <span>Sistema</span>
+        </h2> *@
+
+        <h2 class="my-2 text-base font-bold text-black/50 dark:text-white/30 group-data-[sidebar=dark]/item:text-white/30 group-data-[sidebar=brand]/item:text-sky-200/50">
+            <span>Sistema</span>
+        </h2>
           
       <li class="menu nav-item">
        <NavLink href="/modules-info" class="nav-link group">
@@ -84,9 +95,14 @@
       </li>
        </Authorized>
        <NotAuthorized>
-     <MudText Typo="Typo.h6" Class="my-2 text-sm text-black/50 dark:text-white/30 group-data-[sidebar=dark]/item:text-white/30 group-data-[sidebar=brand]/item:text-sky-200/50">
-     <span>Please login to view modules</span>
-      </MudText>
+     @* <h2 Class="my-2 text-black/50 dark:text-white/30 group-data-[sidebar=dark]/item:text-white/30 group-data-[sidebar=brand]/item:text-sky-200/50">
+<span>Please login to view modules</span>
+     </h2> *@
+
+        <h2 class="my-2 text-base font-bold text-black/50 dark:text-white/30 group-data-[sidebar=dark]/item:text-white/30 group-data-[sidebar=brand]/item:text-sky-200/50">
+            <span>Please login to view modules</span>
+        </h2>
+
      </NotAuthorized>
     </AuthorizeView>
         </ul>

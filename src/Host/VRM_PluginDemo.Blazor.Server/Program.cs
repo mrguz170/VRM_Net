@@ -1,5 +1,6 @@
 ﻿using VRM_Plugin.Blazor.Server.Components;
 using VRM_Plugin.Blazor.Server.Services;
+using VRM_Plugin.Blazor.Server.StateService;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using MudBlazor.Services;
@@ -16,13 +17,17 @@ builder.Services.AddServerSideBlazor(options =>
 {
     options.DetailedErrors = builder.Environment.IsDevelopment();
     options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
-    options.DisconnectedCircuitMaxRetained = 100;
+  options.DisconnectedCircuitMaxRetained = 100;
     options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
 });
 
 // ==================== MUDBLAZOR ====================
 // ⭐ NUEVO: Servicios de MudBlazor para componentes de UI
 builder.Services.AddMudServices();
+
+// ==================== STATE SERVICES (SLICED) ====================
+// ⭐ NUEVO: Servicio de estado de tema (dark/light mode)
+builder.Services.AddSingleton<ModeStateService>();
 
 // ==================== AUTENTICACIÓN Y AUTORIZACIÓN ====================
 // ⚠️ AUTENTICACIÓN SIMULADA (SOLO DESARROLLO)
@@ -48,10 +53,11 @@ builder.Services.AddCascadingAuthenticationState();
 // ✅ NUEVO: HttpContextAccessor para acceder a cookies
 builder.Services.AddHttpContextAccessor();
 
-// ⭐ CAMBIO CRÍTICO: Singleton en lugar de Scoped
-// Esto asegura que el cache en memoria persista entre requests
-builder.Services.AddSingleton<DummyAuthenticationStateProvider>();
-builder.Services.AddSingleton<AuthenticationStateProvider>(provider => 
+// ⭐ CAMBIO CRÍTICO: Scoped con PersistentComponentState
+// DummyAuthenticationStateProvider ahora usa PersistentComponentState
+// para mantener autenticación entre SSR e Interactive Server
+builder.Services.AddScoped<DummyAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
     provider.GetRequiredService<DummyAuthenticationStateProvider>());
 
 // ==================== AUTORIZACIÓN GRANULAR DE MÓDULOS ====================
@@ -104,6 +110,11 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
+}
+else
+{
+    // ⭐ AGREGAR: Mejor debugging en desarrollo (como Sliced_web_app)
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
