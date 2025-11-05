@@ -37,6 +37,15 @@ public interface IModule
     /// </summary>
     string Author { get; }
 
+    // ==================== PRESENTACIÓN VISUAL ====================
+
+    /// <summary>
+    /// Clase CSS del icono del módulo para mostrar en menús y UI.
+    /// Formato: Remix Icons (ej: "ri-user-3-fill", "ri-money-dollar-circle-fill")
+    /// Si no se especifica, se usará "ri-apps-fill" por defecto.
+    /// </summary>
+    string Icon { get; }
+
     // ==================== CATEGORIZACIÓN ====================
 
     /// <summary>
@@ -133,11 +142,6 @@ public class ModuleComponentInfo
     /// Tipo del componente (Type del .razor)
     /// </summary>
     public Type ComponentType { get; set; } = null!;
-
-    /// <summary>
-    /// Icono para mostrar en menús (clase CSS, ej: "bi-people-fill")
-    /// </summary>
-    public string Icon { get; set; } = string.Empty;
 
     /// <summary>
     /// Indica si debe aparecer en el menú de navegación

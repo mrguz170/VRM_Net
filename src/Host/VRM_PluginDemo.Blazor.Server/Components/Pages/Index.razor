@@ -89,54 +89,53 @@
     <!-- Available Modules Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
      
-      @{
- var modules = ModuleManager.GetAllModules();
-  var authorizedModulesList = modules
-       .SelectMany(m => m.GetComponents())
-  .Where(c => c.ShowInMenu)
-    .ToList();
+        @{
+      var modules = ModuleManager.GetAllModules();
         }
 
-      @if (authorizedModulesList.Any())
+   @if (modules.Any())
         {
-      @foreach (var component in authorizedModulesList)
-        {
-   <div class="bg-white dark:bg-darklight p-6 rounded-lg shadow-sm border border-black/10 dark:border-darkborder hover:shadow-md transition-shadow">
-         <div class="flex items-center mb-4">
-    @if (!string.IsNullOrEmpty(component.Icon))
-       {
-       <i class="@component.Icon text-purple text-3xl mr-4"></i>
-    }
-    <div>
-   <h3 class="text-xl font-semibold text-gray-800 dark:text-white">
-   @component.Name
-         </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-         @component.Route
-           </p>
-             </div>
-    </div>
-     
-          <p class="text-gray-600 dark:text-gray-400 mb-4">
-   Component available in the plugin system
-      </p>
+      @foreach (var module in modules)
+      {
+     var components = module.GetComponents().Where(c => c.ShowInMenu);
+   
+        @foreach (var component in components)
+      {
+     <div class="bg-white dark:bg-darklight p-6 rounded-lg shadow-sm border border-black/10 dark:border-darkborder hover:shadow-md transition-shadow">
+    <div class="flex items-center mb-4">
+      @* Usar icono del módulo padre *@
+           <i class="@module.Icon text-purple text-3xl mr-4"></i>
+        <div>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white">
+          @component.Name
+      </h3>
+           <p class="text-sm text-gray-500 dark:text-gray-400">
+ @component.Route
+     </p>
+       </div>
+           </div>
+    
+      <p class="text-gray-600 dark:text-gray-400 mb-4">
+           Component available in the plugin system
+          </p>
 
- <a href="@component.Route" 
-    class="inline-block px-4 py-2 bg-purple text-white rounded hover:bg-purple/90 transition-colors">
-     Open Module
-    </a>
-       </div>
-            }
-    }
-      else
-     {
-   <div class="col-span-full">
-   <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-6 rounded-lg">
-   <p class="text-yellow-800 dark:text-yellow-200">
-  You don't have access to any modules yet.
-       </p>
+    <a href="@component.Route" 
+          class="inline-block px-4 py-2 bg-purple text-white rounded hover:bg-purple/90 transition-colors">
+                   Open Module
+            </a>
          </div>
-       </div>
+       }
+}
+        }
+        else
+        {
+  <div class="col-span-full">
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-6 rounded-lg">
+           <p class="text-yellow-800 dark:text-yellow-200">
+         You don't have access to any modules yet.
+    </p>
+    </div>
+            </div>
         }
     </div>
 

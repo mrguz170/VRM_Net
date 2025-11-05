@@ -27,6 +27,13 @@ public class ProspectosModule : IModule
 
     public string Author => "Equipo de Desarrollo VRM";
 
+    // ==================== PRESENTACIÓN VISUAL ====================
+
+    /// <summary>
+    /// Icono Remix: Usuario con lupa - representa búsqueda/gestión de prospectos
+    /// </summary>
+    public string Icon => "ri-list-check-3";
+
     // ==================== CATEGORIZACIÓN ====================
 
     public string Category => "Administración";
@@ -104,7 +111,6 @@ public class ProspectosModule : IModule
                 Name = "Prospectos",
                 Route = "/prospectos",
                 ComponentType = typeof(VRM_Plugin.Modules.Prospectos.Components.Prospectos),
-                Icon = "bi-people-fill",
                 ShowInMenu = true,
                 MenuOrder = 10
             }
@@ -136,7 +142,7 @@ public class ProspectosModule : IModule
     public async Task OnModuleLoadedAsync()
     {
         Console.WriteLine($"[{ModuleId}] Módulo cargado exitosamente - Versión {Version}");
-        Console.WriteLine($"[{ModuleId}] Componentes registrados: {GetComponents().Count}");
+      Console.WriteLine($"[{ModuleId}] Componentes registrados: {GetComponents().Count}");
 
         await Task.CompletedTask;
     }

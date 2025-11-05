@@ -26,6 +26,13 @@ public class FinanzasModule : IModule
 
     public string Author => "Equipo de Desarrollo VRM";
 
+    // ==================== PRESENTACIÓN VISUAL ====================
+
+    /// <summary>
+    /// Icono Remix: Moneda de dólar en círculo - representa operaciones financieras
+    /// </summary>
+    public string Icon => "ri-currency-line";
+
     // ==================== CATEGORIZACIÓN ====================
 
     public string Category => "Finanzas";
@@ -104,7 +111,6 @@ public class FinanzasModule : IModule
                 Name = "Finanzas",
                 Route = "/finanzas",
                 ComponentType = typeof(Components.Finanzas),
-                Icon = "bi-currency-dollar",
                 ShowInMenu = true,
                 MenuOrder = 20
             }
