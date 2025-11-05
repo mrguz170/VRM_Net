@@ -43,7 +43,6 @@
             <div class="space-y-4">
     <!-- Email -->
         <div>
-             <label class="block text-sm font-medium mb-2 dark:text-white">Email</label>
           <InputText @bind-Value="loginModel.Email" 
      placeholder="Enter your email" 
          class="form-input w-full px-4 py-3 border border-black/10 dark:border-darkborder rounded-lg focus:ring-2 focus:ring-purple focus:border-transparent dark:bg-dark dark:text-white" />
@@ -52,7 +51,6 @@
 
          <!-- Password -->
       <div>
-         <label class="block text-sm font-medium mb-2 dark:text-white">Password</label>
        <InputText @bind-Value="loginModel.Password" 
        type="password"
       placeholder="Enter your password" 
@@ -80,20 +78,8 @@
          </div>
         </EditForm>
 
-        <!-- Demo Credentials -->
-        <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-   <p class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">🔑 Demo Credentials:</p>
-            <div class="space-y-1 text-sm text-blue-700 dark:text-blue-300">
-      <p><strong>Admin:</strong> admin@vrm.com</p>
-     <p><strong>User:</strong> user@vrm.com</p>
-          <p><strong>Gerente Finanzas:</strong> gerente.finanzas@vrm.com</p>
-       <p><strong>Contador:</strong> contador@vrm.com</p>
-             <p class="mt-2 text-xs italic">Password: cualquier texto (dummy auth)</p>
-            </div>
-        </div>
-
         <p class="mt-5 text-center text-muted dark:text-darkmuted">
-   Not a Member yet? <a href="/signup" class="text-black dark:text-white hover:underline">Create an Account</a>
+            <a href="/signup" class="text-black dark:text-white hover:underline">Registro de Prospectos</a>
         </p>
 </div>
 </div>
