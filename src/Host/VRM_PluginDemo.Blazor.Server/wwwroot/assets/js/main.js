@@ -9,16 +9,16 @@
 (function () {
     ("use strict");
 
-    console.log('[main.js] ?? Iniciando configuración de Alpine.js...');
+    //console.log('[main.js] ?? Iniciando configuración de Alpine.js...');
 
     document.addEventListener("alpine:init", () => {
-        console.log('[main.js] ?? Evento alpine:init disparado');
+        //console.log('[main.js] ?? Evento alpine:init disparado');
 
         // ? COMPONENTE: Collapse (Sidebar)
         Alpine.data("collapse", () => ({
         collapse: false,
             collapseSidebar() {
-        console.log('[Collapse] Toggle sidebar collapse:', !this.collapse);
+        //console.log('[Collapse] Toggle sidebar collapse:', !this.collapse);
            this.collapse = !this.collapse;
      },
         }));
@@ -27,9 +27,9 @@
         Alpine.data("dropdown", (initialOpenState = false) => ({
      open: initialOpenState,
         toggle() {
-    console.log('[Dropdown] Toggle - Estado actual:', this.open);
+    //console.log('[Dropdown] Toggle - Estado actual:', this.open);
      this.open = !this.open;
-     console.log('[Dropdown] Toggle - Nuevo estado:', this.open);
+     //console.log('[Dropdown] Toggle - Nuevo estado:', this.open);
         },
         }));
 
@@ -37,25 +37,25 @@
         Alpine.data("modals", (initialOpenState = false) => ({
             open: initialOpenState,
       toggle() {
-  console.log('[Modals/Settings] ?? Toggle LLAMADO - Estado actual:', this.open);
+  //console.log('[Modals/Settings] ?? Toggle LLAMADO - Estado actual:', this.open);
         this.open = !this.open;
-             console.log('[Modals/Settings] ? Toggle COMPLETADO - Nuevo estado:', this.open);
+             //console.log('[Modals/Settings] ? Toggle COMPLETADO - Nuevo estado:', this.open);
             },
         }));
 
         // main - custom functions
         Alpine.data("main", (value) => { });
 
-        console.log('[main.js] ? Componentes Alpine registrados: collapse, dropdown, modals');
+        //console.log('[main.js] ? Componentes Alpine registrados: collapse, dropdown, modals');
 
      // ? STORE PRINCIPAL con Alpine.$persist
    Alpine.store("app", {
        // Sidebar
      sidebar: false,
             toggleSidebar() {
-                console.log('[Store.app] ?? toggleSidebar() - Estado actual:', this.sidebar);
+                //console.log('[Store.app] ?? toggleSidebar() - Estado actual:', this.sidebar);
                 this.sidebar = !this.sidebar;
-       console.log('[Store.app] ? toggleSidebar() - Nuevo estado:', this.sidebar);
+       //console.log('[Store.app] ? toggleSidebar() - Nuevo estado:', this.sidebar);
   },
 
 // ? PERSISTENCIA: Light and dark Mode
@@ -66,30 +66,30 @@ direction: Alpine.$persist('ltr'),
      showSettings: false,
 
        toggleMode(val) {
-    console.log('[Store.app] ?? toggleMode() - Valor recibido:', val);
+    //console.log('[Store.app] ?? toggleMode() - Valor recibido:', val);
                 
                 if (!val) {
     val = this.mode || "light";
           }
     
            this.mode = val;
-    console.log('[Store.app] ? toggleMode() - Modo aplicado:', this.mode);
+    //console.log('[Store.app] ? toggleMode() - Modo aplicado:', this.mode);
 
             },
 
             toggleFullScreen() {
-       console.log('[Store.app] ??? toggleFullScreen() LLAMADO');
+       //console.log('[Store.app] ??? toggleFullScreen() LLAMADO');
                 if (document.fullscreenElement) {
               document.exitFullscreen();
-     console.log('[Store.app] ??? Saliendo de fullscreen');
+     //console.log('[Store.app] ??? Saliendo de fullscreen');
   } else {
         document.documentElement.requestFullscreen();
-        console.log('[Store.app] ??? Entrando a fullscreen');
+        //console.log('[Store.app] ??? Entrando a fullscreen');
          }
   },
 
             setLayout() {
-                console.log('[Store.app] ?? setLayout() LLAMADO');
+                //console.log('[Store.app] ?? setLayout() LLAMADO');
            
               // Set the layout based on current settings
                 this.layout = this.layout || 'vertical';
@@ -128,13 +128,13 @@ direction: Alpine.$persist('ltr'),
 
 
 
-    console.log('[main.js] ? Store "app" registrado con Alpine.$persist');
+    //console.log('[main.js] ? Store "app" registrado con Alpine.$persist');
 
         function setActiveClass() {
             var currentPath = window.location.pathname;
             // Extract the last part of the path (to handle directories)
             var activeItem = document.querySelector('.sidebar ul li a[href="' + currentPath + '"]');
-            console.log("setActiveClass", activeItem, 'currentPath', currentPath)
+            //console.log("setActiveClass", activeItem, 'currentPath', currentPath)
             if (activeItem) {
                 activeItem.classList.add('active');
             } else {
@@ -154,37 +154,37 @@ direction: Alpine.$persist('ltr'),
                 var currentPath = window.location.pathname;
                 var activeItem = document.querySelector('.sidebar ul li a[href="' + currentPath + '"]');
 
-                console.log('[SidebarMenu] Ruta actual:', currentPath);
+                //console.log('[SidebarMenu] Ruta actual:', currentPath);
 
                 if (activeItem) {
                     activeItem.classList.add('active');
-                    console.log('[SidebarMenu] ✅ Item activo:', activeItem.textContent?.trim());
+                    //console.log('[SidebarMenu] ✅ Item activo:', activeItem.textContent?.trim());
                 } else {
                     currentPath = currentPath.substring(currentPath.lastIndexOf('/') + 1);
                     activeItem = document.querySelector('.sidebar ul li a[href="' + currentPath + '"]');
                     if (activeItem) {
                         activeItem.classList.add('active');
-                        console.log('[SidebarMenu] ✅ Item activo (fallback):', activeItem.textContent?.trim());
+                        //console.log('[SidebarMenu] ✅ Item activo (fallback):', activeItem.textContent?.trim());
                     }
                 }
             }
         }));
 
-        console.log('[main.js] ? Componente "sidebarMenu" registrado');
+        //console.log('[main.js] ? Componente "sidebarMenu" registrado');
     });
 
     // ? LISTENER: Alpine inicializado
     document.addEventListener('alpine:initialized', () => {
-        console.log('[main.js] 🎉 Alpine.js COMPLETAMENTE INICIALIZADO');
+        //console.log('[main.js] 🎉 Alpine.js COMPLETAMENTE INICIALIZADO');
 
         const store = Alpine.store('app');
-        console.log('[main.js] 📊 Estado inicial del store:', {
-            mode: store.mode,
-            sidebarMode: store.sidebarMode,
-            layout: store.layout,
-            direction: store.direction,
-            sidebar: store.sidebar
-        });
+        //console.log('[main.js] 📊 Estado inicial del store:', {
+        //    mode: store.mode,
+        //    sidebarMode: store.sidebarMode,
+        //    layout: store.layout,
+        //    direction: store.direction,
+        //    sidebar: store.sidebar
+        //});
 
         // ✅ NUEVO: Exponer Alpine globalmente para debugging
         window.AlpineDebug = {
@@ -193,9 +193,9 @@ direction: Alpine.$persist('ltr'),
             toggleFullScreen: () => Alpine.store('app').toggleFullScreen()
         };
 
-        console.log('[main.js] ✅ Alpine expuesto en window.AlpineDebug');
+        //console.log('[main.js] ✅ Alpine expuesto en window.AlpineDebug');
     });
 
-    console.log('[main.js] ? Listeners de Alpine configurados');
+    //console.log('[main.js] ? Listeners de Alpine configurados');
 
 })();

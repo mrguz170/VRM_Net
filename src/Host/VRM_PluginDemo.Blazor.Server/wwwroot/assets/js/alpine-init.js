@@ -99,9 +99,9 @@ if (!val) {
         //console.log('[Store.app] ☀️ Light mode activado');
       }
             
-  // ✅ NUEVO: Actualizar atributo data-mode (requerido por Tailwind)
+  // ✅ Actualizar atributo data-mode (requerido por Tailwind)
       document.documentElement.setAttribute('data-mode', val);
- console.log('[Store.app] ✅ data-mode actualizado a:', val);
+ //console.log('[Store.app] ✅ data-mode actualizado a:', val);
    },
 
          toggleFullScreen() {
@@ -153,11 +153,11 @@ this.direction = this.direction || 'ltr';
         let currentPath = window.location.pathname;
         let activeItem = document.querySelector('.sidebar ul li a[href="' + currentPath + '"]');
             
-console.log('[SidebarMenu] Ruta actual:', currentPath);
+//console.log('[SidebarMenu] Ruta actual:', currentPath);
     
   if (activeItem) {
         activeItem.classList.add('active');
-         console.log('[SidebarMenu] ✅ Item activo:', activeItem.textContent?.trim());
+         //console.log('[SidebarMenu] ✅ Item activo:', activeItem.textContent?.trim());
             } else {
  currentPath = currentPath.substring(currentPath.lastIndexOf('/') + 1);
        activeItem = document.querySelector('.sidebar ul li a[href="' + currentPath + '"]');
@@ -179,7 +179,7 @@ console.log('[SidebarMenu] Ruta actual:', currentPath);
     // ==================== ALPINE INITIALIZED ====================
 
     document.addEventListener('alpine:initialized', function() {
-        console.log('[alpine-init.js] 🎉 Alpine.js COMPLETAMENTE INICIALIZADO');
+        //console.log('[alpine-init.js] 🎉 Alpine.js COMPLETAMENTE INICIALIZADO');
         
         try {
             const store = Alpine.store('app');

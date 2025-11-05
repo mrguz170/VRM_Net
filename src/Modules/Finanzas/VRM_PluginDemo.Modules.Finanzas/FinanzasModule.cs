@@ -30,8 +30,8 @@ public class FinanzasModule : IModule
 
     /// <summary>
     /// Icono Remix: Moneda de dólar en círculo - representa operaciones financieras
-    /// </summary>
-    public string Icon => "ri-currency-line";
+    /// </summary>   
+    public string Icon => "ri-money-dollar-circle-line";
 
     // ==================== CATEGORIZACIÓN ====================
 

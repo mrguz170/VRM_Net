@@ -134,17 +134,17 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
     <script>
             // ✅ Esperar a que Blazor esté completamente iniciado
         window.addEventListener('DOMContentLoaded', function() {
-            console.log('[App] 🚀 DOM Completamente Cargado');
+            // console.log('[App] 🚀 DOM Completamente Cargado');
 
             // Dar tiempo a MudBlazor para inicializarse
             setTimeout(function() {
-                console.log('[App] ✅ Inicializando wrappers...');
+                // console.log('[App] ✅ Inicializando wrappers...');
 
                 window.toggleFullScreen = function() {
-                    console.log('[Global] toggleFullScreen() LLAMADA desde Blazor');
+                    // console.log('[Global] toggleFullScreen() LLAMADA desde Blazor');
 
                     if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
-                        console.log('[Global] ✅ Usando Alpine.store("app").toggleFullScreen()');
+                        // console.log('[Global] ✅ Usando Alpine.store("app").toggleFullScreen()');
                         window.Alpine.store('app').toggleFullScreen();
                     } else {
                         console.warn('[Global] ⚠️ Alpine no listo, usando fallback');
@@ -157,10 +157,10 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
                 };
 
                 window.toggleSidebar = function () {
-                    console.log('[Global] toggleSidebar() LLAMADA desde Blazor');
+                    // console.log('[Global] toggleSidebar() LLAMADA desde Blazor');
 
                     if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
-                        console.log('[Global] ✅ Usando Alpine.store("app").toggleSidebar()');
+                        // console.log('[Global] ✅ Usando Alpine.store("app").toggleSidebar()');
                         window.Alpine.store('app').toggleSidebar();
                     } else {
                         console.warn('[Global] ⚠️ Alpine no listo, usando fallback');
@@ -169,7 +169,7 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
                     }
                 };
 
-                console.log('[Global] ✅ Funciones wrapper registradas');
+                // console.log('[Global] ✅ Funciones wrapper registradas');
             }, 500); // Esperar 500ms a que MudBlazor se inicialice
         });
 
@@ -216,11 +216,11 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
 
         // ✅ NUEVO: Wrapper que llama al store de Alpine cuando esté listo
         window.toggleFullScreen = function() {
-            console.log('[Global] toggleFullScreen() LLAMADA desde Blazor');
+            // console.log('[Global] toggleFullScreen() LLAMADA desde Blazor');
 
             // Intentar usar Alpine store primero
             if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
-                console.log('[Global] ✅ Usando Alpine.store("app").toggleFullScreen()');
+                // console.log('[Global] ✅ Usando Alpine.store("app").toggleFullScreen()');
                 window.Alpine.store('app').toggleFullScreen();
             } else {
                 // Fallback si Alpine no está listo
@@ -234,10 +234,10 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
         };
 
         window.toggleSidebar = function () {
-            console.log('[Global] toggleSidebar() LLAMADA desde Blazor');
+            // console.log('[Global] toggleSidebar() LLAMADA desde Blazor');
 
             if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
-                console.log('[Global] ✅ Usando Alpine.store("app").toggleSidebar()');
+                // console.log('[Global] ✅ Usando Alpine.store("app").toggleSidebar()');
                 window.Alpine.store('app').toggleSidebar();
             } else {
                 console.warn('[Global] ⚠️ Alpine no listo, usando fallback');
@@ -287,7 +287,7 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
             console.log(message);
         };
 
-        console.log('[Global] ✅ Funciones wrapper registradas para Alpine.js');
+        // console.log('[Global] ✅ Funciones wrapper registradas para Alpine.js');
     </script>
 
     <!-- Custom Scripts -->
@@ -317,7 +317,7 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
                     }
                 };
 
-                console.log('[Circuit Guard] ✅ Interceptor global de circuit activado');
+                // console.log('[Circuit Guard] ✅ Interceptor global de circuit activado');
             }
 
             // También interceptar errores no capturados
