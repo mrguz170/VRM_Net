@@ -22,15 +22,15 @@ builder.Services.AddServerSideBlazor(options =>
 });
 
 // ==================== MUDBLAZOR ====================
-// ⭐ NUEVO: Servicios de MudBlazor para componentes de UI
+// Servicios de MudBlazor para componentes de UI
 builder.Services.AddMudServices();
 
 // ==================== STATE SERVICES (SLICED) ====================
-// ⭐ NUEVO: Servicio de estado de tema (dark/light mode)
+// Servicio de estado de tema (dark/light mode)
 builder.Services.AddSingleton<ModeStateService>();
 
 // ==================== AUTENTICACIÓN Y AUTORIZACIÓN ====================
-// ⚠️ AUTENTICACIÓN SIMULADA (SOLO DESARROLLO)
+// AUTENTICACIÓN SIMULADA (SOLO DESARROLLO)
 // Configurar esquema de autenticación por defecto para Blazor Server
 builder.Services.AddAuthentication(options =>
 {
@@ -50,10 +50,9 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-// ✅ NUEVO: HttpContextAccessor para acceder a cookies
+// HttpContextAccessor para acceder a cookies
 builder.Services.AddHttpContextAccessor();
 
-// ⭐ CAMBIO CRÍTICO: Scoped con PersistentComponentState
 // DummyAuthenticationStateProvider ahora usa PersistentComponentState
 // para mantener autenticación entre SSR e Interactive Server
 builder.Services.AddScoped<DummyAuthenticationStateProvider>();
@@ -61,7 +60,7 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<DummyAuthenticationStateProvider>());
 
 // ==================== AUTORIZACIÓN GRANULAR DE MÓDULOS ====================
-// ⭐ NUEVO: Servicio para verificar permisos por acción
+// Servicio para verificar permisos por acción
 builder.Services.AddScoped<IModuleAuthorizationService, ModuleAuthorizationService>();
 
 // ==================== SISTEMA DE PLUGINS ====================
@@ -112,8 +111,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 else
-{
-    // ⭐ AGREGAR: Mejor debugging en desarrollo (como Sliced_web_app)
+{    
     app.UseDeveloperExceptionPage();
 }
 
@@ -121,7 +119,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-// ⭐ IMPORTANTE: Agregar autenticación y autorización al pipeline
+// Agregar autenticación y autorización al pipeline
 app.UseAuthentication();
 app.UseAuthorization();
 

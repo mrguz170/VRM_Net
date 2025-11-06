@@ -1,242 +1,278 @@
-﻿# VRM Plugin Demo
+﻿# VRM Net - Sistema Modular de Gestión Empresarial
 
-**Versión:** 2.0 - Con Cookies y Renderizado Condicional  
-**Framework:** .NET 8 con Blazor Server  
-**Última actualización:** Enero 2025
+Sistema empresarial basado en arquitectura de plugins dinámicos construido con Blazor Server (.NET 8).
 
----
+## Arquitectura del Sistema
 
-## 🚀 Inicio Rápido
+Este proyecto utiliza una **arquitectura modular basada en plugins** que permite:
 
-Para comenzar rápidamente, consulta:
-- **[docs/QUICK_START.md](docs/QUICK_START.md)** - Ejecuta la aplicación en 5 minutos
-- **[docs/INDICE_DOCUMENTACION.md](docs/INDICE_DOCUMENTACION.md)** - Índice completo de toda la documentación
-- **[docs/ESTRUCTURA_PROYECTO.md](docs/ESTRUCTURA_PROYECTO.md)** - Estructura detallada del proyecto
+- ✅ Cargar módulos dinámicamente en tiempo de ejecución
+- ✅ Habilitar/deshabilitar funcionalidades por cliente
+- ✅ Agregar nuevos módulos sin modificar el código base
+- ✅ Sistema de permisos granular por acción
+- ✅ Hot deployment (copiar DLL → reiniciar → módulo disponible)
 
----
-
-## 🎯 Novedades en Versión 2.0
-
-### 🍪 Integración de Cookies HTTP Persistentes
-- ✅ Sesión persistente entre recargas del navegador
-- ✅ Autenticación robusta con ASP.NET Core Authentication
-- ✅ Preparado para migración a ASP.NET Core Identity
-- 📖 **Ver:** [docs/AUTENTICACION_Y_COOKIES.md](docs/AUTENTICACION_Y_COOKIES.md)
-
-### 🔄 Renderizado Condicional (SSR + Interactive Server)
-- ✅ Login/Logout con SSR estático (escribe cookies correctamente)
-- ✅ Páginas protegidas con Interactive Server (interactividad completa)
-- ✅ Resuelto problema "Response ya comenzó"
-- ✅ Compatible con módulos dinámicos
-- 📖 **Ver:** [docs/SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md](docs/SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md)
-
----
-
-## 📚 Documentación Principal
-
-### Para Desarrolladores
-- **[docs/QUICK_START.md](docs/QUICK_START.md)** - Guía de inicio en 5 minutos
-- **[docs/GUIA_AUTENTICACION_SIMULADA.md](docs/GUIA_AUTENTICACION_SIMULADA.md)** - Sistema de autenticación
-- **[docs/AUTENTICACION_Y_COOKIES.md](docs/AUTENTICACION_Y_COOKIES.md)** - Autenticación y cookies persistentes 🍪
-- **[docs/GUIA_SISTEMA_PERMISOS_GRANULARES.md](docs/GUIA_SISTEMA_PERMISOS_GRANULARES.md)** - Permisos avanzados
-- **[src/Core/README.md](src/Core/README.md)** - Abstracciones y dominio
-- **[src/Host/README.md](src/Host/README.md)** - Aplicación host
-- **[src/Modules/README.md](src/Modules/README.md)** - Crear módulos
-
-### Para Arquitectos
-- **[docs/GUIA_DISENO_ARQUITECTURA.md](docs/GUIA_DISENO_ARQUITECTURA.md)** - Arquitectura completa
-- **[docs/SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md](docs/SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md)** - Arquitectura de renderizado 🔄
-- **[docs/ROADMAP_EMPRESARIAL.md](docs/ROADMAP_EMPRESARIAL.md)** - Planificación por fases
-
-### Para DevOps
-- **[docs/COMANDOS_SCRIPTS.md](docs/COMANDOS_SCRIPTS.md)** - Scripts y comandos útiles
-- **[docs/VERSION_HISTORY.md](docs/VERSION_HISTORY.md)** - Historial de versiones y changelog
-
-### Índice Completo
-- **[docs/INDICE_DOCUMENTACION.md](docs/INDICE_DOCUMENTACION.md)** - Índice maestro de toda la documentación
-- **[docs/VERSION_HISTORY.md](docs/VERSION_HISTORY.md)** - Historial de versiones
-
----
-
-## ✨ Características Principales
-
-### 🧩 Sistema Modular Dinámico
-- Carga de módulos en tiempo de ejecución
-- Hot-reload de módulos sin recompilar el host
-- Arquitectura extensible basada en `IModule`
-
-### 🔐 Autenticación y Autorización
-- Cookies HTTP persistentes con ASP.NET Core Authentication
-- Sistema de roles jerárquico
-- Permisos granulares por acción
-- Renderizado condicional para compatibilidad cookies + interactive
-
-### 🏢 Multi-Tenant Ready
-- Soporte para múltiples clientes
-- Configuración por tenant
-- Aislamiento de datos
-
-### 🏗️ Arquitectura Clean
-- Separación de capas (Core, Infrastructure, Application)
-- Inyección de dependencias
-- Patrón Repository
-- SOLID principles
-
----
-
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 VRM_Net/
-├── README.md          ← Este archivo (ÚNICO en raíz)
-├── docs/          ← 📚 Toda la documentación
-│├── QUICK_START.md
-│   ├── INDICE_DOCUMENTACION.md
-│   ├── VERSION_HISTORY.md
-│   ├── ESTRUCTURA_PROYECTO.md
-│   ├── AUTENTICACION_Y_COOKIES.md
-│   ├── GUIA_AUTENTICACION_SIMULADA.md
-│   ├── GUIA_SISTEMA_PERMISOS_GRANULARES.md
-│   ├── GUIA_DISENO_ARQUITECTURA.md
-│   ├── SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md
-│   ├── COMANDOS_SCRIPTS.md
-│   └── ROADMAP_EMPRESARIAL.md
 ├── src/
-│   ├── Core/          # Núcleo del sistema
-│   │   ├── VRM_Plugin.Core.Abstractions/
-│   │   └── VRM_Plugin.Core.Domain/
-│   ├── Host/   # Aplicación host Blazor
-│   │   ├── Sliced_web_app/
-│   │   └── VRM_Plugin.Blazor.Server/
-│   └── Modules/       # Módulos de negocio
+│   ├── Core/                    # 🔧 Abstracciones y contratos compartidos
+│   ├── Host/                    # 🚀 Aplicación principal Blazor Server
+│   └── Modules/                 # 📦 Módulos de negocio (plugins)
 │       ├── Finanzas/
-│       └── Onboarding/Prospectos/
-└── scripts/           # Scripts de automatización
+│       └── Onboarding/
+└── README.md
 ```
 
 ---
 
-## 🏃‍♂️ Ejecutar el Proyecto
+## Core - Fundamentos del Sistema
 
-### Prerrequisitos
-- .NET 8 SDK
-- Visual Studio 2022 o VS Code
-- Git
+**Ubicación:** `src/Core/`
 
-### Pasos
+Contiene las **abstracciones y contratos** que definen cómo funciona el sistema de plugins.
 
-```bash
-# 1. Clonar el repositorio
-git clone https://github.com/mrguz170/VRM_Net
-cd VRM_Net
+### Proyectos:
 
-# 2. Restaurar dependencias
-dotnet restore
+#### `VRM_Plugin.Core.Abstractions`
+Define las interfaces que todos los módulos deben implementar:
 
-# 3. Compilar
-dotnet build
+- **`IModule`** - Contrato principal que implementa cada módulo
+- **`ModuleComponentInfo`** - Metadata de componentes Blazor
+- Interfaces para permisos, dependencias y configuración
 
-# 4. Ejecutar
-cd src/Host/VRM_Plugin.Blazor.Server
-dotnet run
+#### `VRM_Plugin.Core.Domain`
+Modelos compartidos entre módulos:
 
-# O simplemente presionar F5 en Visual Studio
+- Configuración fiscal (`ConfiguracionFiscal`)
+- Configuración de negocio (`ConfiguracionNegocio`)
+- Entidades comunes del dominio
+
+### Concepto clave: `IModule`
+
+Cada módulo implementa esta interfaz para integrarse al sistema:
+
+```csharp
+public interface IModule
+{
+    string ModuleId { get; }                    // Identificador único
+    string DisplayName { get; }                 // Nombre visible
+    List<ModuleComponentInfo> GetComponents();  // Componentes Blazor
+    void ConfigureServices(...);                // Servicios del módulo
+    Dictionary<string,string[]> GetActionPermissions(); // Permisos granulares
+}
 ```
 
-### Login de Prueba
+---
 
-Usuarios disponibles (cualquier password funciona):
-- `admin@vrm.com` - Administrador (acceso completo)
-- `gerente.finanzas@vrm.com` - Gerente de Finanzas
-- `contador@vrm.com` - Contador (solo lectura)
+## Host - Aplicación Principal
 
-Ver todos los usuarios en [docs/GUIA_AUTENTICACION_SIMULADA.md](docs/GUIA_AUTENTICACION_SIMULADA.md)
+**Ubicación:** `src/Host/VRM_PluginDemo.Blazor.Server/`
+
+Es la **aplicación Blazor Server** que orquesta todo el sistema.
+
+### Responsabilidades:
+
+- ✅ **Descubre y carga módulos** dinámicamente desde la carpeta `Modules/`
+- ✅ **Configura autenticación y autorización** con cookies
+- ✅ **Registra servicios** de cada módulo en el contenedor DI
+- ✅ **Renderiza componentes** de módulos en el routing
+- ✅ **Protege rutas** según permisos del usuario
+
+### Componentes clave:
+
+#### `Program.cs`
+- Configura autenticación con cookies
+- Descubre módulos con `ModuleLoader`
+- Registra servicios de cada módulo
+- Configura rutas dinámicas
+
+#### `Services/ModuleLoader.cs`
+- Busca DLLs en la carpeta `Modules/`
+- Carga ensamblados dinámicamente
+- Instancia las clases que implementan `IModule`
+
+#### `Components/Routes.razor`
+- Router principal con `<AuthorizeRouteView>`
+- Protege todas las rutas (excepto login)
+- Redirige usuarios no autenticados a `/login`
+
+#### `Services/DummyAuthenticationStateProvider.cs`
+- Sistema de autenticación simulado (solo desarrollo)
+- Usa cookies persistentes con `SignInAsync`/`SignOutAsync`
+- Mantiene estado entre SSR e Interactive Server
+
+### Sistema de Seguridad:
+1. Usuario intenta acceder a `/finanzas` sin login
+2. `[Authorize]` en el componente detecta que no está autenticado
+3. `<AuthorizeRouteView>` activa `<RedirectToLogin />`
+4. Usuario es redirigido a `/login?ReturnUrl=finanzas`
+5. Después del login exitoso → vuelve a `/finanzas`
 
 ---
 
-## 🔧 Crear un Nuevo Módulo
+## Modules - Módulos de Negocio. Los modulos son plugins dinámicos y autónomos.
+## Modulos prueba para demostrar la arquitectura modular.
 
-```bash
-# 1. Crear proyecto
-dotnet new razorclasslib -n VRM_Plugin.Modules.MiModulo -o src/Modules/MiModulo
+**Ubicación:** `src/Modules/`
 
-# 2. Implementar IModule
-# Ver guía completa en src/Modules/README.md
+Cada módulo es un **proyecto independiente** que se compila a DLL y se carga dinámicamente.
 
-# 3. Compilar y copiar DLL
-dotnet build src/Modules/MiModulo
-copy src/Modules/MiModulo/bin/Debug/net8.0/*.dll src/Host/VRM_Plugin.Blazor.Server/Modules/
+### Módulos Disponibles:
 
-# 4. Reiniciar aplicación
-# El módulo se cargará automáticamente
+#### 1. **Finanzas** (`src/Modules/Finanzas/VRM_Plugin.Modules.Finanzas/`)
+
+**Propósito:** Gestión de facturas y pagos
+
+**Ruta:** `/finanzas`
+
+**Permisos:**
+- Ver facturas: `Admin`, `GerenteFinanzas`, `CoordinadorFinanzas`, `Contador`
+- Crear facturas: `Admin`, `GerenteFinanzas`, `CoordinadorFinanzas`
+- Timbrar SAT: `Admin`, `GerenteFinanzas` (granular)
+
+#### 2. **Prospectos** (`src/Modules/Onboarding/VRM_Plugin.Modules.Prospectos/`)
+
+**Propósito:** Onboarding de nuevos proveedores
+
+**Ruta:** `/prospectos`
+
+**Permisos:**
+- Ver prospectos: `Admin`, `GestorProspectos`, `RevisorProspectos`
+- Crear prospectos: `Admin`, `GestorProspectos`
+- Aprobar final: `Admin`, `GestorProspectos` (granular)
+
+### Estructura de un Módulo:
+
+```
+VRM_Plugin.Modules.Finanzas/
+├── Components/
+│   ├── Finanzas.razor          # Componente con @page "/finanzas"
+│   └── _Imports.razor           # Importaciones (incluye [Authorize])
+├── Domain/
+│   ├── Factura.cs
+│   └── Pago.cs
+├── Services/
+│   ├── IFacturaService.cs
+│   └── FacturaService.cs
+└── FinanzasModule.cs           # Implementa IModule
 ```
 
-Ver guía completa: **[src/Modules/README.md](src/Modules/README.md)**
 
 ---
 
-## 🗺️ Roadmap
+## Flujo de Carga de Módulos
 
-### ✅ Fase 1: Fundamentos (Completado)
-- [x] Sistema modular dinámico
-- [x] Autenticación simulada
-- [x] Permisos granulares
-- [x] Módulos Finanzas y Prospectos
-- [x] **Integración de cookies persistentes** 🍪
-- [x] **Renderizado condicional SSR + Interactive** 🔄
+```
+1. 🏁 App inicia (Program.cs)
+      ⬇️
+2. 🔍 ModuleLoader busca DLLs en Modules/
+      ⬇️
+3. 📦 Carga ensamblados con Assembly.LoadFrom()
+      ⬇️
+4. 🔎 Busca clases que implementen IModule
+      ⬇️
+5. 🎯 Crea instancia de cada módulo
+      ⬇️
+6. ⚙️ Llama a ConfigureServices() de cada módulo
+      ⬇️
+7. 🗺️ Registra componentes en Routes.razor
+      ⬇️
+8. ✅ Módulos disponibles en el menú (según permisos)
+```
 
-### 🔄 Fase 2: Base de Datos (En progreso)
-- [ ] Entity Framework Core
-- [ ] Migraciones
-- [ ] Repositorios
-- [ ] ASP.NET Core Identity
+```
 
-### 📋 Fase 3: Producción (Planeado)
-- [ ] Docker
-- [ ] CI/CD
-- [ ] Logging avanzado (Serilog + Seq)
-- [ ] Health checks
-
-Ver roadmap completo: **[docs/ROADMAP_EMPRESARIAL.md](docs/ROADMAP_EMPRESARIAL.md)**
-
----
-
-## 💬 Soporte
-
-### Documentación
-- Consulta **[docs/INDICE_DOCUMENTACION.md](docs/INDICE_DOCUMENTACION.md)** para encontrar la guía que necesitas
-- Busca en el código con `Ctrl+Shift+F` (los comentarios tienen emojis 📌)
-
-### Issues
-- Reporta bugs en [GitHub Issues](https://github.com/mrguz170/VRM_Net/issues)
-- Usa labels: `bug`, `enhancement`, `documentation`, `question`
-
-### Preguntas Frecuentes
-- **"¿Por qué Login no es Interactive Server?"** → Ver [docs/SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md](docs/SOLUCION_FINAL_RENDERIZADO_CONDICIONAL.md)
-- **"¿Cómo funcionan las cookies?"** → Ver [docs/AUTENTICACION_Y_COOKIES.md](docs/AUTENTICACION_Y_COOKIES.md)
-- **"¿Cómo crear un módulo?"** → Ver [src/Modules/README.md](src/Modules/README.md)
+**🎉 El módulo aparece automáticamente en el menú**
 
 ---
 
-## 👥 Equipo
+## 👥 Usuarios de Prueba
 
-**Mantenedor:** Equipo VRM  
-**Repositorio:** [https://github.com/mrguz170/VRM_Net](https://github.com/mrguz170/VRM_Net)  
-**Licencia:** MIT
+El sistema incluye usuarios dummy para desarrollo:
 
----
+| Email | Roles | Acceso |
+|-------|-------|--------|
+| `admin@vrm.com` | Admin | Todo el sistema |
+| `gerente.finanzas@vrm.com` | GerenteFinanzas | Finanzas (completo) |
+| `coordinador.finanzas@vrm.com` | CoordinadorFinanzas | Finanzas (limitado) |
+| `contador@vrm.com` | Contador | Finanzas (solo lectura) |
+| `gestor.prospectos@vrm.com` | GestorProspectos | Prospectos (completo) |
 
-## 📖 Recursos
-
-### Oficial
-- [Documentación de Blazor](https://learn.microsoft.com/aspnet/core/blazor/)
-- [Blazor Render Modes (.NET 8)](https://learn.microsoft.com/aspnet/core/blazor/components/render-modes)
-- [ASP.NET Core Authentication](https://learn.microsoft.com/aspnet/core/security/authentication/)
-
-### Comunidad
-- [Blazor University](https://blazor-university.com/)
-- [Awesome Blazor](https://github.com/AdrienTorris/awesome-blazor)
+**Contraseña:** Cualquiera (es un sistema dummy)
 
 ---
 
-**🚀 ¡Empieza explorando [docs/QUICK_START.md](docs/QUICK_START.md)!**
+## 🔧 Tecnologías Utilizadas
+
+- **.NET 8** - Framework base
+- **Blazor Server** - UI interactiva
+- **ASP.NET Core Identity** - Autenticación con cookies
+- **Reflection** - Carga dinámica de módulos
+- **Dependency Injection** - Inyección de servicios por módulo
+- **Tailwind CSS** - Estilos (tema Sliced)
+- **Remix Icons** - Iconografía
+
+---
+
+## Estructura de Archivos Importantes
+
+```
+VRM_Net/
+├── src/
+│   ├── Core/
+│   │   ├── VRM_Plugin.Core.Abstractions/
+│   │   │   └── IModule.cs                          # ⭐ Interfaz principal
+│   │   └── VRM_Plugin.Core.Domain/
+│   │       └── ConfiguracionNegocio.cs
+│   │
+│   ├── Host/
+│   │   └── VRM_PluginDemo.Blazor.Server/
+│   │       ├── Program.cs                          # ⭐ Configuración principal
+│   │       ├── Components/
+│   │       │   ├── Routes.razor                    # ⭐ Router con seguridad
+│   │       │   ├── Pages/
+│   │       │   │   └── Login.razor                 # Login SSR
+│   │       │   └── Auth/
+│   │       │       └── RedirectToLogin.razor       # Redirección automática
+│   │       ├── Services/
+│   │       │   ├── ModuleLoader.cs                 # ⭐ Cargador de módulos
+│   │       │   └── DummyAuthenticationStateProvider.cs
+│   │       └── Modules/                            # 📂 Aquí se copian las DLLs
+│   │
+│   └── Modules/
+│       ├── Finanzas/
+│       │   └── VRM_PluginDemo.Modules.Finanzas/
+│       │       ├── FinanzasModule.cs               # ⭐ Implementación IModule
+│       │       ├── Components/
+│       │       │   ├── Finanzas.razor              # ⭐ Componente principal
+│       │       │   └── _Imports.razor              # Importaciones
+│       │       ├── Domain/
+│       │       │   └── Factura.cs
+│       │       └── Services/
+│       │           └── FacturaService.cs
+│       │
+│       └── Onboarding/
+│           └── VRM_PluginDemo.Modules.Prospectos/
+│               ├── ProspectosModule.cs             # ⭐ Implementación IModule
+│               └── Components/
+│                   └── Prospectos.razor            # ⭐ Componente principal
+│
+└── README.md                                       # Este archivo
+```
+
+---
+
+## Ventajas de Esta Arquitectura
+
+✅ **Modularidad** - Cada módulo es independiente  
+✅ **Escalabilidad** - Agregar funcionalidades sin tocar el core  
+✅ **Hot Deployment** - Copiar DLL y reiniciar  
+✅ **Seguridad Granular** - Permisos por acción  
+✅ **Separación de Responsabilidades** - Cada módulo gestiona su dominio  
+✅ **Reutilización** - Módulos compartibles entre proyectos  
+
+---
+
+```

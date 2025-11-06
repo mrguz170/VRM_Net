@@ -1,9 +1,6 @@
 ﻿@page "/finanzas"
+@attribute [Authorize]
 @rendermode InteractiveServer
-@namespace VRM_Plugin.Modules.Finanzas.Components
-@using Microsoft.AspNetCore.Components.Authorization
-@using VRM_Plugin.Modules.Finanzas.Services
-@using VRM_Plugin.Modules.Finanzas.Domain
 @inject IFacturaService FacturaService
 @inject IPagoService PagoService
 

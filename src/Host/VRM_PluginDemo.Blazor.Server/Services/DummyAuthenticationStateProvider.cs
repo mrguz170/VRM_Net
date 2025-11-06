@@ -9,9 +9,7 @@ namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
 /// Proveedor de autenticación simulado con usuarios dummy.
-/// ?? SOLO PARA DESARROLLO - Reemplazar con autenticación real en producción.
-/// 
-/// ? ACTUALIZADO: Usa PersistentComponentState para mantener autenticación entre SSR e Interactive Server.
+/// -- SOLO PARA DESARROLLO --
 /// </summary>
 public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDisposable
 {
@@ -31,7 +29,7 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
         _httpContextAccessor = httpContextAccessor;
         _persistentState = persistentState;
         
-        // ? Suscribirse al ciclo de vida del prerendering
+        // Suscribirse al ciclo de vida del prerendering
         _subscription = persistentState.RegisterOnPersisting(OnPersistingAsync);
         
         _logger.LogInformation("?? [Auth] DummyAuthenticationStateProvider inicializado con PersistentComponentState");
@@ -41,7 +39,7 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
     {
         try
         {
-            // ?? FASE 1: Prerendering (SSR) - Lee de HttpContext
+            // FASE 1: Prerendering (SSR) - Lee de HttpContext
          var httpContext = _httpContextAccessor.HttpContext;
   
        if (httpContext != null)
@@ -60,7 +58,7 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
                 }
          }
             
-   // ?? FASE 2: Interactive Server (Circuit) - Lee del estado persistido
+   // FASE 2: Interactive Server (Circuit) - Lee del estado persistido
   if (_persistentState.TryTakeFromJson<UserInfo>("UserInfo", out var userInfo))
             {
       _logger.LogInformation("? [Circuit] Usuario restaurado desde estado persistido: {Email} con roles: [{Roles}]", 
@@ -98,7 +96,7 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
 
     private Task OnPersistingAsync()
  {
-        // ?? Guardar estado de autenticación para el Circuit
+        // Guardar estado de autenticación para el Circuit
      if (_authenticationState?.User.Identity?.IsAuthenticated ?? false)
   {
             var user = _authenticationState.User;
@@ -130,8 +128,7 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
 
     /// <summary>
     /// Simula un login con usuario y contraseña.
-    /// ? Crea cookie de autenticación persistente.
-    /// ?? En producción, esto validaría contra una base de datos con contraseñas hasheadas.
+    /// Crea cookie de autenticación persistente.
     /// </summary>
     public async Task<bool> LoginAsync(string username, string password)
     {
@@ -159,7 +156,7 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
                 usuario.Username, 
     string.Join(", ", usuario.Roles));
 
-            // ?? Crear claims
+            //  Crear claims
          var claims = new List<Claim>
     {
   new Claim(ClaimTypes.NameIdentifier, usuario.Id),
@@ -175,11 +172,11 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
    claims.Add(new Claim(ClaimTypes.Role, rol));
     }
 
-    // ?? Crear identity y principal
+    //  Crear identity y principal
          var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
 
-      // ?? CRÍTICO: Crear cookie de autenticación
+      //  Crear cookie de autenticación
        var httpContext = _httpContextAccessor.HttpContext;
             
  if (httpContext == null)
