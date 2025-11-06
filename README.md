@@ -220,7 +220,7 @@ El sistema incluye usuarios dummy para desarrollo:
 ```
 ## Estructura de Archivos Importantes
 
-```
+
 VRM_Net/
 ├── src/
 │   ├── Core/
