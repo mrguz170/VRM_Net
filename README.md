@@ -202,8 +202,10 @@ El sistema incluye usuarios dummy para desarrollo:
 
 **Contraseña:** Cualquiera (es un sistema dummy)
 
+```
 ---
 
+```
 ## 🔧 Tecnologías Utilizadas
 
 - **.NET 8** - Framework base
@@ -213,9 +215,9 @@ El sistema incluye usuarios dummy para desarrollo:
 - **Dependency Injection** - Inyección de servicios por módulo
 - **Tailwind CSS** - Estilos (tema Sliced)
 - **Remix Icons** - Iconografía
-
+```
 ---
-
+```
 ## Estructura de Archivos Importantes
 
 ```
@@ -263,7 +265,7 @@ VRM_Net/
 ```
 
 ---
-
+```
 ## Ventajas de Esta Arquitectura
 
 ✅ **Modularidad** - Cada módulo es independiente  
