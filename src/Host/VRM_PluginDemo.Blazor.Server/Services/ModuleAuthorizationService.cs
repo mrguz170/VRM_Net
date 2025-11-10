@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using VRM_Plugin.Core.Abstractions.Entities;
 
 namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
 /// Implementación del servicio de autorización granular de módulos.
-/// Verifica permisos a nivel de acción usando los roles del usuario autenticado.
+/// ? Actualizado para usar nueva arquitectura con IDs numéricos.
+/// Verifica permisos a nivel de acción usando los IDs de permisos del usuario autenticado.
 /// </summary>
 public class ModuleAuthorizationService : IModuleAuthorizationService
 {
@@ -23,35 +25,32 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Verifica si el usuario actual puede ejecutar una acción específica (por ActionKey legacy)
+    /// </summary>
     public async Task<bool> CanExecuteActionAsync(string actionKey)
     {
         try
         {
-            // Obtener el usuario autenticado
             var authState = await _authStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
-            // Verificar si está autenticado
             if (!user.Identity?.IsAuthenticated ?? true)
             {
                 _logger.LogWarning("Usuario no autenticado intentó acceder a {ActionKey}", actionKey);
                 return false;
             }
 
-            // Extraer roles del usuario
-            var userRoles = user.Claims
-                .Where(c => c.Type == ClaimTypes.Role)
-                .Select(c => c.Value)
-                .ToList();
+            // Obtener IDs de permisos del usuario desde claims
+            var userPermissionIds = GetUserPermissionIds(user);
 
-            if (!userRoles.Any())
+            if (!userPermissionIds.Any())
             {
-                _logger.LogWarning("Usuario {UserName} no tiene roles asignados", user.Identity.Name);
+                _logger.LogWarning("Usuario {UserName} no tiene permisos asignados", user.Identity.Name);
                 return false;
             }
 
-            // Verificar permiso
-            return await CheckActionPermissionAsync(actionKey, userRoles);
+            return await CheckActionPermissionByKeyAsync(actionKey, userPermissionIds);
         }
         catch (Exception ex)
         {
@@ -60,14 +59,52 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         }
     }
 
+    /// <summary>
+    /// Verifica si el usuario actual puede ejecutar una acción específica (por ID)
+    /// </summary>
+    public async Task<bool> CanExecuteActionByIdAsync(int idAction)
+    {
+        try
+        {
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (!user.Identity?.IsAuthenticated ?? true)
+            {
+                _logger.LogWarning("Usuario no autenticado intentó acceder a IdAction={IdAction}", idAction);
+                return false;
+            }
+
+            var userPermissionIds = GetUserPermissionIds(user);
+
+            if (!userPermissionIds.Any())
+            {
+                _logger.LogWarning("Usuario {UserName} no tiene permisos asignados", user.Identity.Name);
+                return false;
+            }
+
+            return await CheckActionPermissionByIdAsync(idAction, userPermissionIds);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al verificar permiso para IdAction={IdAction}", idAction);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Verifica si un usuario específico puede ejecutar una acción
+    /// </summary>
     public async Task<bool> UserCanExecuteActionAsync(string userId, string actionKey)
     {
-        // TODO: Implementar cuando tengas IUsuarioService
-        // Por ahora, delega al usuario actual
+        // TODO: Implementar cuando tengas IUsuarioService para obtener permisos por userId
         _logger.LogWarning("UserCanExecuteActionAsync no implementado completamente. Delegando a CanExecuteActionAsync");
         return await CanExecuteActionAsync(actionKey);
     }
 
+    /// <summary>
+    /// Obtiene todas las acciones disponibles para el usuario actual
+    /// </summary>
     public async Task<List<string>> GetAvailableActionsAsync()
     {
         try
@@ -78,24 +115,20 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
             if (!user.Identity?.IsAuthenticated ?? true)
                 return new List<string>();
 
-            var userRoles = user.Claims
-                .Where(c => c.Type == ClaimTypes.Role)
-                .Select(c => c.Value)
-                .ToList();
-
+            var userPermissionIds = GetUserPermissionIds(user);
             var availableActions = new List<string>();
             var allModules = _moduleManager.GetAllModules();
 
             foreach (var module in allModules)
             {
-                var moduleActions = module.GetActionPermissions();
+                var actions = module.GetActions();
 
-                foreach (var action in moduleActions)
+                foreach (var action in actions.Where(a => a.IsActive))
                 {
-                    // Si el usuario tiene al menos uno de los roles requeridos
-                    if (action.Value.Any(requiredRole => userRoles.Contains(requiredRole)))
+                    // Si el usuario tiene al menos uno de los permisos requeridos
+                    if (action.RequiredPermissionIds.Any(reqPermId => userPermissionIds.Contains(reqPermId)))
                     {
-                        availableActions.Add(action.Key);
+                        availableActions.Add(action.ActionKey);
                     }
                 }
             }
@@ -109,7 +142,10 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         }
     }
 
-    public async Task<List<string>> GetAvailableActionsForModuleAsync(string moduleId)
+    /// <summary>
+    /// ? ACTUALIZADO: Obtiene las acciones disponibles para un módulo específico (por ID)
+    /// </summary>
+    public async Task<List<string>> GetAvailableActionsForModuleAsync(int idModule)
     {
         try
         {
@@ -119,26 +155,26 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
             if (!user.Identity?.IsAuthenticated ?? true)
                 return new List<string>();
 
-            var userRoles = user.Claims
-                .Where(c => c.Type == ClaimTypes.Role)
-                .Select(c => c.Value)
-                .ToList();
+            var userPermissionIds = GetUserPermissionIds(user);
+            
+            // Buscar módulo por IdModule
+            var module = _moduleManager.GetAllModules()
+                .FirstOrDefault(m => m.IdModule == idModule);
 
-            var module = _moduleManager.GetModule(moduleId);
             if (module == null)
             {
-                _logger.LogWarning("Módulo {ModuleId} no encontrado", moduleId);
+                _logger.LogWarning("Módulo con IdModule={IdModule} no encontrado", idModule);
                 return new List<string>();
             }
 
-            var moduleActions = module.GetActionPermissions();
+            var actions = module.GetActions();
             var availableActions = new List<string>();
 
-            foreach (var action in moduleActions)
+            foreach (var action in actions.Where(a => a.IsActive))
             {
-                if (action.Value.Any(requiredRole => userRoles.Contains(requiredRole)))
+                if (action.RequiredPermissionIds.Any(reqPermId => userPermissionIds.Contains(reqPermId)))
                 {
-                    availableActions.Add(action.Key);
+                    availableActions.Add(action.ActionKey);
                 }
             }
 
@@ -146,81 +182,290 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al obtener acciones del módulo {ModuleId}", moduleId);
+            _logger.LogError(ex, "Error al obtener acciones del módulo IdModule={IdModule}", idModule);
             return new List<string>();
         }
     }
 
-    public async Task<Dictionary<string, string[]>> GetModuleActionsAsync(string moduleId)
+    /// <summary>
+    /// ? ACTUALIZADO: Obtiene todas las acciones de un módulo (sin filtrar por permisos) por ID
+    /// </summary>
+    public async Task<Dictionary<string, string[]>> GetModuleActionsAsync(int idModule)
     {
         try
         {
-            var module = _moduleManager.GetModule(moduleId);
+            // Buscar módulo por IdModule
+            var module = _moduleManager.GetAllModules()
+                .FirstOrDefault(m => m.IdModule == idModule);
 
             if (module == null)
             {
-                _logger.LogWarning("Módulo {ModuleId} no encontrado", moduleId);
+                _logger.LogWarning("Módulo con IdModule={IdModule} no encontrado", idModule);
                 return new Dictionary<string, string[]>();
             }
 
-            return await Task.FromResult(module.GetActionPermissions());
+            // Convertir de nueva estructura (IDs) a legacy (nombres) para compatibilidad
+            var actions = module.GetActions();
+            var legacyFormat = new Dictionary<string, string[]>();
+
+            foreach (var action in actions.Where(a => a.IsActive))
+            {
+                // Por ahora, devolver IDs como strings para compatibilidad
+                legacyFormat[action.ActionKey] = action.RequiredPermissionIds
+                    .Select(id => id.ToString())
+                    .ToArray();
+            }
+
+            return await Task.FromResult(legacyFormat);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al obtener acciones del módulo {ModuleId}", moduleId);
+            _logger.LogError(ex, "Error al obtener acciones del módulo IdModule={IdModule}", idModule);
             return new Dictionary<string, string[]>();
         }
     }
 
     /// <summary>
-    /// Verifica si el usuario tiene permiso para ejecutar una acción específica.
+    /// Verifica si el usuario puede acceder a un componente específico
     /// </summary>
-    private async Task<bool> CheckActionPermissionAsync(string actionKey, List<string> userRoles)
+    public async Task<bool> CanAccessComponentAsync(int idComponent)
     {
-        // Extraer ModuleId de la actionKey (ej: "Finanzas.Facturas.TimbrarSAT" -> "Finanzas")
-        var parts = actionKey.Split('.');
-        if (parts.Length < 2)
+        try
         {
-            _logger.LogWarning("Formato de actionKey inválido: {ActionKey}. Formato esperado: ModuleId.Entidad.Accion", actionKey);
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (!user.Identity?.IsAuthenticated ?? true)
+            {
+                _logger.LogWarning("Usuario no autenticado intentó acceder a IdComponent={IdComponent}", idComponent);
+                return false;
+            }
+
+            var userPermissionIds = GetUserPermissionIds(user);
+
+            if (!userPermissionIds.Any())
+            {
+                _logger.LogWarning("Usuario {UserName} no tiene permisos asignados", user.Identity.Name);
+                return false;
+            }
+
+            // Buscar el componente en todos los módulos
+            foreach (var module in _moduleManager.GetAllModules())
+            {
+                var component = module.GetComponents()
+                    .FirstOrDefault(c => c.IdComponent == idComponent && c.IsActive);
+
+                if (component != null)
+                {
+                    return CheckComponentPermission(component, userPermissionIds, module.GetComponents());
+                }
+            }
+
+            _logger.LogWarning("Componente {IdComponent} no encontrado", idComponent);
             return false;
         }
-
-        var moduleId = parts[0];
-        var module = _moduleManager.GetModule(moduleId);
-
-        if (module == null)
+        catch (Exception ex)
         {
-            _logger.LogWarning("Módulo {ModuleId} no encontrado para acción {ActionKey}", moduleId, actionKey);
+            _logger.LogError(ex, "Error al verificar acceso a componente {IdComponent}", idComponent);
             return false;
         }
+    }
 
-        var actionPermissions = module.GetActionPermissions();
-
-        if (!actionPermissions.ContainsKey(actionKey))
+    /// <summary>
+    /// Obtiene los componentes visibles para el usuario actual (para construir el menú)
+    /// </summary>
+    public async Task<List<ModuleComponent>> GetVisibleComponentsAsync()
+    {
+        try
         {
-            _logger.LogWarning("Acción {ActionKey} no definida en módulo {ModuleId}", actionKey, moduleId);
-            return false;
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (!user.Identity?.IsAuthenticated ?? true)
+                return new List<ModuleComponent>();
+
+            var userPermissionIds = GetUserPermissionIds(user);
+            var visibleComponents = new List<ModuleComponent>();
+
+            foreach (var module in _moduleManager.GetAllModules())
+            {
+                var components = module.GetComponents();
+
+                foreach (var component in components.Where(c => c.IsActive && c.ShowInMenu))
+                {
+                    if (CheckComponentPermission(component, userPermissionIds, components))
+                    {
+                        visibleComponents.Add(component);
+                    }
+                }
+            }
+
+            return visibleComponents.OrderBy(c => c.MenuOrder).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener componentes visibles");
+            return new List<ModuleComponent>();
+        }
+    }
+
+    // ==================== MÉTODOS PRIVADOS ====================
+
+    /// <summary>
+    /// Extrae los IDs de permisos del usuario desde sus claims
+    /// </summary>
+    private List<int> GetUserPermissionIds(ClaimsPrincipal user)
+    {
+        // Opción 1: Si los permisos están en claims como "Permission"
+        var permissionClaims = user.Claims
+            .Where(c => c.Type == "Permission")
+            .Select(c => c.Value)
+            .ToList();
+
+        if (permissionClaims.Any())
+        {
+            return permissionClaims
+                .Select(p => int.TryParse(p, out var id) ? id : 0)
+                .Where(id => id > 0)
+                .ToList();
         }
 
-        var requiredRoles = actionPermissions[actionKey];
-        var hasPermission = requiredRoles.Any(requiredRole => userRoles.Contains(requiredRole));
+        // Opción 2: Mapeo de roles a IDs de permisos (temporal, para compatibilidad)
+        // TODO: Reemplazar con consulta a BD cuando tengas tabla Usuarios-Permisos
+        var userRoles = user.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
 
-        if (!hasPermission)
+        return MapRolesToPermissionIds(userRoles);
+    }
+
+    /// <summary>
+    /// Mapeo temporal de roles a IDs de permisos
+    /// TODO: Reemplazar con consulta a BD
+    /// </summary>
+    private List<int> MapRolesToPermissionIds(List<string> roles)
+    {
+        var permissionIds = new HashSet<int>();
+
+        foreach (var role in roles)
         {
-            _logger.LogWarning(
-                "Usuario sin permisos para {ActionKey}. Roles del usuario: [{UserRoles}], Roles requeridos: [{RequiredRoles}]",
-                actionKey,
-                string.Join(", ", userRoles),
-                string.Join(", ", requiredRoles));
-        }
-        else
-        {
-            _logger.LogDebug(
-                "Usuario autorizado para {ActionKey}. Rol coincidente encontrado en: [{UserRoles}]",
-                actionKey,
-                string.Join(", ", userRoles));
+            switch (role.ToLower())
+            {
+                case "admin":
+                    permissionIds.Add(1); // Admin
+                    break;
+                case "gerente.finanzas":
+                case "gerentefinanzas":
+                    permissionIds.Add(2); // Gerente Finanzas
+                    break;
+                case "coordinador.finanzas":
+                case "coordinadorfinanzas":
+                    permissionIds.Add(3); // Coordinador Finanzas
+                    break;
+                case "contador":
+                    permissionIds.Add(4); // Contador
+                    break;
+                case "gestor.prospectos":
+                case "gestorprospectos":
+                    permissionIds.Add(5); // Gestor Prospectos
+                    break;
+                case "coordinador.prospectos":
+                case "coordinadorprospectos":
+                    permissionIds.Add(6); // Coordinador Prospectos
+                    break;
+                case "revisor.legal":
+                case "revisorlegal":
+                    permissionIds.Add(7); // Revisor Legal
+                    break;
+                case "revisor.finanzas":
+                case "revisorfinanzas":
+                    permissionIds.Add(8); // Revisor Finanzas
+                    break;
+                case "revisor.tecnico":
+                case "revisortecnico":
+                    permissionIds.Add(9); // Revisor Técnico
+                    break;
+            }
         }
 
-        return await Task.FromResult(hasPermission);
+        return permissionIds.ToList();
+    }
+
+    /// <summary>
+    /// Verifica si el usuario tiene permiso para acceder a una acción (por ActionKey)
+    /// </summary>
+    private async Task<bool> CheckActionPermissionByKeyAsync(string actionKey, List<int> userPermissionIds)
+    {
+        // Buscar la acción en todos los módulos
+        foreach (var module in _moduleManager.GetAllModules())
+        {
+            var action = module.GetActions()
+                .FirstOrDefault(a => a.ActionKey.Equals(actionKey, StringComparison.OrdinalIgnoreCase) && a.IsActive);
+
+            if (action != null)
+            {
+                var hasPermission = action.RequiredPermissionIds.Any(reqPermId => userPermissionIds.Contains(reqPermId));
+
+                if (!hasPermission)
+                {
+                    _logger.LogWarning(
+                        "Usuario sin permisos para {ActionKey}. Permisos del usuario: [{UserPerms}], Permisos requeridos: [{RequiredPerms}]",
+                        actionKey,
+                        string.Join(", ", userPermissionIds),
+                        string.Join(", ", action.RequiredPermissionIds));
+                }
+
+                return await Task.FromResult(hasPermission);
+            }
+        }
+
+        _logger.LogWarning("Acción {ActionKey} no encontrada en ningún módulo", actionKey);
+        return false;
+    }
+
+    /// <summary>
+    /// Verifica si el usuario tiene permiso para acceder a una acción (por ID)
+    /// </summary>
+    private async Task<bool> CheckActionPermissionByIdAsync(int idAction, List<int> userPermissionIds)
+    {
+        foreach (var module in _moduleManager.GetAllModules())
+        {
+            var action = module.GetActions()
+                .FirstOrDefault(a => a.IdAction == idAction && a.IsActive);
+
+            if (action != null)
+            {
+                var hasPermission = action.RequiredPermissionIds.Any(reqPermId => userPermissionIds.Contains(reqPermId));
+                return await Task.FromResult(hasPermission);
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Verifica permisos de componente con herencia desde el padre
+    /// </summary>
+    private bool CheckComponentPermission(ModuleComponent component, List<int> userPermissionIds, List<ModuleComponent> allComponents)
+    {
+        // Si el componente tiene permisos definidos, usarlos
+        if (component.RequiredPermissionIds.Any())
+        {
+            return component.RequiredPermissionIds.Any(reqPermId => userPermissionIds.Contains(reqPermId));
+        }
+
+        // Si no tiene permisos y tiene padre, heredar del padre
+        if (component.IdParent.HasValue)
+        {
+            var parent = allComponents.FirstOrDefault(c => c.IdComponent == component.IdParent.Value);
+            if (parent != null)
+            {
+                return CheckComponentPermission(parent, userPermissionIds, allComponents);
+            }
+        }
+
+        // Si no tiene permisos ni padre, es público
+        return true;
     }
 }

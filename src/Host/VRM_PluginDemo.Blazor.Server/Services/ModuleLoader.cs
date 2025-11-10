@@ -6,6 +6,7 @@ namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
 /// Carga dinámicamente módulos desde ensamblados
+/// ✅ Actualizado para nueva arquitectura sin Author, Category, Dependencies
 /// </summary>
 public class ModuleLoader : IModuleManager
 {
@@ -22,37 +23,90 @@ public class ModuleLoader : IModuleManager
     /// </summary>
     public async Task<int> DiscoverAndLoadModulesAsync(string modulesPath)
     {
-        _logger.LogInformation("🔍 Iniciando descubrimiento de módulos en: {Path}", modulesPath);
+        var startTime = DateTime.UtcNow;
+        _logger.LogInformation(
+            "[ModuleLoader] Iniciando descubrimiento de módulos en: {ModulesPath}",
+            modulesPath);
 
-        var baseDirectory = AppContext.BaseDirectory;
-        var fullPath = Path.Combine(baseDirectory, modulesPath);
-
-        if (!Directory.Exists(fullPath))
+        if (!Directory.Exists(modulesPath))
         {
-            _logger.LogWarning("⚠️ La ruta de módulos no existe: {Path}", fullPath);
-            Directory.CreateDirectory(fullPath);
-            _logger.LogInformation("✅ Carpeta de módulos creada: {Path}", fullPath);
+            _logger.LogWarning(
+                "[ModuleLoader] Carpeta de módulos no encontrada: {ModulesPath}. Creando carpeta...",
+                modulesPath);
+            Directory.CreateDirectory(modulesPath);
             return 0;
         }
 
-        // Buscar todos los DLLs que coincidan con el patrón de módulos
-        var moduleFiles = Directory.GetFiles(fullPath, "VRM_Plugin.*.dll", SearchOption.AllDirectories);
+        var dllFiles = Directory.GetFiles(modulesPath, "VRM_Plugin.Modules.*.dll", SearchOption.AllDirectories);
+        
+        _logger.LogInformation(
+            "[ModuleLoader] Encontrados {DllCount} archivos DLL potenciales",
+            dllFiles.Length);
 
-        _logger.LogInformation("📦 Encontrados {Count} archivos de módulos potenciales", moduleFiles.Length);
-
-        foreach (var file in moduleFiles)
+        foreach (var dllPath in dllFiles)
         {
             try
             {
-                await LoadModuleFromAssemblyAsync(file);
+                _logger.LogDebug(
+                    "[ModuleLoader] Intentando cargar ensamblado: {DllPath}",
+                    dllPath);
+
+                var assembly = Assembly.LoadFrom(dllPath);
+                var moduleTypes = assembly.GetTypes()
+                    .Where(t => typeof(IModule).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+                    .ToList();
+
+                if (!moduleTypes.Any())
+                {
+                    _logger.LogDebug(
+                        "[ModuleLoader] No se encontraron tipos IModule en: {AssemblyName}",
+                        assembly.GetName().Name);
+                    continue;
+                }
+
+                foreach (var moduleType in moduleTypes)
+                {
+                    try
+                    {
+                        var module = (IModule)Activator.CreateInstance(moduleType)!;
+                        
+                        _logger.LogInformation(
+                            "[ModuleLoader] Módulo descubierto: {ModuleName} (ID: {IdModule}, Versión: {Version})",
+                            module.ModuleName,
+                            module.IdModule,
+                            module.Version);
+
+                        _loadedModules.Add(module);
+
+                        await module.OnModuleLoadedAsync();
+                        
+                        _logger.LogDebug(
+                            "[ModuleLoader] OnModuleLoadedAsync ejecutado para: {ModuleName}",
+                            module.ModuleName);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex,
+                            "[ModuleLoader] Error al instanciar módulo: {ModuleType}",
+                            moduleType.FullName);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Error al cargar módulo desde: {File}", file);
+                _logger.LogError(ex,
+                    "[ModuleLoader] Error al cargar ensamblado: {DllPath}",
+                    dllPath);
             }
         }
 
-        _logger.LogInformation("✅ Carga de módulos completada. Total cargados: {Count}", _loadedModules.Count);
+        var elapsedMs = (DateTime.UtcNow - startTime).TotalMilliseconds;
+        
+        _logger.LogInformation(
+            "[ModuleLoader] ✅ Descubrimiento completado: {ModuleCount} módulos cargados en {ElapsedMs}ms",
+            _loadedModules.Count,
+            elapsedMs);
+
         return _loadedModules.Count;
     }
 
@@ -92,63 +146,35 @@ public class ModuleLoader : IModuleManager
                     continue;
                 }
 
-                // Verificar dependencias
-                if (!ValidateDependencies(module))
-                {
-                    _logger.LogError("❌ Faltan dependencias para el módulo: {ModuleId}", module.ModuleId);
-                    continue;
-                }
-
                 // Ejecutar inicialización del módulo
                 await module.OnModuleLoadedAsync();
 
                 // Agregar a la lista de módulos cargados
                 _loadedModules.Add(module);
 
+                // Logging mejorado
+                var componentCount = module.GetComponents().Count;
+                var actionCount = module.GetActions().Count;
+                
                 _logger.LogInformation(
-                    "✅ Módulo cargado: {ModuleId} v{Version} - {DisplayName} (Autor: {Author})",
-                    module.ModuleId,
+                    "✅ Módulo cargado: {ModuleName} (ID: {IdModule}) v{Version} - {DisplayName}",
+                    module.ModuleName,
+                    module.IdModule,
                     module.Version,
-                    module.DisplayName,
-                    module.Author
+                    module.DisplayName
                 );
-
-                if (module.Dependencies.Any())
-                {
-                    _logger.LogInformation("   📌 Dependencias: {Dependencies}",
-                        string.Join(", ", module.Dependencies));
-                }
+                
+                _logger.LogInformation(
+                    "   📌 Componentes: {ComponentCount}, Acciones: {ActionCount}",
+                    componentCount,
+                    actionCount
+                );
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "❌ Error al instanciar módulo: {Type}", moduleType.FullName);
             }
         }
-    }
-
-    /// <summary>
-    /// Valida que las dependencias de un módulo estén satisfechas
-    /// </summary>
-    private bool ValidateDependencies(IModule module)
-    {
-        if (!module.Dependencies.Any())
-            return true;
-
-        var missingDependencies = module.Dependencies
-            .Where(dep => !_loadedModules.Any(m => m.ModuleId == dep))
-            .ToList();
-
-        if (missingDependencies.Any())
-        {
-            _logger.LogWarning(
-                "⚠️ Módulo {ModuleId} tiene dependencias faltantes: {Missing}",
-                module.ModuleId,
-                string.Join(", ", missingDependencies)
-            );
-            return false;
-        }
-
-        return true;
     }
 
     // ==================== IMPLEMENTACIÓN DE IModuleManager ====================
@@ -160,8 +186,14 @@ public class ModuleLoader : IModuleManager
 
     public IModule? GetModuleById(string moduleId)
     {
+        // Buscar por IdModule (int convertido a string) o por ModuleName
+        if (int.TryParse(moduleId, out var id))
+        {
+            return _loadedModules.FirstOrDefault(m => m.IdModule == id);
+        }
+        
         return _loadedModules.FirstOrDefault(m =>
-            m.ModuleId.Equals(moduleId, StringComparison.OrdinalIgnoreCase));
+            m.ModuleName.Equals(moduleId, StringComparison.OrdinalIgnoreCase));
     }
 
     public IEnumerable<IModule> GetModulesForClient(string clienteId)
@@ -171,20 +203,24 @@ public class ModuleLoader : IModuleManager
 
     public IEnumerable<IModule> GetModulesByCategory(string category)
     {
-        return _loadedModules.Where(m =>
-            m.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+        // ❌ ELIMINADO: Category ya no existe
+        // Ahora se usa jerarquía de componentes (IdParent = null como categorías)
+        _logger.LogWarning("GetModulesByCategory está obsoleto. Use jerarquía de componentes con IdParent.");
+        return Enumerable.Empty<IModule>();
     }
 
     public bool IsModuleLoaded(string moduleId)
     {
-        return _loadedModules.Any(m => m.ModuleId.Equals(moduleId, StringComparison.OrdinalIgnoreCase));
+        if (int.TryParse(moduleId, out var id))
+        {
+            return _loadedModules.Any(m => m.IdModule == id);
+        }
+        
+        return _loadedModules.Any(m => m.ModuleName.Equals(moduleId, StringComparison.OrdinalIgnoreCase));
     }
 
     public IModule? GetModule(string moduleId)
     {
-        return _loadedModules.FirstOrDefault(m => 
-            m.ModuleId.Equals(moduleId, StringComparison.OrdinalIgnoreCase));
+        return GetModuleById(moduleId);
     }
-
-    // ==================== PRIVATE METHODS ====================
 }

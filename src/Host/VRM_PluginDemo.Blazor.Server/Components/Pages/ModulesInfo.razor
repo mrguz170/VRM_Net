@@ -1,4 +1,4 @@
-﻿@page "/modules"
+﻿@page "/modules-info"
 @inject IModuleManager ModuleManager
 
 <PageTitle>Módulos Cargados</PageTitle>
@@ -11,56 +11,159 @@
 {
     <div class="card mb-3">
         <div class="card-header bg-primary text-white">
-            <h4>@modulo.DisplayName <span class="badge bg-light text-dark">v@modulo.Version</span></h4>
+            <h4>
+                @modulo.DisplayName 
+                <span class="badge bg-light text-dark">v@modulo.Version</span>
+                <span class="badge bg-secondary">ID: @modulo.IdModule</span>
+            </h4>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>ID del Módulo:</strong> @modulo.ModuleId</p>
-                    <p><strong>Categoría:</strong> <span class="badge bg-info">@modulo.Category</span></p>
-                    <p><strong>Autor:</strong> @modulo.Author</p>
+                    <p><strong>Nombre Técnico:</strong> <code>@modulo.ModuleName</code></p>
                     <p><strong>Descripción:</strong> @modulo.Description</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Permisos Requeridos:</strong></p>
-                    @if (modulo.RequiredPermissions.Any())
+                    
+                    <hr />
+                    
+                    <h5>📋 Componentes (@modulo.GetComponents().Count)</h5>
+                    @if (modulo.GetComponents().Any())
                     {
-                        <ul>
-                            @foreach (var permiso in modulo.RequiredPermissions)
+                        <ul class="list-group">
+                            @foreach (var component in modulo.GetComponents().Where(c => c.ShowInMenu).OrderBy(c => c.MenuOrder))
                             {
-                                <li><code>@permiso</code></li>
-                            }
-                        </ul>
-                    }
-                    else
-                    {
-                        <p class="text-muted">Sin permisos específicos</p>
-                    }
-
-                    <p><strong>Dependencias:</strong></p>
-                    @if (modulo.Dependencies.Any())
-                    {
-                        <ul>
-                            @foreach (var dep in modulo.Dependencies)
-                            {
-                                <li>
-                                    <code>@dep</code>
-                                    @if (ModuleManager.IsModuleLoaded(dep))
-                                    {
-                                        <span class="badge bg-success">✓ Cargado</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">✗ No encontrado</span>
-                                    }
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="@component.Icon"></i>
+                                        <strong>@component.Name</strong>
+                                        @if (!string.IsNullOrEmpty(component.Route))
+                                        {
+                                            <br />
+                                            <small class="text-muted">Ruta: <code>@component.Route</code></small>
+                                        }
+                                        @if (component.IdParent.HasValue)
+                                        {
+                                            <br />
+                                            <small class="text-info">Hijo de componente ID: @component.IdParent</small>
+                                        }
+                                        else
+                                        {
+                                            <br />
+                                            <small class="text-success">✓ Componente raíz (categoría)</small>
+                                        }
+                                    </div>
+                                    <div>
+                                        @if (component.RequiredPermissionIds.Any())
+                                        {
+                                            <span class="badge bg-warning">Permisos: @string.Join(", ", component.RequiredPermissionIds)</span>
+                                        }
+                                        else if (component.IdParent.HasValue)
+                                        {
+                                            <span class="badge bg-info">Hereda permisos del padre</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Público</span>
+                                        }
+                                        @if (component.IsActive)
+                                        {
+                                            <span class="badge bg-success ms-2">✓ Activo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger ms-2">✗ Inactivo</span>
+                                        }
+                                    </div>
                                 </li>
                             }
                         </ul>
                     }
                     else
                     {
-                        <p class="text-muted">Sin dependencias</p>
+                        <p class="text-muted">Sin componentes visibles en menú</p>
                     }
+                </div>
+                
+                <div class="col-md-6">
+                    <h5>⚡ Acciones Granulares (@modulo.GetActions().Count)</h5>
+                    @if (modulo.GetActions().Any())
+                    {
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-sm table-striped">
+                                <thead class="table-dark sticky-top">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Acción</th>
+                                        <th>Tipo</th>
+                                        <th>Permisos</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var action in modulo.GetActions().OrderBy(a => a.IdAction))
+                                    {
+                                        <tr>
+                                            <td><code>@action.IdAction</code></td>
+                                            <td>
+                                                <small><strong>@action.Name</strong></small><br />
+                                                <small class="text-muted">@action.ActionKey</small>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var typeColor = action.IdActionType switch
+                                                    {
+                                                        1 => "primary",
+                                                        2 => "warning",
+                                                        3 => "danger",
+                                                        _ => "secondary"
+                                                    };
+                                                    var typeName = action.IdActionType switch
+                                                    {
+                                                        1 => "Lectura",
+                                                        2 => "Escritura",
+                                                        3 => "Crítica",
+                                                        _ => "Desconocido"
+                                                    };
+                                                }
+                                                <span class="badge bg-@typeColor">@typeName</span>
+                                            </td>
+                                            <td>
+                                                <small>@string.Join(", ", action.RequiredPermissionIds)</small>
+                                            </td>
+                                            <td>
+                                                @if (action.IsActive)
+                                                {
+                                                    <span class="badge bg-success">✓</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">✗</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Sin acciones definidas</p>
+                    }
+                    
+                    <hr />
+                    
+                    <h6>📊 Resumen de Tipos de Acción</h6>
+                    <div class="d-flex gap-2">
+                        @{
+                            var actions = modulo.GetActions();
+                            var lecturaCount = actions.Count(a => a.IdActionType == 1);
+                            var escrituraCount = actions.Count(a => a.IdActionType == 2);
+                            var criticaCount = actions.Count(a => a.IdActionType == 3);
+                        }
+                        <span class="badge bg-primary">Lectura: @lecturaCount</span>
+                        <span class="badge bg-warning">Escritura: @escrituraCount</span>
+                        <span class="badge bg-danger">Crítica: @criticaCount</span>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,24 +1,38 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VRM_Plugin.Core.Abstractions.Entities;
 
 namespace VRM_Plugin.Core.Abstractions;
 
 /// <summary>
 /// Interfaz base que todos los módulos/plugins deben implementar.
-/// Versión empresarial con soporte para dependencias, permisos y categorización.
+/// ✅ Arquitectura completamente basada en IDs numéricos para BD relacional.
+/// ✅ Permisos separados: Navegación (componentes) vs Acciones (business logic).
+/// ✅ Auditoría completa con CreatedAt, UpdatedAt, CreatedBy, UpdatedBy.
+/// ✅ Organización mediante jerarquía de componentes (IdParent) en lugar de Category.
+/// ✅ Módulos completamente independientes (sin dependencias entre ellos).
 /// </summary>
 public interface IModule
 {
     // ==================== IDENTIFICACIÓN ====================
 
     /// <summary>
-    /// Identificador único del módulo (ej: "Prospectos", "Facturas")
-    /// Debe ser único en todo el sistema.
+    /// ✅ ID numérico único del módulo (PK en BD).
+    /// Se asigna automáticamente al persistir en BD con IDENTITY.
+    /// En código (desarrollo), se simula con valores como 1, 2, 3...
     /// </summary>
-    string ModuleId { get; }
+    int IdModule { get; set; }
 
     /// <summary>
-    /// Nombre para mostrar en la UI (ej: "Gestión de Prospectos")
+    /// ✅ Nombre técnico/código del módulo (para código y logging).
+    /// Ej: "Finanzas", "Prospectos", "Inventario"
+    /// Se usa para identificación en código pero NO como PK.
+    /// En BD, se mapea a columna 'Codigo' en tabla Modulos con constraint UNIQUE.
+    /// </summary>
+    string ModuleName { get; }
+
+    /// <summary>
+    /// Nombre para mostrar en la UI (ej: "Gestión de Finanzas")
     /// </summary>
     string DisplayName { get; }
 
@@ -32,66 +46,33 @@ public interface IModule
     /// </summary>
     string Version { get; }
 
-    /// <summary>
-    /// Autor o equipo responsable del módulo
-    /// </summary>
-    string Author { get; }
-
-    // ==================== PRESENTACIÓN VISUAL ====================
+    // ==================== COMPONENTES Y NAVEGACIÓN ====================
 
     /// <summary>
-    /// Clase CSS del icono del módulo para mostrar en menús y UI.
-    /// Formato: Remix Icons (ej: "ri-user-3-fill", "ri-money-dollar-circle-fill")
-    /// Si no se especifica, se usará "ri-apps-fill" por defecto.
-    /// </summary>
-    string Icon { get; }
-
-    // ==================== CATEGORIZACIÓN ====================
-
-    /// <summary>
-    /// Categoría del módulo para organización en la UI
-    /// Ejemplos: "Fiscal", "Administración", "Prospectos", "Reportes"
-    /// </summary>
-    string Category { get; }
-
-    // ==================== DEPENDENCIAS ====================
-
-    /// <summary>
-    /// Lista de IDs de módulos que este módulo requiere para funcionar.
-    /// Ejemplo: El módulo "Facturas" puede requerir "ConfiguracionFiscal"
-    /// </summary>
-    List<string> Dependencies { get; }
-
-    // ==================== PERMISOS Y SEGURIDAD ====================
-
-    /// <summary>
-    /// Lista de permisos/roles que el usuario necesita para acceder a este módulo.
-    /// Ejemplo: ["Admin", "GestorProspectos", "Revisor"]
-    /// El usuario necesita AL MENOS UNO de estos roles para ver el módulo.
-    /// </summary>
-    List<string> RequiredPermissions { get; }
-
-    /// <summary>
-    /// ⭐ NUEVO: Permisos granulares por acción dentro del módulo.
-    /// Permite control fino sobre qué usuarios pueden realizar acciones específicas.
+    /// ✅ HOMOLOGADO: Obtiene componentes con IDs numéricos y permisos de navegación.
+    /// Los componentes definen la jerarquía del menú (raíz → submenús → páginas).
+    /// Los IDs son simulados en código; en producción, vienen de BD.
     /// 
-    /// Formato de la clave: "{ModuleId}.{Entidad}.{Acción}"
-    /// Ejemplos:
-    ///   - "Finanzas.Facturas.TimbrarSAT" → Solo gerentes
-    ///   - "Finanzas.Pagos.Autorizar" → Solo gerentes
-    ///   - "Finanzas.Facturas.Ver" → Gerentes, coordinadores, contadores
+    /// ORGANIZACIÓN JERÁRQUICA:
+    /// - Componentes raíz (IdParent = null) actúan como CATEGORÍAS en el menú
+    /// - Componentes hijos (IdParent != null) son módulos dentro de la categoría
+    /// - Soporta múltiples niveles de anidación
     /// 
-    /// Valor: Array de roles permitidos para esa acción
+    /// Ejemplo:
+    ///   Finanzas (IdParent = null) → Categoría
+    ///     └─ Contabilidad (IdParent = 1)
+    ///     └─ Tesorería (IdParent = 1)
     /// </summary>
-    /// <returns>Diccionario de acciones y roles permitidos</returns>
-    Dictionary<string, string[]> GetActionPermissions();
+    List<ModuleComponent> GetComponents();
 
-    // ==================== COMPONENTES BLAZOR ====================
+    // ==================== ACCIONES GRANULARES ====================
 
     /// <summary>
-    /// Obtiene la información de los componentes Blazor del módulo
+    /// ✅ HOMOLOGADO: Obtiene acciones con IDs numéricos y permisos de ejecución.
+    /// Las acciones representan operaciones específicas dentro de componentes.
+    /// Cada acción tiene una relación explícita con su componente (IdComponent).
     /// </summary>
-    List<ModuleComponentInfo> GetComponents();
+    List<ModuleAction> GetActions();
 
     // ==================== CONFIGURACIÓN E INYECCIÓN DE DEPENDENCIAS ====================
 
@@ -118,38 +99,6 @@ public interface IModule
     /// <summary>
     /// Se ejecuta cuando el módulo se carga por primera vez en la aplicación.
     /// Útil para inicialización, migraciones de BD, carga de configuración, etc.
-    /// Implementación por defecto: no hace nada.
     /// </summary>
     Task OnModuleLoadedAsync() => Task.CompletedTask;
-}
-
-/// <summary>
-/// Información de un componente Blazor dentro de un módulo
-/// </summary>
-public class ModuleComponentInfo
-{
-    /// <summary>
-    /// Nombre del componente (ej: "Prospectos", "ListaProspectos")
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Ruta de la página (ej: "/prospectos", "/facturas/crear")
-    /// </summary>
-    public string Route { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Tipo del componente (Type del .razor)
-    /// </summary>
-    public Type ComponentType { get; set; } = null!;
-
-    /// <summary>
-    /// Indica si debe aparecer en el menú de navegación
-    /// </summary>
-    public bool ShowInMenu { get; set; } = true;
-
-    /// <summary>
-    /// Orden en el menú
-    /// </summary>
-    public int MenuOrder { get; set; } = 0;
 }

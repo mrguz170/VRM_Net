@@ -76,8 +76,7 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
 
     <script src="/assets/js/main.js"></script>
 
-
-    <!-- 3️⃣ Alpine.js (SIN defer - DESPUÉS del init) -->
+    <!-- 3️⃣ Alpine.js (SIN defer - DESPUÉS de cargar plugins) -->
     <script src="assets/js/pages/alpine.min.js" ></script>
 
     <!-- Blazor -->
@@ -170,9 +169,10 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
                 };
 
                 // console.log('[Global] ✅ Funciones wrapper registradas');
-            }, 500); // Esperar 500ms a que MudBlazor se inicialice
+            }, 500);
         });
 
+        // ✅ FUNCIONES GLOBALES ADICIONALES (restauradas)
         window.DocumentClickHandler = {
             callbacks: [],
             subscribe: function () {
@@ -205,45 +205,12 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
             });
             calendar.render();
         }
-              
 
         window.initializeFlatpickr = () => {
             flatpickr("#basicExample", {
                 enableTime: true,
                 dateFormat: "d-m-Y",
             });
-        };
-
-        // ✅ NUEVO: Wrapper que llama al store de Alpine cuando esté listo
-        window.toggleFullScreen = function() {
-            // console.log('[Global] toggleFullScreen() LLAMADA desde Blazor');
-
-            // Intentar usar Alpine store primero
-            if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
-                // console.log('[Global] ✅ Usando Alpine.store("app").toggleFullScreen()');
-                window.Alpine.store('app').toggleFullScreen();
-            } else {
-                // Fallback si Alpine no está listo
-                console.warn('[Global] ⚠️ Alpine no listo, usando fallback');
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                } else {
-                    document.documentElement.requestFullscreen();
-                }
-            }
-        };
-
-        window.toggleSidebar = function () {
-            // console.log('[Global] toggleSidebar() LLAMADA desde Blazor');
-
-            if (window.Alpine && window.Alpine.store && window.Alpine.store('app')) {
-                // console.log('[Global] ✅ Usando Alpine.store("app").toggleSidebar()');
-                window.Alpine.store('app').toggleSidebar();
-            } else {
-                console.warn('[Global] ⚠️ Alpine no listo, usando fallback');
-                const body = document.querySelector('body');
-                body.classList.toggle('toggle-sidebar');
-            }
         };
 
         window.removeToggleSidebarClass = function () {
@@ -258,12 +225,6 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
         window.setBodyClass = (className) => {
             document.body.classList.remove('light', 'dark');
             document.body.classList.add(className);
-        };
-
-        window.addClickListener = function (dotNetObject) {
-            document.body.addEventListener("click", function () {
-                dotNetObject.invokeMethodAsync("HandleClickEvent");
-            });
         };
 
         window.addClass = (element, className) => {
@@ -286,8 +247,6 @@ class="relative overflow-x-hidden text-sm antialiased font-normal text-black fon
         window.consoleLog = (message) => {
             console.log(message);
         };
-
-        // console.log('[Global] ✅ Funciones wrapper registradas para Alpine.js');
     </script>
 
     <!-- Custom Scripts -->

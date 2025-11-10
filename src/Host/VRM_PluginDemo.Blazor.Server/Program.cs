@@ -5,178 +5,235 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using MudBlazor.Services;
 using System.Reflection;
+using Serilog;
+using Serilog.Events;
 
-var builder = WebApplication.CreateBuilder(args);
+// ==================== CONFIGURACIÓN DE SERILOG ====================
+// ✅ Configurar Serilog ANTES de crear el builder
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("System", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithProperty("Application", "VRM_PluginDemo")
+    .WriteTo.Console(
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+    )
+    .WriteTo.File(
+        path: "logs/vrm-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
+        fileSizeLimitBytes: 10_485_760  // 10 MB
+    )
+    .CreateLogger();
 
-// ==================== SERVICIOS BÁSICOS DE BLAZOR ====================
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-// ==================== CONFIGURACIÓN DE BLAZOR SERVER CIRCUITS ====================
-builder.Services.AddServerSideBlazor(options =>
+try
 {
-    options.DetailedErrors = builder.Environment.IsDevelopment();
-    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
-  options.DisconnectedCircuitMaxRetained = 100;
-    options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
-});
+    Log.Information("🚀 Iniciando aplicación VRM_PluginDemo");
 
-// ==================== MUDBLAZOR ====================
-// ⭐ NUEVO: Servicios de MudBlazor para componentes de UI
-builder.Services.AddMudServices();
+    var builder = WebApplication.CreateBuilder(args);
 
-// ==================== STATE SERVICES (SLICED) ====================
-// ⭐ NUEVO: Servicio de estado de tema (dark/light mode)
-builder.Services.AddSingleton<ModeStateService>();
+    // ✅ Usar Serilog para logging
+    builder.Host.UseSerilog();
 
-// ==================== AUTENTICACIÓN Y AUTORIZACIÓN ====================
-// ⚠️ AUTENTICACIÓN SIMULADA (SOLO DESARROLLO)
-// Configurar esquema de autenticación por defecto para Blazor Server
-builder.Services.AddAuthentication(options =>
-{
-    // Blazor Server usa cookies para mantener la sesión
-    options.DefaultScheme = "Cookies";
-    options.DefaultChallengeScheme = "Cookies";
-})
-.AddCookie("Cookies", options =>
-{
-    options.LoginPath = "/login";
-    options.LogoutPath = "/logout";
-    options.AccessDeniedPath = "/access-denied";
-    options.ExpireTimeSpan = TimeSpan.FromHours(8);
-    options.SlidingExpiration = true;
-});
+    // ==================== SERVICIOS BÁSICOS DE BLAZOR ====================
+    builder.Services.AddRazorComponents()
+        .AddInteractiveServerComponents();
 
-builder.Services.AddAuthorization();
-builder.Services.AddCascadingAuthenticationState();
+    // ==================== CONFIGURACIÓN DE BLAZOR SERVER CIRCUITS ====================
+    builder.Services.AddServerSideBlazor(options =>
+    {
+        options.DetailedErrors = builder.Environment.IsDevelopment();
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
+      options.DisconnectedCircuitMaxRetained = 100;
+        options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
+    });
 
-// ✅ NUEVO: HttpContextAccessor para acceder a cookies
-builder.Services.AddHttpContextAccessor();
+    // ==================== MUDBLAZOR ====================
+    // ⭐ NUEVO: Servicios de MudBlazor para componentes de UI
+    builder.Services.AddMudServices();
 
-// ⭐ CAMBIO CRÍTICO: Scoped con PersistentComponentState
-// DummyAuthenticationStateProvider ahora usa PersistentComponentState
-// para mantener autenticación entre SSR e Interactive Server
-builder.Services.AddScoped<DummyAuthenticationStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
-    provider.GetRequiredService<DummyAuthenticationStateProvider>());
+    // ==================== STATE SERVICES (SLICED) ====================
+    builder.Services.AddSingleton<ModeStateService>();
 
-// ==================== AUTORIZACIÓN GRANULAR DE MÓDULOS ====================
-// ⭐ NUEVO: Servicio para verificar permisos por acción
-builder.Services.AddScoped<IModuleAuthorizationService, ModuleAuthorizationService>();
+    // ==================== AUTENTICACIÓN Y AUTORIZACIÓN ====================
+    // ⚠️ AUTENTICACIÓN SIMULADA (SOLO DESARROLLO)
+    // Configurar esquema de autenticación por defecto para Blazor Server
+    builder.Services.AddAuthentication(options =>
+    {
+        // Blazor Server usa cookies para mantener la sesión
+        options.DefaultScheme = "Cookies";
+        options.DefaultChallengeScheme = "Cookies";
+    })
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
+        options.AccessDeniedPath = "/access-denied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
 
-// ==================== SISTEMA DE PLUGINS ====================
+    builder.Services.AddAuthorization();
+    builder.Services.AddCascadingAuthenticationState();
 
-// Crear un ServiceProvider temporal solo para obtener el logger
-using var loggerFactory = LoggerFactory.Create(loggingBuilder =>
-    loggingBuilder.AddConsole());
-var logger = loggerFactory.CreateLogger<ModuleLoader>();
+    // ✅ NUEVO: HttpContextAccessor para acceder a cookies
+    builder.Services.AddHttpContextAccessor();
 
-// Registrar el ModuleLoader como Singleton
-var moduleLoader = new ModuleLoader(logger);
+    // ⭐ CAMBIO CRÍTICO: Scoped con PersistentComponentState
+    // DummyAuthenticationStateProvider ahora usa PersistentComponentState
+    // para mantener autenticación entre SSR e Interactive Server
+    builder.Services.AddScoped<DummyAuthenticationStateProvider>();
+    builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
+        provider.GetRequiredService<DummyAuthenticationStateProvider>());
 
-// Registrar IModuleManager para que otros servicios puedan consultarlo
-builder.Services.AddSingleton<IModuleManager>(moduleLoader);
+    // ==================== AUTORIZACIÓN GRANULAR DE MÓDULOS ====================
+    // ⭐ NUEVO: Servicio para verificar permisos por acción
+    builder.Services.AddScoped<IModuleAuthorizationService, ModuleAuthorizationService>();
 
-// Descubrir y cargar módulos desde la carpeta "Modules"
-var modulesPath = "Modules";
-var modulosEncontrados = await moduleLoader.DiscoverAndLoadModulesAsync(modulesPath);
+    // ✅ NUEVO: Servicio para obtener nombres de visualización de roles
+    builder.Services.AddSingleton<IRoleDisplayNameService, RoleDisplayNameService>();
 
-Console.WriteLine($"\n╔══════════════════════════════════════════════════════════╗");
-Console.WriteLine($"║  🔌 SISTEMA DE PLUGINS INICIADO                         ║");
-Console.WriteLine($"║  📦 Módulos cargados: {modulosEncontrados,-2}                              ║");
-Console.WriteLine($"╚══════════════════════════════════════════════════════════╝\n");
+    // ==================== SISTEMA DE PLUGINS ====================
 
-// ==================== REGISTRAR SERVICIOS DE MÓDULOS ====================
+    // Crear un ServiceProvider temporal solo para obtener el logger
+    using var loggerFactory = LoggerFactory.Create(loggingBuilder =>
+        loggingBuilder.AddConsole());
+    var logger = loggerFactory.CreateLogger<ModuleLoader>();
 
-var todosLosModulos = moduleLoader.GetAllModules();
+    // Registrar el ModuleLoader como Singleton
+    var moduleLoader = new ModuleLoader(logger);
 
-foreach (var modulo in todosLosModulos)
-{
-    Console.WriteLine($"⚙️  Configurando servicios del módulo: {modulo.ModuleId}");
+    // Registrar IModuleManager para que otros servicios puedan consultarlo
+    builder.Services.AddSingleton<IModuleManager>(moduleLoader);
 
-    // Cada módulo registra sus propios servicios (repositorios, validadores, etc.)
-    modulo.ConfigureServices(builder.Services, builder.Configuration);
-}
+    // Descubrir y cargar módulos desde la carpeta "Modules"
+    var modulesPath = "Modules";
+    var modulosEncontrados = await moduleLoader.DiscoverAndLoadModulesAsync(modulesPath);
 
-Console.WriteLine($"\n✅ Configuración de servicios completada\n");
+    Console.WriteLine($"\n╔══════════════════════════════════════════════════════════╗");
+    Console.WriteLine($"║  🔌 SISTEMA DE PLUGINS INICIADO                         ║");
+    Console.WriteLine($"║  📦 Módulos cargados: {modulosEncontrados,-2}                              ║");
+    Console.WriteLine($"╚══════════════════════════════════════════════════════════╝\n");
 
-// ==================== CONSTRUIR LA APLICACIÓN ====================
+    // ==================== REGISTRAR SERVICIOS DE MÓDULOS ====================
 
-var app = builder.Build();
-
-// ==================== PIPELINE DE MIDDLEWARE ====================
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseHsts();
-}
-else
-{
-    // ⭐ AGREGAR: Mejor debugging en desarrollo (como Sliced_web_app)
-    app.UseDeveloperExceptionPage();
-}
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseAntiforgery();
-
-// ⭐ IMPORTANTE: Agregar autenticación y autorización al pipeline
-app.UseAuthentication();
-app.UseAuthorization();
-
-// Obtener ensamblados de módulos para habilitar interactividad
-var moduleAssemblies = todosLosModulos
-    .Select(m => m.GetType().Assembly)
-    .Distinct()
-    .ToArray();
-
-Console.WriteLine($"🔌 Registrando {moduleAssemblies.Length} ensamblados de módulos para interactividad:");
-foreach (var asm in moduleAssemblies)
-{
-    Console.WriteLine($"   • {asm.GetName().Name}");
-}
-
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddAdditionalAssemblies(moduleAssemblies);
-
-// ==================== INFORMACIÓN DE MÓDULOS AL INICIAR ====================
-
-// Capturar variables para el evento
-var environmentName = app.Environment.EnvironmentName;
-var urls = app.Urls;
-
-app.Lifetime.ApplicationStarted.Register(() =>
-{
-    Console.WriteLine("\n" + new string('=', 60));
-    Console.WriteLine("🚀 APLICACIÓN INICIADA");
-    Console.WriteLine(new string('=', 60));
-    Console.WriteLine($"🌐 Entorno: {environmentName}");
-    Console.WriteLine($"📍 URL: {urls.FirstOrDefault() ?? "No disponible"}");
-    Console.WriteLine("\n📦 MÓDULOS CARGADOS:");
-    Console.WriteLine(new string('-', 60));
+    var todosLosModulos = moduleLoader.GetAllModules();
 
     foreach (var modulo in todosLosModulos)
     {
-        Console.WriteLine($"  • {modulo.ModuleId,-20} v{modulo.Version,-8} - {modulo.DisplayName}");
-        Console.WriteLine($"    Categoría: {modulo.Category}");
-        Console.WriteLine($"    Autor: {modulo.Author}");
+        Console.WriteLine($"⚙️  Configurando servicios del módulo: {modulo.ModuleName} (ID: {modulo.IdModule})");
 
-        if (modulo.RequiredPermissions.Any())
-        {
-            Console.WriteLine($"    Permisos: {string.Join(", ", modulo.RequiredPermissions)}");
-        }
-
-        if (modulo.Dependencies.Any())
-        {
-            Console.WriteLine($"    Dependencias: {string.Join(", ", modulo.Dependencies)}");
-        }
-
-        Console.WriteLine();
+        // Cada módulo registra sus propios servicios (repositorios, validadores, etc.)
+        modulo.ConfigureServices(builder.Services, builder.Configuration);
     }
 
-    Console.WriteLine(new string('=', 60) + "\n");
-});
+    Console.WriteLine($"\n✅ Configuración de servicios completada\n");
 
-app.Run();
+    // ==================== CONSTRUIR LA APLICACIÓN ====================
+
+    var app = builder.Build();
+
+    // ==================== PIPELINE DE MIDDLEWARE ====================
+
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Error", createScopeForErrors: true);
+        app.UseHsts();
+    }
+    else
+    {
+        // ⭐ AGREGAR: Mejor debugging en desarrollo (como Sliced_web_app)
+        app.UseDeveloperExceptionPage();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseStaticFiles();
+    app.UseAntiforgery();
+
+    // ⭐ IMPORTANTE: Agregar autenticación y autorización al pipeline
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    // Obtener ensamblados de módulos para habilitar interactividad
+    var moduleAssemblies = todosLosModulos
+        .Select(m => m.GetType().Assembly)
+        .Distinct()
+        .ToArray();
+
+    Console.WriteLine($"🔌 Registrando {moduleAssemblies.Length} ensamblados de módulos para interactividad:");
+    foreach (var asm in moduleAssemblies)
+    {
+        Console.WriteLine($"   • {asm.GetName().Name}");
+    }
+
+    app.MapRazorComponents<App>()
+        .AddInteractiveServerRenderMode()
+        .AddAdditionalAssemblies(moduleAssemblies);
+
+    // ==================== INFORMACIÓN DE MÓDULOS AL INICIAR ====================
+
+    // Capturar variables para el evento
+    var environmentName = app.Environment.EnvironmentName;
+    var urls = app.Urls;
+
+    app.Lifetime.ApplicationStarted.Register(() =>
+    {
+        Console.WriteLine("\n" + new string('=', 60));
+        Console.WriteLine("🚀 APLICACIÓN INICIADA");
+        Console.WriteLine(new string('=', 60));
+        Console.WriteLine($"🌐 Entorno: {environmentName}");
+        Console.WriteLine($"📍 URL: {urls.FirstOrDefault() ?? "No disponible"}");
+        Console.WriteLine("\n📦 MÓDULOS CARGADOS:");
+        Console.WriteLine(new string('-', 60));
+
+        foreach (var modulo in todosLosModulos)
+        {
+            Console.WriteLine($"  • {modulo.ModuleName,-20} (ID: {modulo.IdModule}) v{modulo.Version,-8}");
+            Console.WriteLine($"    {modulo.DisplayName}");
+            Console.WriteLine($"    Descripción: {modulo.Description}");
+            
+            var components = modulo.GetComponents();
+            var actions = modulo.GetActions();
+            
+            Console.WriteLine($"    📋 Componentes: {components.Count}");
+            Console.WriteLine($"    ⚡ Acciones: {actions.Count}");
+            
+            // Mostrar componentes raíz (categorías)
+            var rootComponents = components.Where(c => c.IdParent == null && c.ShowInMenu);
+            if (rootComponents.Any())
+            {
+                Console.WriteLine($"    Menú principal:");
+                foreach (var rc in rootComponents)
+                {
+                    Console.WriteLine($"      └─ {rc.Name} ({rc.Icon})");
+                }
+            }
+
+            Console.WriteLine();
+        }
+
+        Console.WriteLine(new string('=', 60) + "\n");
+        Log.Information("✅ Aplicación VRM_PluginDemo iniciada correctamente");
+    });
+
+    Log.Information("🎯 Iniciando aplicación web...");
+    app.Run();
+    
+    Log.Information("🛑 Aplicación detenida correctamente");
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "🛑 La aplicación no pudo iniciarse correctamente");
+    throw;
+}
+finally
+{
+    // ✅ Asegurarse de que todos los logs se escriben antes de cerrar
+    Log.Information("🔄 Cerrando sistema de logging...");
+    Log.CloseAndFlush();
+}

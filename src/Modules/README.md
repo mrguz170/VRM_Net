@@ -1,60 +1,74 @@
-# Modules - Modulos de Negocio
+# Modules - Módulos de Negocio
 
-Esta carpeta contiene los modulos de negocio que se cargan dinamicamente.
-
-## Modulos Disponibles
-
-### 1. Modulo Finanzas
-
-**Ubicacion:** `src/Modules/Finanzas/VRM_Plugin.Modules.Finanzas/`
-
-**Proposito:** Gestion de facturas, pagos y finanzas.
-
-**Ruta:** `/finanzas`
-
-**Servicios:**
-- `IFacturaService` - Gestion de facturas
-- `IPagoService` - Gestion de pagos
-
-**Permisos Granulares:**
-
-| Accion | Roles Permitidos |
-|--------|------------------|
-| `Finanzas.Facturas.Ver` | Admin, GerenteFinanzas, CoordinadorFinanzas, Contador |
-| `Finanzas.Facturas.Crear` | Admin, GerenteFinanzas, CoordinadorFinanzas |
-| `Finanzas.Facturas.Editar` | Admin, GerenteFinanzas, CoordinadorFinanzas |
-| `Finanzas.Facturas.Eliminar` | Admin, GerenteFinanzas |
-| `Finanzas.Facturas.TimbrarSAT` | **Admin, GerenteFinanzas** (Granular) |
-| `Finanzas.Reportes.VerSensibles` | **Admin, GerenteFinanzas** (Granular) |
+Esta carpeta contiene los módulos de negocio que se cargan dinámicamente.
 
 ---
 
-### 2. Modulo Prospectos
+## ?? Módulos Disponibles
 
-**Ubicacion:** `src/Modules/Onboarding/VRM_Plugin.Modules.Prospectos/`
+### 1. Módulo Finanzas
 
-**Proposito:** Gestion de onboarding de clientes potenciales.
+**Ubicación:** `src/Modules/Finanzas/VRM_Plugin.Modules.Finanzas/`
 
-**Ruta:** `/prospectos`
+**Propósito:** Gestión de facturas, pagos, conciliaciones y operaciones financieras.
+
+**Ruta Principal:** `/finanzas`
+
+**ID del Módulo:** `1`
 
 **Servicios:**
-- `IProspectoService` - Gestion de prospectos
+- `IFacturaService` - Gestión de facturas
+- `IPagoService` - Gestión de pagos
 
-**Permisos Granulares:**
+**Componentes:**
+- **Finanzas (Root)** - Categoría raíz (IdComponent: 1, IdParent: null)
+  - **Facturas** - Gestión de facturas (IdComponent: 2, IdParent: 1)
+  - **Cobros y Pagos** - Gestión de cobros y pagos (IdComponent: 3, IdParent: 1)
 
-| Accion | Roles Permitidos |
-|--------|------------------|
-| `Prospectos.Ver` | Admin, GestorProspectos, RevisorLegal, RevisorFinanzas |
-| `Prospectos.Crear` | Admin, GestorProspectos |
-| `Prospectos.Editar` | Admin, GestorProspectos |
-| `Prospectos.Aprobar` | **Admin, GestorProspectos** (Granular) |
-| `Prospectos.Rechazar` | **Admin, GestorProspectos** (Granular) |
-| `Prospectos.RevisionLegal` | **Admin, RevisorLegal** (Granular) |
-| `Prospectos.RevisionFinanciera` | **Admin, RevisorFinanzas** (Granular) |
+**Permisos Requeridos (IDs):**
+
+| Acción | Tipo | IDs de Permisos |
+|--------|------|----------------|
+| Ver Facturas | Lectura (1) | 1, 2, 3, 4 |
+| Crear Factura | Escritura (2) | 1, 2, 3 |
+| Editar Factura | Escritura (2) | 1, 2, 3 |
+| Eliminar Factura | Crítica (3) | 1, 2 |
+| **Timbrar SAT** | **Crítica (3)** | **1, 2** (Solo Admin y Gerente) |
+| **Ver Reportes Confidenciales** | **Lectura (1)** | **1, 2** (Solo Admin y Gerente) |
 
 ---
 
-## Como Crear un Nuevo Modulo
+### 2. Módulo Prospectos
+
+**Ubicación:** `src/Modules/Onboarding/VRM_Plugin.Modules.Prospectos/`
+
+**Propósito:** Gestión de onboarding de proveedores potenciales.
+
+**Ruta Principal:** `/prospectos`
+
+**ID del Módulo:** `2`
+
+**Servicios:**
+- `IProspectoService` - Gestión de prospectos
+
+**Componentes:**
+- **Prospectos** - Componente principal (IdComponent: 4, IdParent: null)
+
+**Permisos Requeridos (IDs):**
+
+| Acción | Tipo | IDs de Permisos |
+|--------|------|----------------|
+| Ver Prospectos | Lectura (1) | 1, 5, 6, 7, 8, 9 |
+| Crear Prospecto | Escritura (2) | 1, 5 |
+| Editar Prospecto | Escritura (2) | 1, 5 |
+| Eliminar Prospecto | Crítica (3) | 1, 5 |
+| **Aprobar Prospecto** | **Crítica (3)** | **1, 5** (Solo Admin y Gestor) |
+| **Revisión Legal** | **Escritura (2)** | **1, 7** (Solo Admin y Revisor Legal) |
+| **Revisión Financiera** | **Escritura (2)** | **1, 8** (Solo Admin y Revisor Finanzas) |
+
+---
+
+## ??? Cómo Crear un Nuevo Módulo
 
 ### Paso 1: Crear Proyecto
 
@@ -76,33 +90,116 @@ dotnet new razorclasslib -n VRM_Plugin.Modules.Inventario -o src/Modules/Inventa
 ### Paso 3: Implementar IModule
 
 ```csharp
-// InventarioModule.cs
 using VRM_Plugin.Core.Abstractions;
+using VRM_Plugin.Core.Abstractions.Entities;
 
 namespace VRM_Plugin.Modules.Inventario;
 
 public class InventarioModule : IModule
 {
-    public string ModuleId => "Inventario";
-    public string DisplayName => "Gestion de Inventario";
+    public int IdModule { get; set; } = 3;  // ? ID numérico único
+    public string ModuleName => "Inventario";
+    public string DisplayName => "Gestión de Inventario";
     public string Description => "Control de productos y almacenes";
     public string Version => "1.0.0";
-    public string Author => "Tu Nombre";
-    public string Category => "Operaciones";
     
-    public List<ComponentInfo> GetComponents()
+    public List<ModuleComponent> GetComponents()
     {
-        return new List<ComponentInfo>
+        return new List<ModuleComponent>
         {
-            new ComponentInfo
+            // Componente raíz (categoría)
+            new ModuleComponent
             {
+                IdComponent = 100,  // ? ID único
+                IdModule = 3,
+                IdParent = null,  // ? NULL = Categoría raíz
+                ComponentCode = "Inventario.Root",
                 Name = "Inventario",
-                Route = "/inventario",
-                ComponentType = typeof(Components.Inventario),
+                Route = "",  // Sin ruta, solo contenedor
+                Icon = "ri-box-line",
+                MenuOrder = 30,
                 ShowInMenu = true,
-                MenuOrder = 3,
-                Icon = "bi bi-box-seam",
-                Description = "Gestion de productos"
+                ComponentType = null,  // Sin componente, solo categoría
+                RequiredPermissionIds = new List<int> { 1, 10, 11 },  // ? IDs de permisos
+                IsActive = true
+            },
+            
+            // Submódulo: Productos
+            new ModuleComponent
+            {
+                IdComponent = 101,
+                IdModule = 3,
+                IdParent = 100,  // ? Hijo de Inventario (categoría)
+                ComponentCode = "Inventario.Productos",
+                Name = "Productos",
+                Route = "/inventario/productos",
+                Icon = "ri-product-hunt-line",
+                MenuOrder = 1,
+                ShowInMenu = true,
+                ComponentType = typeof(Components.Productos),
+                RequiredPermissionIds = new List<int> { 1, 10, 11 },  // Admin, Gerente, Almacenista
+                IsActive = true
+            },
+            
+            // Submódulo: Almacenes
+            new ModuleComponent
+            {
+                IdComponent = 102,
+                IdModule = 3,
+                IdParent = 100,  // ? Hijo de Inventario
+                ComponentCode = "Inventario.Almacenes",
+                Name = "Almacenes",
+                Route = "/inventario/almacenes",
+                Icon = "ri-store-line",
+                MenuOrder = 2,
+                ShowInMenu = true,
+                ComponentType = typeof(Components.Almacenes),
+                RequiredPermissionIds = new List<int> { 1, 10 },  // Solo Admin y Gerente Inventario
+                IsActive = true
+            }
+        };
+    }
+    
+    public List<ModuleAction> GetActions()
+    {
+        return new List<ModuleAction>
+        {
+            // Acciones de Productos
+            new ModuleAction 
+            { 
+                IdAction = 100, 
+                IdComponent = 101,
+                IdActionType = 1,  // Lectura
+                ActionKey = "Inventario.Productos.Ver", 
+                Name = "Ver Productos", 
+                Description = "Permite visualizar el catálogo de productos",
+                RequiredPermissionIds = new List<int> { 1, 10, 11 },  // Admin, Gerente, Almacenista
+                IsActive = true 
+            },
+            
+            new ModuleAction 
+            { 
+                IdAction = 101, 
+                IdComponent = 101,
+                IdActionType = 2,  // Escritura
+                ActionKey = "Inventario.Productos.Crear", 
+                Name = "Crear Producto", 
+                Description = "Permite agregar nuevos productos",
+                RequiredPermissionIds = new List<int> { 1, 10 },  // Solo Admin y Gerente
+                IsActive = true 
+            },
+            
+            // Acción crítica: Solo gerentes
+            new ModuleAction 
+            { 
+                IdAction = 102, 
+                IdComponent = 101,
+                IdActionType = 3,  // Crítica
+                ActionKey = "Inventario.Reportes.VerValorizado", 
+                Name = "Ver Reporte Valorizado", 
+                Description = "Reporte de inventario con costos (información sensible)",
+                RequiredPermissionIds = new List<int> { 1, 10 },  // Solo Admin y Gerente
+                IsActive = true 
             }
         };
     }
@@ -113,157 +210,93 @@ public class InventarioModule : IModule
         services.AddScoped<IAlmacenService, AlmacenService>();
     }
     
-    public Dictionary<string, string[]> GetActionPermissions()
-    {
-        return new Dictionary<string, string[]>
-        {
-            ["Inventario.Productos.Ver"] = new[] 
-            { 
-                "Admin", "GerenteInventario", "Almacenista" 
-            },
-            
-            ["Inventario.Productos.Crear"] = new[] 
-            { 
-                "Admin", "GerenteInventario" 
-            },
-            
-            ["Inventario.Productos.AjustarStock"] = new[] 
-            { 
-                "Admin", "GerenteInventario", "Almacenista" 
-            },
-            
-            // Permiso granular: Solo gerentes ven reportes valorizados
-            ["Inventario.Reportes.VerValorizado"] = new[] 
-            { 
-                "Admin", "GerenteInventario" 
-            }
-        };
-    }
+    public bool IsEnabledForClient(string clienteId) => true;
     
-    public List<string> Dependencies => new List<string>();
-    public List<string> RequiredPermissions => new List<string>();
+    public async Task OnModuleLoadedAsync()
+    {
+        Console.WriteLine($"[{ModuleName}] Módulo cargado - IdModule: {IdModule}");
+        await Task.CompletedTask;
+    }
 }
 ```
 
 ### Paso 4: Crear Componente Blazor
 
 ```razor
-<!-- Components/Inventario.razor -->
-@page "/inventario"
+<!-- Components/Productos.razor -->
+@page "/inventario/productos"
 @rendermode InteractiveServer
-@using Microsoft.AspNetCore.Components.Authorization
+@using VRM_Plugin.Blazor.Server.Components.Auth
 
-<PageTitle>Inventario</PageTitle>
+<PageTitle>Productos</PageTitle>
 
-<h1>Gestion de Inventario</h1>
+<!-- ? NUEVO: Proteger con IdComponent -->
+<AuthorizeModule IdComponent="101">
+    
+    <h1>?? Gestión de Productos</h1>
 
-<AuthorizeView Roles="Admin,GerenteInventario,Almacenista">
-    <Authorized>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Productos en Stock</h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- Lista de productos -->
-                        
-                        <!-- Boton crear: Solo gerentes -->
-                        <AuthorizeView Roles="Admin,GerenteInventario">
-                            <Authorized>
-                                <button class="btn btn-primary">
-                                    Nuevo Producto
-                                </button>
-                            </Authorized>
-                        </AuthorizeView>
-                        
-                        <!-- Boton ajustar stock: Gerentes y almacenistas -->
-                        <AuthorizeView Roles="Admin,GerenteInventario,Almacenista">
-                            <Authorized>
-                                <button class="btn btn-warning">
-                                    Ajustar Stock
-                                </button>
-                            </Authorized>
-                        </AuthorizeView>
-                    </div>
-                </div>
+    <div class="card">
+        <div class="card-header">
+            <h5>Catálogo de Productos</h5>
+        </div>
+        <div class="card-body">
+            <!-- Lista de productos (todos pueden ver) -->
+            <table class="table">
+                <!-- ... -->
+            </table>
+            
+            <!-- ? Proteger acción específica -->
+            <AuthorizeAction ActionKey="Inventario.Productos.Crear">
+                <button class="btn btn-primary">
+                    Nuevo Producto
+                </button>
+            </AuthorizeAction>
+        </div>
+    </div>
+    
+    <!-- ? Reportes sensibles: Solo gerentes -->
+    <AuthorizeAction ActionKey="Inventario.Reportes.VerValorizado">
+        <div class="card border-danger mt-3">
+            <div class="card-header bg-danger text-white">
+                <h5>?? Reportes Valorizados (Confidencial)</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-danger">Ver Inventario Valorizado</button>
+                <button class="btn btn-danger">Reporte de Costos</button>
             </div>
         </div>
-        
-        <!-- Reportes valorizados: SOLO gerentes -->
-        <AuthorizeView Roles="Admin,GerenteInventario">
-            <Authorized>
-                <div class="card border-danger mt-3">
-                    <div class="card-header bg-danger text-white">
-                        <h5>Reportes Valorizados</h5>
-                    </div>
-                    <div class="card-body">
-                        <button>Inventario Valorizado</button>
-                        <button>Costo Promedio</button>
-                    </div>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="alert alert-warning mt-3">
-                    Solo disponible para gerentes de inventario
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-    </Authorized>
-    <NotAuthorized>
-        <div class="alert alert-warning">
-            No tienes acceso a este modulo
-        </div>
-    </NotAuthorized>
-</AuthorizeView>
+    </AuthorizeAction>
+    
+</AuthorizeModule>
 
 @code {
-    // Logica del componente
+    // Lógica del componente
 }
 ```
 
-### Paso 5: Crear Servicios
-
-```csharp
-// Services/IProductoService.cs
-public interface IProductoService
-{
-    Task<List<Producto>> ObtenerTodosAsync();
-    Task<Producto?> ObtenerPorIdAsync(int id);
-    Task CrearAsync(Producto producto);
-    Task ActualizarAsync(Producto producto);
-    Task EliminarAsync(int id);
-}
-
-// Services/ProductoService.cs
-public class ProductoService : IProductoService
-{
-    // Implementacion
-}
-```
-
-### Paso 6: Compilar y Desplegar
+### Paso 5: Compilar y Desplegar
 
 ```bash
 # Compilar
 dotnet build src/Modules/Inventario/VRM_Plugin.Modules.Inventario/
 
-# Copiar DLL
+# Copiar DLL a carpeta Modules
 copy "src/Modules/Inventario/VRM_Plugin.Modules.Inventario/bin/Debug/net8.0/VRM_Plugin.Modules.Inventario.dll" "src/Host/VRM_Plugin.Blazor.Server/Modules/"
 
-# Reiniciar aplicacion
+# Reiniciar aplicación
 cd src/Host/VRM_Plugin.Blazor.Server
 dotnet run
 ```
 
 ---
 
-## Estructura de un Modulo
+## ?? Estructura de un Módulo
 
 ```
 VRM_Plugin.Modules.Inventario/
 ??? Components/
-?   ??? Inventario.razor       # Componente UI con @page
+?   ??? Productos.razor           # Componente UI con @page
+?   ??? Almacenes.razor
 ??? Domain/
 ?   ??? Producto.cs
 ?   ??? Almacen.cs
@@ -272,115 +305,115 @@ VRM_Plugin.Modules.Inventario/
 ?   ??? ProductoService.cs
 ?   ??? IAlmacenService.cs
 ?   ??? AlmacenService.cs
-??? InventarioModule.cs        # Implementa IModule
+??? InventarioModule.cs            # Implementa IModule
 ```
 
 ---
 
-## Ejemplo: Permisos Granulares en Accion
+## ?? Tips y Mejores Prácticas
 
-### Escenario: Modulo Finanzas
-
-**Coordinador de Finanzas** (`coordinador.finanzas`):
-- Puede ver facturas
-- Puede crear facturas
-- Puede editar facturas
-- **NO puede** eliminar facturas
-- **NO puede** timbrar en SAT
-- **NO puede** ver reportes sensibles
-
-**Gerente de Finanzas** (`gerente.finanzas`):
-- Puede hacer TODO lo del coordinador
-- **SI puede** eliminar facturas
-- **SI puede** timbrar en SAT
-- **SI puede** ver reportes sensibles
-
-### Implementacion en el Componente
-
-```razor
-<!-- Todos los del modulo pueden ver -->
-<AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas,Contador">
-    <Authorized>
-        <table><!-- Lista de facturas --></table>
-    </Authorized>
-</AuthorizeView>
-
-<!-- Solo gerentes y coordinadores pueden crear -->
-<AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas">
-    <Authorized>
-        <button>Nueva Factura</button>
-    </Authorized>
-</AuthorizeView>
-
-<!-- Solo gerentes pueden timbrar -->
-<AuthorizeView Roles="Admin,GerenteFinanzas">
-    <Authorized>
-        <button>Timbrar SAT</button>
-    </Authorized>
-</AuthorizeView>
-
-<!-- Solo gerentes ven reportes sensibles -->
-<AuthorizeView Roles="Admin,GerenteFinanzas">
-    <Authorized>
-        <div class="card border-danger">
-            <div class="card-header bg-danger text-white">
-                Reportes Confidenciales
-            </div>
-        </div>
-    </Authorized>
-</AuthorizeView>
-```
-
----
-
-## Tips y Mejores Practicas
-
-### 1. Nombrar Acciones de Forma Descriptiva
+### 1. IDs de Permisos Consistentes
 
 ```csharp
-// BIEN
-["Finanzas.Facturas.TimbrarSAT"] = new[] { "Admin", "GerenteFinanzas" }
+// ? BIEN: Usar IDs consistentes
+RequiredPermissionIds = new List<int> { 1, 10 }  // Admin, Gerente Inventario
 
-// MAL
-["Finanzas.Accion1"] = new[] { "Admin", "GerenteFinanzas" }
+// ? MAL: IDs inventados sin estructura
+RequiredPermissionIds = new List<int> { 999, 123 }
 ```
 
-### 2. Usar AuthorizeView para UI Adaptativa
-
-```razor
-<!-- En lugar de ocultar con CSS, usa AuthorizeView -->
-<AuthorizeView Roles="Admin,Gerente">
-    <Authorized>
-        <button>Accion Sensible</button>
-    </Authorized>
-</AuthorizeView>
-```
-
-### 3. Siempre Incluir Admin
+### 2. Jerarquía de Componentes Clara
 
 ```csharp
-// Admin debe tener acceso a todo
-["MiModulo.MiAccion"] = new[] { "Admin", "OtrosRoles" }
+// ? BIEN: Jerarquía de 2-3 niveles
+// Nivel 1: Categoría (IdParent = null)
+// Nivel 2: Módulos principales (IdParent = IdCategoria)
+// Nivel 3: Submódulos (IdParent = IdModuloPrincipal)
+
+// ? MAL: Más de 4 niveles (confuso para usuarios)
 ```
 
-### 4. Documentar Permisos
+### 3. Tipos de Acción Apropiados
 
 ```csharp
-public Dictionary<string, string[]> GetActionPermissions()
+// IdActionType = 1: Lectura (ver, listar, consultar)
+new ModuleAction { IdActionType = 1, ActionKey = "Inventario.Productos.Ver" }
+
+// IdActionType = 2: Escritura (crear, editar, actualizar)
+new ModuleAction { IdActionType = 2, ActionKey = "Inventario.Productos.Crear" }
+
+// IdActionType = 3: Crítica (eliminar, aprobar, operaciones sensibles)
+new ModuleAction { IdActionType = 3, ActionKey = "Inventario.Productos.Eliminar" }
+```
+
+### 4. Documentar Permisos en Código
+
+```csharp
+public List<ModuleAction> GetActions()
 {
-    return new Dictionary<string, string[]>
+    return new List<ModuleAction>
     {
-        // Ver: Todos los usuarios del modulo
-        ["Inventario.Ver"] = new[] { "Admin", "Gerente", "Operador" },
+        // Ver: Todos los usuarios del módulo (Admin + Gerente + Almacenista)
+        new ModuleAction 
+        { 
+            ActionKey = "Inventario.Ver", 
+            RequiredPermissionIds = new List<int> { 1, 10, 11 } 
+        },
         
-        // Crear: Solo gerentes (operadores solo consultan)
-        ["Inventario.Crear"] = new[] { "Admin", "Gerente" },
+        // Crear: Solo gerentes (Admin + Gerente)
+        // Operadores solo consultan, no pueden crear
+        new ModuleAction 
+        { 
+            ActionKey = "Inventario.Crear", 
+            RequiredPermissionIds = new List<int> { 1, 10 } 
+        },
         
-        // Reportes valorizados: Solo gerentes (informacion sensible de costos)
-        ["Inventario.Reportes.Valorizado"] = new[] { "Admin", "Gerente" }
+        // Reportes valorizados: Solo gerentes
+        // Información sensible de costos y márgenes
+        new ModuleAction 
+        { 
+            ActionKey = "Inventario.Reportes.Valorizado", 
+            RequiredPermissionIds = new List<int> { 1, 10 } 
+        }
     };
 }
 ```
+
+### 5. Usar Componentes de Autorización
+
+```razor
+<!-- ? BIEN: Usar AuthorizeModule y AuthorizeAction -->
+<AuthorizeModule IdComponent="101">
+    <h1>Productos</h1>
+    
+    <AuthorizeAction ActionKey="Inventario.Productos.Crear">
+        <button>Nuevo Producto</button>
+    </AuthorizeAction>
+</AuthorizeModule>
+
+<!-- ? MAL: Usar solo AuthorizeView con roles (menos flexible) -->
+<AuthorizeView Roles="Admin,Gerente">
+    <!-- ... -->
+</AuthorizeView>
+```
+
+---
+
+## ?? Mapeo de IDs de Permisos (Ejemplo)
+
+| ID | Permiso | Descripción |
+|----|---------|-------------|
+| 1 | Admin | Acceso completo al sistema |
+| 2 | Gerente Finanzas | Gerente del módulo de finanzas |
+| 3 | Coordinador Finanzas | Coordinador de finanzas |
+| 4 | Contador | Contador |
+| 5 | Gestor Prospectos | Gestor de prospectos |
+| 6 | Coordinador Prospectos | Coordinador de prospectos |
+| 7 | Revisor Legal | Revisor legal |
+| 8 | Revisor Finanzas | Revisor financiero |
+| 9 | Revisor Técnico | Revisor técnico |
+| 10 | Gerente Inventario | Gerente de inventario |
+| 11 | Almacenista | Personal de almacén |
 
 ---
 

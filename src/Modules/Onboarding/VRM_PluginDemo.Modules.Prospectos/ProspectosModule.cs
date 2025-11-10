@@ -1,149 +1,83 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VRM_Plugin.Core.Abstractions;
+using VRM_Plugin.Core.Abstractions.Entities;
 using VRM_Plugin.Modules.Prospectos.Services;
 using VRM_Plugin.Modules.Prospectos.Components;
-
 
 namespace VRM_Plugin.Modules.Prospectos;
 
 /// <summary>
 /// Módulo de gestión de prospectos.
 /// Implementa IModule para integrarse en el sistema de plugins.
+/// ✅ Arquitectura con IDs numéricos y permisos separados.
+/// ✅ Organización mediante jerarquía de componentes (sin Category).
 /// </summary>
 public class ProspectosModule : IModule
 {
-    // ==================== IDENTIFICACIÓN ====================
-
-    public string ModuleId => "Prospectos";
-
+    public int IdModule { get; set; } = 2;
+    public string ModuleName => "Prospectos";
     public string DisplayName => "Gestión de Prospectos";
-
-    public string Description =>
-        "Módulo para gestionar solicitudes de proveedores. " +
-        "Permite recibir, revisar y aprobar empresas que desean ser proveedores.";
-
+    public string Description => "Módulo para gestionar solicitudes de proveedores. Permite recibir, revisar y aprobar empresas que desean ser proveedores.";
     public string Version => "1.0.0";
 
-    public string Author => "Equipo de Desarrollo VRM";
-
-    // ==================== PRESENTACIÓN VISUAL ====================
-
-    /// <summary>
-    /// Icono Remix: Usuario con lupa - representa búsqueda/gestión de prospectos
-    /// </summary>
-    public string Icon => "ri-list-check-3";
-
-    // ==================== CATEGORIZACIÓN ====================
-
-    public string Category => "Administración";
-
-    // ==================== DEPENDENCIAS ====================
-
-    public List<string> Dependencies => new()
+    public List<ModuleComponent> GetComponents()
     {
-        // Este módulo no tiene dependencias de otros módulos
-    };
-
-    // ==================== PERMISOS ====================
-
-    public List<string> RequiredPermissions => new()
-    {
-        "Admin",
-        "GestorProspectos",
-        "RevisorProspectos"
-    };
-
-    // ==================== PERMISOS GRANULARES POR ACCIÓN ====================
-
-    /// <summary>
-    /// Define permisos específicos para revisiones especializadas y aprobaciones finales.
-    /// Permite que múltiples revisores trabajen en paralelo pero solo gestores aprueben finalmente.
-    /// </summary>
-    public Dictionary<string, string[]> GetActionPermissions()
-    {
-        return new Dictionary<string, string[]>
+        return new List<ModuleComponent>
         {
-            // ===== VISUALIZACIÓN Y GESTIÓN BÁSICA =====
-            ["Prospectos.Ver"] = new[] { "Admin", "GestorProspectos", "RevisorProspectos", "RevisorLegal", "RevisorFinanzas", "RevisorTecnico" },
-            ["Prospectos.Crear"] = new[] { "Admin", "GestorProspectos" },
-            ["Prospectos.Editar"] = new[] { "Admin", "GestorProspectos" },
-            ["Prospectos.Eliminar"] = new[] { "Admin", "GestorProspectos" },
-            
-            // ===== ASIGNACIÓN DE REVISORES =====
-            ["Prospectos.AsignarRevisor"] = new[] { "Admin", "GestorProspectos" },
-            ["Prospectos.ReasignarRevisor"] = new[] { "Admin", "GestorProspectos" },
-            
-            // ===== REVISIONES POR ÁREA (Cada revisor solo su área) =====
-            ["Prospectos.RevisionLegal"] = new[] { "Admin", "RevisorLegal" },
-            ["Prospectos.RevisionFinanciera"] = new[] { "Admin", "RevisorFinanzas" },
-            ["Prospectos.RevisionTecnica"] = new[] { "Admin", "RevisorTecnico" },
-            ["Prospectos.RevisionCalidad"] = new[] { "Admin", "RevisorCalidad" },
-            
-            // ⭐ APROBACIONES FINALES - SOLO GESTORES
-            ["Prospectos.AprobarFinal"] = new[] { "Admin", "GestorProspectos" },
-            ["Prospectos.RechazarFinal"] = new[] { "Admin", "GestorProspectos" },
-            ["Prospectos.ConvertirProveedor"] = new[] { "Admin", "GestorProspectos" },
-            
-            // ===== GESTIÓN DE DOCUMENTOS =====
-            ["Prospectos.VerDocumentos"] = new[] { "Admin", "GestorProspectos", "RevisorProspectos", "RevisorLegal", "RevisorFinanzas" },
-            ["Prospectos.SolicitarDocumentos"] = new[] { "Admin", "GestorProspectos", "RevisorLegal", "RevisorFinanzas" },
-            ["Prospectos.AprobarDocumentos"] = new[] { "Admin", "GestorProspectos", "RevisorLegal" },
-            
-            // ===== REPORTES Y ESTADÍSTICAS =====
-            ["Prospectos.VerEstadisticas"] = new[] { "Admin", "GestorProspectos" },
-            ["Prospectos.ExportarDatos"] = new[] { "Admin", "GestorProspectos" },
-            
-            // ===== CONFIGURACIÓN =====
-            ["Prospectos.ConfigurarAreas"] = new[] { "Admin", "GestorProspectos" },
-            ["Prospectos.ConfigurarFlujo"] = new[] { "Admin" }
-        };
-    }
-
-    // ==================== COMPONENTES BLAZOR (NUEVO) ====================
-
-    public List<ModuleComponentInfo> GetComponents()
-    {
-        return new List<ModuleComponentInfo>
-        {
-            new ModuleComponentInfo
-            {
-                Name = "Prospectos",
-                Route = "/prospectos",
-                ComponentType = typeof(VRM_Plugin.Modules.Prospectos.Components.Prospectos),
-                ShowInMenu = true,
-                MenuOrder = 10
+            // ===== COMPONENTE RAÍZ (SIN CATEGORÍA PADRE) =====
+            new ModuleComponent 
+            { 
+                IdComponent = 4, 
+                IdModule = 2, 
+                IdParent = null,  // ✅ NULL = Aparece en raíz del menú
+                ComponentCode = "Prospectos.Root", 
+                Name = "Prospectos", 
+                Route = "/prospectos", 
+                Icon = "ri-list-check-3", 
+                ComponentType = typeof(VRM_Plugin.Modules.Prospectos.Components.Prospectos), 
+                ShowInMenu = true, 
+                MenuOrder = 10, 
+                RequiredPermissionIds = new List<int> { 1, 5, 6 }, 
+                IsActive = true 
             }
-            // Aquí puedes agregar más componentes del módulo en el futuro:
-            // - ListaProspectos
-            // - DetalleProspecto
-            // - FormularioProspecto, etc.
         };
     }
 
-    // ==================== CONFIGURACIÓN ====================
+    public List<ModuleAction> GetActions()
+    {
+        return new List<ModuleAction>
+        {
+            new ModuleAction { IdAction = 20, IdComponent = 4, ActionKey = "Prospectos.Ver", Name = "Ver Prospectos", Description = "Permite visualizar prospectos", IdActionType = 1, RequiredPermissionIds = new List<int> { 1, 5, 6, 7, 8, 9 }, IsActive = true },
+            new ModuleAction { IdAction = 21, IdComponent = 4, ActionKey = "Prospectos.Crear", Name = "Crear Prospecto", Description = "Permite crear nuevos prospectos", IdActionType = 2, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 22, IdComponent = 4, ActionKey = "Prospectos.Editar", Name = "Editar Prospecto", Description = "Permite modificar prospectos", IdActionType = 2, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 23, IdComponent = 4, ActionKey = "Prospectos.Eliminar", Name = "Eliminar Prospecto", Description = "Permite eliminar prospectos", IdActionType = 3, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 24, IdComponent = 4, ActionKey = "Prospectos.AsignarRevisor", Name = "Asignar Revisor", Description = "Asigna un revisor a un prospecto", IdActionType = 2, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 25, IdComponent = 4, ActionKey = "Prospectos.RevisionLegal", Name = "Revisión Legal", Description = "Realiza revisión legal del prospecto", IdActionType = 2, RequiredPermissionIds = new List<int> { 1, 7 }, IsActive = true },
+            new ModuleAction { IdAction = 26, IdComponent = 4, ActionKey = "Prospectos.RevisionFinanciera", Name = "Revisión Financiera", Description = "Realiza revisión financiera del prospecto", IdActionType = 2, RequiredPermissionIds = new List<int> { 1, 8 }, IsActive = true },
+            new ModuleAction { IdAction = 27, IdComponent = 4, ActionKey = "Prospectos.RevisionTecnica", Name = "Revisión Técnica", Description = "Realiza revisión técnica del prospecto", IdActionType = 2, RequiredPermissionIds = new List<int> { 1, 9 }, IsActive = true },
+            new ModuleAction { IdAction = 28, IdComponent = 4, ActionKey = "Prospectos.AprobarFinal", Name = "Aprobar Prospecto", Description = "Aprobación final del prospecto", IdActionType = 3, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 29, IdComponent = 4, ActionKey = "Prospectos.RechazarFinal", Name = "Rechazar Prospecto", Description = "Rechazo final del prospecto", IdActionType = 3, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 30, IdComponent = 4, ActionKey = "Prospectos.ConvertirProveedor", Name = "Convertir a Proveedor", Description = "Convierte prospecto aprobado en proveedor", IdActionType = 3, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 31, IdComponent = 4, ActionKey = "Prospectos.VerDocumentos", Name = "Ver Documentos", Description = "Permite ver documentos del prospecto", IdActionType = 1, RequiredPermissionIds = new List<int> { 1, 5, 6, 7, 8 }, IsActive = true },
+            new ModuleAction { IdAction = 32, IdComponent = 4, ActionKey = "Prospectos.SolicitarDocumentos", Name = "Solicitar Documentos", Description = "Solicita documentos adicionales", IdActionType = 2, RequiredPermissionIds = new List<int> { 1, 5, 7, 8 }, IsActive = true },
+            new ModuleAction { IdAction = 33, IdComponent = 4, ActionKey = "Prospectos.VerEstadisticas", Name = "Ver Estadísticas", Description = "Ver estadísticas de prospectos", IdActionType = 1, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 34, IdComponent = 4, ActionKey = "Prospectos.ExportarDatos", Name = "Exportar Datos", Description = "Exporta datos de prospectos", IdActionType = 1, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 35, IdComponent = 4, ActionKey = "Prospectos.ConfigurarAreas", Name = "Configurar Áreas", Description = "Configura áreas de revisión", IdActionType = 2, RequiredPermissionIds = new List<int> { 1, 5 }, IsActive = true },
+            new ModuleAction { IdAction = 36, IdComponent = 4, ActionKey = "Prospectos.ConfigurarFlujo", Name = "Configurar Flujo", Description = "Configura flujo de aprobación", IdActionType = 3, RequiredPermissionIds = new List<int> { 1 }, IsActive = true }
+        };
+    }
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        // Registrar el servicio de prospectos
         services.AddScoped<IProspectoService, ProspectoService>();
     }
 
-    // ==================== HABILITACIÓN POR CLIENTE ====================
-
-    public bool IsEnabledForClient(string clienteId)
-    {
-        // TODO: Implementar consulta a ConfiguracionNegocio del cliente
-        return true;
-    }
-
-    // ==================== CICLO DE VIDA ====================
+    public bool IsEnabledForClient(string clienteId) => true;
 
     public async Task OnModuleLoadedAsync()
     {
-        Console.WriteLine($"[{ModuleId}] Módulo cargado exitosamente - Versión {Version}");
-      Console.WriteLine($"[{ModuleId}] Componentes registrados: {GetComponents().Count}");
-
+        Console.WriteLine($"[{ModuleName}] Módulo cargado - IdModule: {IdModule}");
         await Task.CompletedTask;
     }
 }
