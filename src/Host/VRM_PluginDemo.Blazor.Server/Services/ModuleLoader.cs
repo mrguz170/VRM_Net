@@ -12,6 +12,8 @@ public class ModuleLoader : IModuleManager
     private readonly List<IModule> _loadedModules = new();
     private readonly ILogger<ModuleLoader> _logger;
 
+    public IEnumerable<IModule> LoadedModules { get; internal set; }
+
     public ModuleLoader(ILogger<ModuleLoader> logger)
     {
         _logger = logger;
@@ -53,6 +55,7 @@ public class ModuleLoader : IModuleManager
         }
 
         _logger.LogInformation("✅ Carga de módulos completada. Total cargados: {Count}", _loadedModules.Count);
+        LoadedModules = _loadedModules;
         return _loadedModules.Count;
     }
 

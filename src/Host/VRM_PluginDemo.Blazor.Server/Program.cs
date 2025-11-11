@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using MudBlazor.Services;
 using System.Reflection;
+using VRM_Plugin.Core.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// ==================== CONFIGURACIÓN DE BLAZOR SERVER CIRCUITS ====================
+// ==================== CONFIGURACIÓN DE BLAZOR SERVER CIRCUITS ===================
 builder.Services.AddServerSideBlazor(options =>
 {
     options.DetailedErrors = builder.Environment.IsDevelopment();
@@ -57,8 +58,7 @@ builder.Services.AddHttpContextAccessor();
 // DummyAuthenticationStateProvider ahora usa PersistentComponentState
 // para mantener autenticación entre SSR e Interactive Server
 builder.Services.AddScoped<DummyAuthenticationStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
-    provider.GetRequiredService<DummyAuthenticationStateProvider>());
+builder.Services.AddScoped<AuthenticationStateProvider, DummyAuthenticationStateProvider>();
 
 // ==================== AUTORIZACIÓN GRANULAR DE MÓDULOS ====================
 // ⭐ NUEVO: Servicio para verificar permisos por acción
@@ -75,7 +75,10 @@ var logger = loggerFactory.CreateLogger<ModuleLoader>();
 var moduleLoader = new ModuleLoader(logger);
 
 // Registrar IModuleManager para que otros servicios puedan consultarlo
+builder.Services.AddSingleton(moduleLoader);
 builder.Services.AddSingleton<IModuleManager>(moduleLoader);
+
+builder.Services.AddScoped<IEnumerable<IModule>>(sp => moduleLoader.GetAllModules());
 
 // Descubrir y cargar módulos desde la carpeta "Modules"
 var modulesPath = "Modules";

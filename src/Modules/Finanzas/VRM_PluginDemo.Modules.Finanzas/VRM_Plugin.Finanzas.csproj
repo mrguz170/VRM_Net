@@ -10,11 +10,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.20" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.20" />
+    <PackageReference Include="MySqlConnector" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Ruta: Finanzas -> Modules -> src -> Core (3 niveles arriba) -->
     <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\Host\VRM_PluginDemo.Blazor.Server\VRM_Plugin.Blazor.Server.csproj" />
   </ItemGroup>
 
 </Project>

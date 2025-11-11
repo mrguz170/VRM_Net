@@ -86,6 +86,8 @@ public interface IModule
     /// <returns>Diccionario de acciones y roles permitidos</returns>
     Dictionary<string, string[]> GetActionPermissions();
 
+    Dictionary<string, string[]> GetActionPermission(string id);
+
     // ==================== COMPONENTES BLAZOR ====================
 
     /// <summary>

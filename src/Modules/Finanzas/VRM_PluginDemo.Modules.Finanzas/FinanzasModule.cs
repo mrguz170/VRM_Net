@@ -1,8 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MySqlConnector;
+using System.Data;
+using VRM_Plugin.Blazor.Server.Services;
 using VRM_Plugin.Core.Abstractions;
-using VRM_Plugin.Modules.Finanzas.Services;
 using VRM_Plugin.Modules.Finanzas.Components;
+using VRM_Plugin.Modules.Finanzas.Services;
 
 namespace VRM_Plugin.Modules.Finanzas;
 
@@ -13,7 +16,9 @@ namespace VRM_Plugin.Modules.Finanzas;
 public class FinanzasModule : IModule
 {
     // ==================== IDENTIFICACIÓN ====================
-
+    private readonly IConfiguration _configuration;
+    private string? _connectionString;
+    private Dictionary<string, string[]>? _cachedPermissions = new Dictionary<string, string[]>();
     public string ModuleId => "Finanzas";
 
     public string DisplayName => "Gestión de Finanzas";
@@ -68,36 +73,72 @@ public class FinanzasModule : IModule
             ["Finanzas.Facturas.Crear"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
             ["Finanzas.Facturas.Editar"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
             ["Finanzas.Facturas.Eliminar"] = new[] { "Admin", "GerenteFinanzas" },
-            
+
             // ⭐ ACCIONES CRÍTICAS - SOLO GERENTES
             ["Finanzas.Facturas.TimbrarSAT"] = new[] { "Admin", "GerenteFinanzas" },
             ["Finanzas.Facturas.CancelarTimbrada"] = new[] { "Admin", "GerenteFinanzas" },
-            
+
             // ===== GESTIÓN DE PAGOS =====
             ["Finanzas.Pagos.Ver"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas", "Contador" },
             ["Finanzas.Pagos.Crear"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
             ["Finanzas.Pagos.Editar"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
-            
+
             // ⭐ AUTORIZACIÓN DE PAGOS - SOLO GERENTES
             ["Finanzas.Pagos.Autorizar"] = new[] { "Admin", "GerenteFinanzas" },
             ["Finanzas.Pagos.Cancelar"] = new[] { "Admin", "GerenteFinanzas" },
-            
+
             // ===== CONCILIACIONES BANCARIAS =====
             ["Finanzas.Conciliacion.Ver"] = new[] { "Admin", "GerenteFinanzas", "Contador" },
             ["Finanzas.Conciliacion.Ejecutar"] = new[] { "Admin", "GerenteFinanzas" },
             ["Finanzas.Conciliacion.Aprobar"] = new[] { "Admin", "GerenteFinanzas" },
-            
+
             // ===== REPORTES FINANCIEROS =====
             ["Finanzas.Reportes.VerGenerales"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas", "Contador" },
-            
+
             // ⭐ REPORTES CONFIDENCIALES - SOLO GERENTES
             ["Finanzas.Reportes.VerSensibles"] = new[] { "Admin", "GerenteFinanzas" },
             ["Finanzas.Reportes.ExportarSensibles"] = new[] { "Admin", "GerenteFinanzas" },
-            
+
             // ===== CONFIGURACIÓN DEL MÓDULO =====
             ["Finanzas.Configuracion.Ver"] = new[] { "Admin", "GerenteFinanzas" },
             ["Finanzas.Configuracion.Modificar"] = new[] { "Admin" }
         };
+    }
+
+
+    public Dictionary<string, string[]> GetActionPermission(string id)
+    {
+        try
+        {
+            DatabaseHelper Ds = new DatabaseHelper(_connectionString);
+
+            var permissions = Ds.ExecuteStoredProcedure("ConsultaPermisos", new Dictionary<string, object>
+        {
+            { "Modulo", "Finanzas" }
+        });
+
+            foreach (DataRow row in permissions.Rows)
+            {
+                string key = row["PermisoId"].ToString()!;  // nombre de columna clave
+                string permisosStr = row["Roles"].ToString()!; // valores separados por coma
+
+                // convertir el string en arreglo
+                string[] valores = permisosStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                _cachedPermissions[key] = valores;
+            }
+
+            return _cachedPermissions;
+        }
+        catch (Exception ex)
+        {
+            // Si hay error, usar los permisos por defecto definidos en el código
+            return new Dictionary<string, string[]>
+            {
+                ["Finanzas.Facturas.Crear"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
+                // ... resto de los permisos ...
+            };
+        }
     }
 
     // ==================== COMPONENTES BLAZOR ====================
@@ -121,6 +162,8 @@ public class FinanzasModule : IModule
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
+        // Actualizar la cadena de conexión si es necesario
+        _connectionString ??= configuration.GetConnectionString("DefaultConnection");
         // Registrar servicios del módulo
         services.AddScoped<IFacturaService, FacturaService>();
         services.AddScoped<IPagoService, PagoService>();
@@ -143,4 +186,13 @@ public class FinanzasModule : IModule
 
         await Task.CompletedTask;
     }
+
+    class ModulePermission { 
+    
+        public string ActionKey { get; set; } = string.Empty;
+        public string Roles { get; set; } = string.Empty;
+
+    }
+
+
 }
