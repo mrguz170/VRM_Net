@@ -7,6 +7,7 @@ namespace VRM_Plugin.Blazor.Server.Services;
 /// <summary>
 /// Carga dinámicamente módulos desde ensamblados
 /// ✅ Actualizado para nueva arquitectura sin Author, Category, Dependencies
+/// ✅ Sin palabra "Demo" en namespaces ni DLLs
 /// </summary>
 public class ModuleLoader : IModuleManager
 {
@@ -20,6 +21,7 @@ public class ModuleLoader : IModuleManager
 
     /// <summary>
     /// Descubre y carga módulos desde una ruta específica
+    /// Busca DLLs con patrón: VRM_Plugin.Modules.*.dll
     /// </summary>
     public async Task<int> DiscoverAndLoadModulesAsync(string modulesPath)
     {
@@ -37,6 +39,7 @@ public class ModuleLoader : IModuleManager
             return 0;
         }
 
+        // ✅ Buscar: VRM_Plugin.Modules.*.dll
         var dllFiles = Directory.GetFiles(modulesPath, "VRM_Plugin.Modules.*.dll", SearchOption.AllDirectories);
         
         _logger.LogInformation(
@@ -108,73 +111,6 @@ public class ModuleLoader : IModuleManager
             elapsedMs);
 
         return _loadedModules.Count;
-    }
-
-    /// <summary>
-    /// Carga un módulo desde un archivo de ensamblado
-    /// </summary>
-    private async Task LoadModuleFromAssemblyAsync(string assemblyPath)
-    {
-        _logger.LogDebug("🔄 Cargando ensamblado: {Path}", assemblyPath);
-
-        // Evitar cargar dos veces el mismo ensamblado
-        var alreadyLoaded = AppDomain.CurrentDomain.GetAssemblies()
-            .FirstOrDefault(a => string.Equals(a.Location, assemblyPath, StringComparison.OrdinalIgnoreCase));
-        var assembly = alreadyLoaded ?? AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
-
-        // Buscar tipos que implementen IModule
-        var moduleTypes = assembly.GetTypes()
-            .Where(t => typeof(IModule).IsAssignableFrom(t) &&
-                       !t.IsInterface &&
-                       !t.IsAbstract)
-            .ToList();
-
-        if (!moduleTypes.Any())
-        {
-            _logger.LogDebug("⚠️ No se encontraron implementaciones de IModule en: {Assembly}", assembly.FullName);
-            return;
-        }
-
-        foreach (var moduleType in moduleTypes)
-        {
-            try
-            {
-                // Crear instancia del módulo
-                if (Activator.CreateInstance(moduleType) is not IModule module)
-                {
-                    _logger.LogWarning("⚠️ No se pudo crear instancia de: {Type}", moduleType.FullName);
-                    continue;
-                }
-
-                // Ejecutar inicialización del módulo
-                await module.OnModuleLoadedAsync();
-
-                // Agregar a la lista de módulos cargados
-                _loadedModules.Add(module);
-
-                // Logging mejorado
-                var componentCount = module.GetComponents().Count;
-                var actionCount = module.GetActions().Count;
-                
-                _logger.LogInformation(
-                    "✅ Módulo cargado: {ModuleName} (ID: {IdModule}) v{Version} - {DisplayName}",
-                    module.ModuleName,
-                    module.IdModule,
-                    module.Version,
-                    module.DisplayName
-                );
-                
-                _logger.LogInformation(
-                    "   📌 Componentes: {ComponentCount}, Acciones: {ActionCount}",
-                    componentCount,
-                    actionCount
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ Error al instanciar módulo: {Type}", moduleType.FullName);
-            }
-        }
     }
 
     // ==================== IMPLEMENTACIÓN DE IModuleManager ====================

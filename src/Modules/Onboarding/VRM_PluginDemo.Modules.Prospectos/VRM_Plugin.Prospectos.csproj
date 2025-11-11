@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>VRM_Plugin.Modules.Prospectos</RootNamespace>
+    <AssemblyName>VRM_Plugin.Modules.Prospectos</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

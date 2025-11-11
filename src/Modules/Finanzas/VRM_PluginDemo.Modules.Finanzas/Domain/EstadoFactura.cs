@@ -16,22 +16,27 @@ public enum EstadoFactura
     Pendiente = 1,
     
     /// <summary>
+    /// Factura timbrada en el SAT, pendiente de pago.
+    /// </summary>
+    Timbrada = 2,
+    
+    /// <summary>
     /// Factura pagada parcialmente.
     /// </summary>
-    PagoParcial = 2,
+    PagoParcial = 3,
     
     /// <summary>
     /// Factura pagada completamente.
     /// </summary>
-    Pagada = 3,
+    Pagada = 4,
     
     /// <summary>
     /// Factura vencida sin pago.
     /// </summary>
-    Vencida = 4,
+    Vencida = 5,
     
     /// <summary>
     /// Factura cancelada.
     /// </summary>
-    Cancelada = 5
+    Cancelada = 6
 }
