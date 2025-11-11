@@ -14,6 +14,8 @@ public class ModuleLoader : IModuleManager
     private readonly List<IModule> _loadedModules = new();
     private readonly ILogger<ModuleLoader> _logger;
 
+    public IEnumerable<IModule> LoadedModules { get; internal set; }
+
     public ModuleLoader(ILogger<ModuleLoader> logger)
     {
         _logger = logger;

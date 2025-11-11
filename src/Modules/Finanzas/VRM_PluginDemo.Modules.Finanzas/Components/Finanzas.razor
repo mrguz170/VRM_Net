@@ -115,22 +115,22 @@
    <td>
     <div class="btn-group btn-group-sm" role="group">
   @* Ver - Todos *@
-     <AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas,Contador">
+       <AuthorizeAction Action="Finanzas.Facturas.Detalles">
          <Authorized>
     <button class="btn btn-outline-info" title="Ver detalles">
-            <span class="bi bi-eye"></span>
+            <span class="bi bi-eye"></span> Detalles 
             </button>
           </Authorized>
-    </AuthorizeView>
+    </AuthorizeAction>
     
      @* Editar - Gerentes y coordinadores *@
-        <AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas">
+       <AuthorizeAction Action="Finanzas.Facturas.Editar">
         <Authorized>
           <button class="btn btn-outline-warning" title="Editar">
-           <span class="bi bi-pencil"></span>
+           <span class="bi bi-pencil"></span> Editar
            </button>
       </Authorized>
-           </AuthorizeView>
+        </AuthorizeAction>
             
   @* ⭐ TIMBRAR SAT - SOLO GERENTES - Usa AuthorizeAction *@
        <AuthorizeAction Action="Finanzas.Facturas.TimbrarSAT">
@@ -145,7 +145,7 @@
            @* Eliminar - Solo gerentes *@
    <AuthorizeAction Action="Finanzas.Facturas.Eliminar">
              <button class="btn btn-outline-danger" title="Eliminar">
-       <span class="bi bi-trash"></span>
+       <span class="bi bi-trash"></span> Eliminar
         </button>
          </AuthorizeAction>
      </div>
@@ -159,7 +159,7 @@
 </div>
 
 @* ⭐ SECCIÓN DE REPORTES SENSIBLES - SOLO GERENTES con AuthorizeAction *@
-<AuthorizeAction Action="Finanzas.Reportes.VerSensibles">
+<AuthorizeAction Action="Finanzas.Finanzas.VerSensibles">
     <div class="card mt-3 border-danger">
         <div class="card-header bg-danger text-white">
           <h5 class="mb-0">🔒 Reportes Confidenciales (Solo Gerente)</h5>
@@ -175,7 +175,7 @@
            </button>
      
        @* Exportar reportes sensibles - Acción aún más restringida *@
-                <AuthorizeAction Action="Finanzas.Reportes.ExportarSensibles">
+<AuthorizeAction Action="Finanzas.Finanzas.ExportarSensibles">
          <button class="btn btn-warning">
       <span class="bi bi-download"></span> Exportar Todo
           </button>
@@ -186,7 +186,7 @@
 </AuthorizeAction>
 
 @* Sección de reportes generales - Todos pueden ver *@
-<AuthorizeAction Action="Finanzas.Reportes.VerGenerales">
+    <AuthorizeAction Action="Finanzas.Finanzas.VerGenerales">
     <div class="card mt-3">
         <div class="card-header">
             <h5 class="mb-0">📊 Reportes Generales</h5>

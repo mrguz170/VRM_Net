@@ -1,17 +1,20 @@
-using Microsoft.AspNetCore.Authentication;
+Ôªøusing Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using System.Data;
 using System.Security.Claims;
 
 namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
-/// Proveedor de autenticaciÛn simulado con usuarios dummy.
-/// ?? SOLO PARA DESARROLLO - Reemplazar con autenticaciÛn real en producciÛn.
+/// Proveedor de autenticaci√≥n simulado con usuarios dummy.
+/// ?? SOLO PARA DESARROLLO - Reemplazar con autenticaci√≥n real en producci√≥n.
 /// 
-/// ? ACTUALIZADO: Usa PersistentComponentState para mantener autenticaciÛn entre SSR e Interactive Server.
+/// ? ACTUALIZADO: Usa PersistentComponentState para mantener autenticaci√≥n entre SSR e Interactive Server.
 /// </summary>
 public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDisposable
 {
@@ -21,15 +24,17 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
     
     private PersistingComponentStateSubscription _subscription;
     private AuthenticationState? _authenticationState;
-
+    private readonly IConfiguration _configuration;
     public DummyAuthenticationStateProvider(
   ILogger<DummyAuthenticationStateProvider> logger,
     IHttpContextAccessor httpContextAccessor,
-        PersistentComponentState persistentState)
+        PersistentComponentState persistentState,
+    IConfiguration configuration)
 {
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
         _persistentState = persistentState;
+        _configuration = configuration;
         
         // ? Suscribirse al ciclo de vida del prerendering
         _subscription = persistentState.RegisterOnPersisting(OnPersistingAsync);
@@ -91,14 +96,14 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
    }
         catch (Exception ex)
         {
-         _logger.LogError(ex, "?? [Auth] Error al obtener estado de autenticaciÛn");
+         _logger.LogError(ex, "?? [Auth] Error al obtener estado de autenticaci√≥n");
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
     }
 
     private Task OnPersistingAsync()
  {
-        // ?? Guardar estado de autenticaciÛn para el Circuit
+        // ?? Guardar estado de autenticaci√≥n para el Circuit
      if (_authenticationState?.User.Identity?.IsAuthenticated ?? false)
   {
             var user = _authenticationState.User;
@@ -117,7 +122,7 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
          
         _persistentState.PersistAsJson("UserInfo", userInfo);
         
-            _logger.LogInformation("?? [Persist] Estado de autenticaciÛn persistido para: {Email}", 
+            _logger.LogInformation("?? [Persist] Estado de autenticaci√≥n persistido para: {Email}", 
         userInfo.Email);
         }
         else
@@ -129,9 +134,9 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
     }
 
     /// <summary>
-    /// Simula un login con usuario y contraseÒa.
-    /// ? Crea cookie de autenticaciÛn persistente.
-    /// ?? En producciÛn, esto validarÌa contra una base de datos con contraseÒas hasheadas.
+    /// Simula un login con usuario y contrase√±a.
+    /// ? Crea cookie de autenticaci√≥n persistente.
+    /// ?? En producci√≥n, esto validar√≠a contra una base de datos con contrase√±as hasheadas.
     /// </summary>
     public async Task<bool> LoginAsync(string username, string password)
     {
@@ -140,7 +145,7 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
             _logger.LogInformation("?? [Auth] Intentando login para usuario: {Username}", username);
 
   // Buscar usuario por email
-            var usuario = GetDummyUserByEmail(username);
+            var usuario = GetDummyUserByEmail(username, password);
 
           if (usuario == null)
             {
@@ -148,10 +153,10 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
  return false;
       }
 
-            // ? VALIDACI”N DUMMY - Cualquier contraseÒa funciona en desarrollo
+            // ? VALIDACI√ìN DUMMY - Cualquier contrase√±a funciona en desarrollo
          if (string.IsNullOrWhiteSpace(password))
             {
-                _logger.LogWarning("?? [Auth] ContraseÒa vacÌa para {Username}", username);
+                _logger.LogWarning("?? [Auth] Contrase√±a vac√≠a para {Username}", username);
       return false;
     }
 
@@ -161,25 +166,21 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
 
             // ?? Crear claims
          var claims = new List<Claim>
-    {
-  new Claim(ClaimTypes.NameIdentifier, usuario.Id),
-         new Claim(ClaimTypes.Name, usuario.Username),
-       new Claim(ClaimTypes.Email, usuario.Email),
-          new Claim("NombreCompleto", usuario.NombreCompleto),
-         new Claim("ClienteId", usuario.ClienteId)
+        {
+            new Claim(ClaimTypes.NameIdentifier, usuario.Id),
+            new Claim(ClaimTypes.Name, usuario.Username),
+            new Claim(ClaimTypes.Email, usuario.Email),
+            new Claim("NombreCompleto", usuario.NombreCompleto)
         };
 
             // Agregar roles como claims
-       foreach (var rol in usuario.Roles)
-     {
-   claims.Add(new Claim(ClaimTypes.Role, rol));
-    }
+            claims.Add(new Claim(ClaimTypes.Role, usuario.Roles));
 
-    // ?? Crear identity y principal
-         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            // ?? Crear identity y principal
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
 
-      // ?? CRÕTICO: Crear cookie de autenticaciÛn
+      // ?? CR√çTICO: Crear cookie de autenticaci√≥n
        var httpContext = _httpContextAccessor.HttpContext;
             
  if (httpContext == null)
@@ -191,8 +192,8 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
             // ?? Verificar que la respuesta NO haya comenzado
        if (httpContext.Response.HasStarted)
     {
-         _logger.LogError("?? [Auth] Response ya comenzÛ. No se puede escribir cookie.");
-       _logger.LogError("?? [Auth] SOLUCI”N: Aseg˙rate de que Login.razor NO tiene @rendermode InteractiveServer");
+         _logger.LogError("?? [Auth] Response ya comenz√≥. No se puede escribir cookie.");
+       _logger.LogError("?? [Auth] SOLUCI√ìN: Aseg√∫rate de que Login.razor NO tiene @rendermode InteractiveServer");
          return false;
     }
 
@@ -207,12 +208,12 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
         AllowRefresh = true
          });
 
-        _logger.LogInformation("? [Auth] Cookie de autenticaciÛn creada exitosamente para {Username}", username);
+        _logger.LogInformation("? [Auth] Cookie de autenticaci√≥n creada exitosamente para {Username}", username);
  
        // Guardar estado actual para persistencia
   _authenticationState = new AuthenticationState(principal);
       
-   // Notificar cambio de autenticaciÛn
+   // Notificar cambio de autenticaci√≥n
             NotifyAuthenticationStateChanged(Task.FromResult(_authenticationState));
             
         return true;
@@ -225,8 +226,8 @@ _logger.LogError(ex, "?? [Auth] Error durante login de {Username}", username);
   }
 
  /// <summary>
-    /// Cierra sesiÛn del usuario actual.
-    /// ? Elimina cookie de autenticaciÛn.
+    /// Cierra sesi√≥n del usuario actual.
+    /// ? Elimina cookie de autenticaci√≥n.
     /// </summary>
     public async Task LogoutAsync()
     {
@@ -240,14 +241,14 @@ _logger.LogError(ex, "?? [Auth] Error durante login de {Username}", username);
      // ?? Verificar que la respuesta NO haya comenzado
     if (!httpContext.Response.HasStarted)
     {
-     // ?? Eliminar cookie de autenticaciÛn
+     // ?? Eliminar cookie de autenticaci√≥n
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
     _logger.LogInformation("? [Auth] Logout exitoso para usuario: {Username}", username);
         }
      else
             {
-     _logger.LogWarning("?? [Auth] No se puede eliminar cookie: Response ya comenzÛ");
+     _logger.LogWarning("?? [Auth] No se puede eliminar cookie: Response ya comenz√≥");
        }
 
      // Limpiar estado
@@ -304,7 +305,7 @@ ClienteId = "cliente-001",
        Id = "user-003",
      Username = "coordinador.finanzas",
             Email = "coordinador.finanzas@vrm.com",
-      NombreCompleto = "MarÌa Coordinadora de Finanzas",
+      NombreCompleto = "Mar√≠a Coordinadora de Finanzas",
    ClienteId = "cliente-001",
             Roles = new List<string> { "CoordinadorFinanzas" }
         },
@@ -346,10 +347,50 @@ ClienteId = "cliente-001",
         }
     };
 
-    private DummyUser? GetDummyUserByEmail(string email)
+    private User? GetDummyUserByEmail(string email, string password)
     {
-  return DummyUsers.FirstOrDefault(u =>
-     u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+        string? connectionString = _configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            _logger.LogError("Cadena de conexiÔøΩn 'DefaultConnection' no encontrada en la configuraciÔøΩn.");
+            return null;
+        }
+
+        DatabaseHelper Ds = new DatabaseHelper(connectionString);
+        var user = Ds.ExecuteStoredProcedure("ConsultaUsuarios", new Dictionary<string, object>
+        {
+            { "mail", email }
+            //,
+            //{ "p_password", password },
+            //{ "p_fecha_intento", DateTime.Now }
+        });
+
+        User usuario = new User();
+
+        if (user.Rows.Count > 0)
+        {
+            bool DeshashedPassword = PasswordHasher.VerifyPassword(password, user.Rows[0]["PasswordHash"].ToString());
+            if (DeshashedPassword)
+            {
+
+                DataRow row = user.Rows[0];
+
+                usuario = new User
+                {
+                    Id = row["Id"].ToString(),
+                    Username = row["Username"].ToString(),
+                    ClienteId = Convert.ToString(row["ClienteId"]),
+                    NombreCompleto = row["NombreCompleto"].ToString(),
+                    Email = row["Email"].ToString(),
+                    Roles = row["Roles"].ToString()
+                };
+            }
+        }
+
+        return usuario;
+
+        //   return DummyUsers.FirstOrDefault(u =>
+        //u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
     }
 
     public static List<DummyUser> GetAllDummyUsers()
@@ -372,3 +413,15 @@ public class DummyUser
     public string ClienteId { get; set; } = string.Empty;
     public List<string> Roles { get; set; } = new();
 }
+
+public class User
+{
+    public string Id { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string NombreCompleto { get; set; } = string.Empty;
+    public string ClienteId { get; set; } = string.Empty;
+    public string Roles { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty; // AÔøΩadir esta propiedad
+}
+

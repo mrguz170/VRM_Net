@@ -1,9 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MySqlConnector;
+using System.Data;
+using VRM_Plugin.Blazor.Server.Services;
 using VRM_Plugin.Core.Abstractions;
 using VRM_Plugin.Core.Abstractions.Entities;
 using VRM_Plugin.Modules.Finanzas.Services;
 using VRM_Plugin.Modules.Finanzas.Components;
+using VRM_Plugin.Modules.Finanzas.Services;
 
 namespace VRM_Plugin.Modules.Finanzas;
 
@@ -15,6 +19,12 @@ namespace VRM_Plugin.Modules.Finanzas;
 /// </summary>
 public class FinanzasModule : IModule
 {
+    // ==================== IDENTIFICACIÓN ====================
+    private readonly IConfiguration _configuration;
+    private string? _connectionString;
+    private Dictionary<string, string[]>? _cachedPermissions = new Dictionary<string, string[]>();
+    public string ModuleId => "Finanzas";
+
     public int IdModule { get; set; } = 1;
     public string ModuleName => "Finanzas";
     public string DisplayName => "Gestión de Finanzas";
@@ -81,6 +91,42 @@ public class FinanzasModule : IModule
         };
     }
 
+
+    public Dictionary<string, string[]> GetActionPermission(string id)
+    {
+        try
+        {
+            DatabaseHelper Ds = new DatabaseHelper(_connectionString);
+
+            var permissions = Ds.ExecuteStoredProcedure("ConsultaPermisos", new Dictionary<string, object>
+        {
+            { "Modulo", "Finanzas" }
+        });
+
+            foreach (DataRow row in permissions.Rows)
+            {
+                string key = row["PermisoId"].ToString()!;  // nombre de columna clave
+                string permisosStr = row["Roles"].ToString()!; // valores separados por coma
+
+                // convertir el string en arreglo
+                string[] valores = permisosStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                _cachedPermissions[key] = valores;
+            }
+
+            return _cachedPermissions;
+        }
+        catch (Exception ex)
+        {
+            // Si hay error, usar los permisos por defecto definidos en el código
+            return new Dictionary<string, string[]>
+            {
+                ["Finanzas.Facturas.Crear"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
+                // ... resto de los permisos ...
+            };
+        }
+    }
+
     public List<ModuleAction> GetActions()
     {
         return new List<ModuleAction>
@@ -109,6 +155,9 @@ public class FinanzasModule : IModule
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
+        // Actualizar la cadena de conexión si es necesario
+        _connectionString ??= configuration.GetConnectionString("DefaultConnection");
+        // Registrar servicios del módulo
         services.AddScoped<IFacturaService, FacturaService>();
         services.AddScoped<IPagoService, PagoService>();
     }
@@ -121,4 +170,13 @@ public class FinanzasModule : IModule
         Console.WriteLine($"[{ModuleName}] Componentes: {GetComponents().Count}, Acciones: {GetActions().Count}");
         await Task.CompletedTask;
     }
+
+    class ModulePermission { 
+    
+        public string ActionKey { get; set; } = string.Empty;
+        public string Roles { get; set; } = string.Empty;
+
+    }
+
+
 }
