@@ -111,8 +111,30 @@ try
     // Registrar IModuleManager para que otros servicios puedan consultarlo
     builder.Services.AddSingleton<IModuleManager>(moduleLoader);
 
+    // ✅ CORREGIDO: Construir ruta absoluta a la carpeta Modules
+    var baseDirectory = AppContext.BaseDirectory; // bin\Debug\net8.0\
+    var modulesPath = Path.Combine(baseDirectory, "Modules");
+
+    Log.Information("🔍 Buscando módulos en: {ModulesPath}", modulesPath);
+    Log.Information("📂 Directorio base de aplicación: {BaseDirectory}", baseDirectory);
+
+    // Verificar si la carpeta existe antes de cargar
+    if (!Directory.Exists(modulesPath))
+    {
+        Log.Warning("⚠️ La carpeta Modules no existe: {ModulesPath}", modulesPath);
+        Log.Warning("⚠️ Creando carpeta Modules...");
+        Directory.CreateDirectory(modulesPath);
+    }
+
+    // Listar archivos DLL en la carpeta
+    var dllFiles = Directory.GetFiles(modulesPath, "*.dll", SearchOption.AllDirectories);
+    Log.Information("📋 Archivos DLL encontrados en Modules: {DllCount}", dllFiles.Length);
+    foreach (var dll in dllFiles)
+    {
+        Log.Debug("   • {DllName}", Path.GetFileName(dll));
+    }
+
     // Descubrir y cargar módulos desde la carpeta "Modules"
-    var modulesPath = "Modules";
     var modulosEncontrados = await moduleLoader.DiscoverAndLoadModulesAsync(modulesPath);
 
     Console.WriteLine($"\n╔══════════════════════════════════════════════════════════╗");
