@@ -103,9 +103,9 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
     }
 
     /// <summary>
-    /// Obtiene todas las acciones disponibles para el usuario actual
+    /// Implementación lectura de permisos de actions por componente IFM
     /// </summary>
-    public async Task<List<string>> GetAvailableActionsAsync()
+    public async Task<List<string>> GetAvailableActionsAsync()  
     {
         try
         {
@@ -272,7 +272,7 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
     }
 
     /// <summary>
-    /// Obtiene los componentes visibles para el usuario actual (para construir el menú)
+    /// Implementación de permisos para componentes IFM
     /// </summary>
     public async Task<List<ModuleComponent>> GetVisibleComponentsAsync()
     {
@@ -322,75 +322,13 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
             .Select(c => c.Value)
             .ToList();
 
-        if (permissionClaims.Any())
-        {
             return permissionClaims
                 .Select(p => int.TryParse(p, out var id) ? id : 0)
                 .Where(id => id > 0)
                 .ToList();
-        }
-
-        // Opción 2: Mapeo de roles a IDs de permisos (temporal, para compatibilidad)
-        // TODO: Reemplazar con consulta a BD cuando tengas tabla Usuarios-Permisos
-        var userRoles = user.Claims
-            .Where(c => c.Type == ClaimTypes.Role)
-            .Select(c => c.Value)
-            .ToList();
-
-        return MapRolesToPermissionIds(userRoles);
     }
 
-    /// <summary>
-    /// Mapeo temporal de roles a IDs de permisos
-    /// TODO: Reemplazar con consulta a BD
-    /// </summary>
-    private List<int> MapRolesToPermissionIds(List<string> roles)
-    {
-        var permissionIds = new HashSet<int>();
 
-        foreach (var role in roles)
-        {
-            switch (role.ToLower())
-            {
-                case "admin":
-                    permissionIds.Add(1); // Admin
-                    break;
-                case "gerente.finanzas":
-                case "gerentefinanzas":
-                    permissionIds.Add(2); // Gerente Finanzas
-                    break;
-                case "coordinador.finanzas":
-                case "coordinadorfinanzas":
-                    permissionIds.Add(3); // Coordinador Finanzas
-                    break;
-                case "contador":
-                    permissionIds.Add(4); // Contador
-                    break;
-                case "gestor.prospectos":
-                case "gestorprospectos":
-                    permissionIds.Add(5); // Gestor Prospectos
-                    break;
-                case "coordinador.prospectos":
-                case "coordinadorprospectos":
-                    permissionIds.Add(6); // Coordinador Prospectos
-                    break;
-                case "revisor.legal":
-                case "revisorlegal":
-                    permissionIds.Add(7); // Revisor Legal
-                    break;
-                case "revisor.finanzas":
-                case "revisorfinanzas":
-                    permissionIds.Add(8); // Revisor Finanzas
-                    break;
-                case "revisor.tecnico":
-                case "revisortecnico":
-                    permissionIds.Add(9); // Revisor Técnico
-                    break;
-            }
-        }
-
-        return permissionIds.ToList();
-    }
 
     /// <summary>
     /// Verifica si el usuario tiene permiso para acceder a una acción (por ActionKey)

@@ -265,7 +265,7 @@
 
     // ✅ Bandera de configuración para visibilidad de iconos
     // TODO: Obtener de base de datos (tabla Configuracion o Cliente)
-    private bool _showAllIcons = false; // Por defecto: mostrar todos los iconos
+    private bool _showAllIcons = true; // Por defecto: mostrar todos los iconos
 
     protected override async Task OnInitializedAsync()
     {
@@ -301,7 +301,6 @@
 
             // ✅ TODO: Obtener configuración de visibilidad de iconos desde BD
             // _showAllIcons = await ConfigService.GetShowAllIconsAsync();
-            _showAllIcons = false;
 
             if (!_visibleComponents?.Any() ?? true)
             {

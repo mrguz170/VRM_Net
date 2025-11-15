@@ -74,7 +74,9 @@ public class ModuleLoader : IModuleManager
                     try
                     {
                         var module = (IModule)Activator.CreateInstance(moduleType)!;
-                        
+
+                       // var metadata = await _metadataService.GetMetadataAsync(module.IdModule);
+
                         _logger.LogInformation(
                             "[ModuleLoader] Módulo descubierto: {ModuleName} (ID: {IdModule}, Versión: {Version})",
                             module.ModuleName,

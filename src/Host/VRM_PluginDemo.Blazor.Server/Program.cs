@@ -1,12 +1,13 @@
-﻿using VRM_Plugin.Blazor.Server.Components;
-using VRM_Plugin.Blazor.Server.Services;
-using VRM_Plugin.Blazor.Server.StateService;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using MudBlazor.Services;
-using System.Reflection;
 using Serilog;
 using Serilog.Events;
+using System.Reflection;
+using VRM_Plugin.Blazor.Server.Components;
+using VRM_Plugin.Blazor.Server.Services;
+using VRM_Plugin.Blazor.Server.StateService;
+using VRM_Plugin.Core.Abstractions;
 
 // ==================== CONFIGURACIÓN DE SERILOG ====================
 // ✅ Configurar Serilog ANTES de crear el builder
@@ -98,6 +99,7 @@ try
     // ✅ NUEVO: Servicio para obtener nombres de visualización de roles
     builder.Services.AddSingleton<IRoleDisplayNameService, RoleDisplayNameService>();
 
+
     // ==================== SISTEMA DE PLUGINS ====================
 
     // Crear un ServiceProvider temporal solo para obtener el logger
@@ -137,25 +139,15 @@ try
     // Descubrir y cargar módulos desde la carpeta "Modules"
     var modulosEncontrados = await moduleLoader.DiscoverAndLoadModulesAsync(modulesPath);
 
-    Console.WriteLine($"\n╔══════════════════════════════════════════════════════════╗");
-    Console.WriteLine($"║  🔌 SISTEMA DE PLUGINS INICIADO                         ║");
-    Console.WriteLine($"║  📦 Módulos cargados: {modulosEncontrados,-2}                              ║");
-    Console.WriteLine($"╚══════════════════════════════════════════════════════════╝\n");
-
     // ==================== REGISTRAR SERVICIOS DE MÓDULOS ====================
 
     var todosLosModulos = moduleLoader.GetAllModules();
 
     foreach (var modulo in todosLosModulos)
     {
-        Console.WriteLine($"⚙️  Configurando servicios del módulo: {modulo.ModuleName} (ID: {modulo.IdModule})");
-
         // Cada módulo registra sus propios servicios (repositorios, validadores, etc.)
         modulo.ConfigureServices(builder.Services, builder.Configuration);
     }
-
-    Console.WriteLine($"\n✅ Configuración de servicios completada\n");
-
     // ==================== CONSTRUIR LA APLICACIÓN ====================
 
     var app = builder.Build();
@@ -187,12 +179,6 @@ try
         .Distinct()
         .ToArray();
 
-    Console.WriteLine($"🔌 Registrando {moduleAssemblies.Length} ensamblados de módulos para interactividad:");
-    foreach (var asm in moduleAssemblies)
-    {
-        Console.WriteLine($"   • {asm.GetName().Name}");
-    }
-
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode()
         .AddAdditionalAssemblies(moduleAssemblies);
@@ -205,48 +191,43 @@ try
 
     app.Lifetime.ApplicationStarted.Register(() =>
     {
-        Console.WriteLine("\n" + new string('=', 60));
-        Console.WriteLine("🚀 APLICACIÓN INICIADA");
-        Console.WriteLine(new string('=', 60));
-        Console.WriteLine($"🌐 Entorno: {environmentName}");
-        Console.WriteLine($"📍 URL: {urls.FirstOrDefault() ?? "No disponible"}");
-        Console.WriteLine("\n📦 MÓDULOS CARGADOS:");
-        Console.WriteLine(new string('-', 60));
+        //Console.WriteLine("\n" + new string('=', 60));
+        //Console.WriteLine("🚀 APLICACIÓN INICIADA");
+        //Console.WriteLine(new string('=', 60));
+        //Console.WriteLine($"🌐 Entorno: {environmentName}");
+        //Console.WriteLine($"📍 URL: {urls.FirstOrDefault() ?? "No disponible"}");
+        //Console.WriteLine("\n📦 MÓDULOS CARGADOS:");
+        //Console.WriteLine(new string('-', 60));
 
         foreach (var modulo in todosLosModulos)
         {
-            Console.WriteLine($"  • {modulo.ModuleName,-20} (ID: {modulo.IdModule}) v{modulo.Version,-8}");
-            Console.WriteLine($"    {modulo.DisplayName}");
-            Console.WriteLine($"    Descripción: {modulo.Description}");
+            //Console.WriteLine($"  • {modulo.ModuleName,-20} (ID: {modulo.IdModule}) v{modulo.Version,-8}");
+            //Console.WriteLine($"    {modulo.DisplayName}");
+            //Console.WriteLine($"    Descripción: {modulo.Description}");
             
             var components = modulo.GetComponents();
             var actions = modulo.GetActions();
             
-            Console.WriteLine($"    📋 Componentes: {components.Count}");
-            Console.WriteLine($"    ⚡ Acciones: {actions.Count}");
+            //Console.WriteLine($"    📋 Componentes: {components.Count}");
+            //Console.WriteLine($"    ⚡ Acciones: {actions.Count}");
             
             // Mostrar componentes raíz (categorías)
             var rootComponents = components.Where(c => c.IdParent == null && c.ShowInMenu);
             if (rootComponents.Any())
             {
-                Console.WriteLine($"    Menú principal:");
+                //Console.WriteLine($"    Menú principal:");
                 foreach (var rc in rootComponents)
                 {
                     Console.WriteLine($"      └─ {rc.Name} ({rc.Icon})");
                 }
             }
-
-            Console.WriteLine();
         }
-
-        Console.WriteLine(new string('=', 60) + "\n");
-        Log.Information("✅ Aplicación VRM_PluginDemo iniciada correctamente");
     });
 
-    Log.Information("🎯 Iniciando aplicación web...");
+
     app.Run();
     
-    Log.Information("🛑 Aplicación detenida correctamente");
+
 }
 catch (Exception ex)
 {

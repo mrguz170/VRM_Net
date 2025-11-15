@@ -1,60 +1,49 @@
-@using VRM_Plugin.Blazor.Server.Services
-@inject IModuleAuthorizationService AuthService
+@namespace VRM_Plugin.Blazor.Server.Components.Auth
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using VRM_Plugin.Core.Abstractions
+@inject IEnumerable<IModule> Modules
 
-@if (isAuthorized)
+@if (HasPermission)
 {
     @ChildContent
 }
-else if (ShowFallback && FallbackContent != null)
-{
-    @FallbackContent
-}
 
 @code {
-    /// <summary>
-    /// Clave de la acción a verificar (ej: "Finanzas.Facturas.TimbrarSAT")
-    /// </summary>
-    [Parameter, EditorRequired]
-    public string ActionKey { get; set; } = string.Empty;
+    [Parameter]
+    public string Action { get; set; } = "";
 
-    /// <summary>
-    /// Contenido a mostrar si el usuario tiene permiso
-    /// </summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
-    /// <summary>
-    /// Contenido alternativo a mostrar si el usuario NO tiene permiso
-    /// </summary>
-    [Parameter]
-    public RenderFragment? FallbackContent { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
 
-    /// <summary>
-    /// Indica si se debe mostrar el contenido fallback cuando no tiene permiso
-    /// </summary>
-    [Parameter]
-    public bool ShowFallback { get; set; } = false;
-
-    private bool isAuthorized = false;
+    private bool HasPermission = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await CheckPermissionAsync();
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await CheckPermissionAsync();
-    }
-
-    private async Task CheckPermissionAsync()
-    {
-        if (string.IsNullOrEmpty(ActionKey))
+        if (AuthenticationState != null)
         {
-            isAuthorized = false;
-            return;
-        }
+            var authState = await AuthenticationState;
+            var user = authState.User;
 
-        isAuthorized = await AuthService.CanExecuteActionAsync(ActionKey);
+            if (user.Identity?.IsAuthenticated ?? false)
+            {
+                // Obtener el módulo por el prefijo de la acción (ej: "Finanzas" de "Finanzas.Facturas.Ver")
+                var moduleId = Action.Split('.').FirstOrDefault();
+                var module = Modules.FirstOrDefault(m => m.ModuleName == moduleId);
+
+                if (module != null)
+                {
+                  string id = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).FirstOrDefault();
+                    var permissions = module.GetActionPermission(id);
+                    if (permissions.TryGetValue(Action, out var allowedRoles))
+                    {
+                        HasPermission = allowedRoles.Any(role => user.IsInRole(role));
+                    }
+                }
+            }
+        }
     }
 }

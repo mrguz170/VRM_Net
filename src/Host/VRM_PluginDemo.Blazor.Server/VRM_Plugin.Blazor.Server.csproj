@@ -12,6 +12,7 @@
   <ItemGroup>
     <!-- Actualizar ruta: ahora Core está 2 niveles arriba -->
     <ProjectReference Include="..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Core\VRM_Plugin.Data\VRM_Plugin.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +30,10 @@
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Shared\" />
+  </ItemGroup>
+
   <!-- 🔥 Target para copiar módulos durante BUILD -->
   <Target Name="CopyModulesOnBuild" AfterTargets="Build">
     <Message Text="🏗️ [BUILD] Descubriendo y compilando módulos..." Importance="high" />
@@ -44,14 +49,11 @@
       <ModuleProjects Include="$(ModulesSourceDir)**\*.csproj" />
     </ItemGroup>
 
-    <Message Text="📦 Encontrados @(ModuleProjects->Count()) proyectos de módulos:" Importance="high" />
+    <Message Text="📦 Encontrados @(ModuleProjects-&gt;Count()) proyectos de módulos:" Importance="high" />
     <Message Text="   %(ModuleProjects.Identity)" Importance="high" />
 
     <!-- 🔨 Compilar todos los módulos encontrados -->
-    <MSBuild Projects="@(ModuleProjects)" 
-             Targets="Build" 
-             Properties="Configuration=$(Configuration);Platform=$(Platform)" 
-             BuildInParallel="true" />
+    <MSBuild Projects="@(ModuleProjects)" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
 
     <!-- 🧹 Limpiar carpeta Modules de salida -->
     <ItemGroup>
@@ -63,29 +65,20 @@
 
     <!-- 📋 Buscar DLLs de módulos compilados (buscar específicamente VRM_Plugin.*.dll) -->
     <ItemGroup>
-      <ModuleDlls Include="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.*.dll" 
-                   Exclude="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.Core.*.dll" />
-      <ModulePdbs Include="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.*.pdb" 
-                   Exclude="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.Core.*.pdb" />
+      <ModuleDlls Include="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.*.dll" Exclude="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.Core.*.dll" />
+      <ModulePdbs Include="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.*.pdb" Exclude="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.Core.*.pdb" />
     </ItemGroup>
 
     <Message Text="📋 Archivos DLL encontrados para copiar:" Importance="high" />
     <Message Text="   %(ModuleDlls.Identity)" Importance="high" />
 
     <!-- 📦 Copiar DLLs a la carpeta Modules -->
-    <Copy SourceFiles="@(ModuleDlls)" 
-          DestinationFolder="$(ModulesOutDir)" 
-          SkipUnchangedFiles="false" 
-          OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(ModuleDlls)" DestinationFolder="$(ModulesOutDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" />
 
     <!-- 📦 Copiar PDBs (para debugging) -->
-    <Copy SourceFiles="@(ModulePdbs)" 
-          DestinationFolder="$(ModulesOutDir)" 
-          SkipUnchangedFiles="false" 
-          OverwriteReadOnlyFiles="true" 
-          ContinueOnError="true" />
+    <Copy SourceFiles="@(ModulePdbs)" DestinationFolder="$(ModulesOutDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
 
-    <Message Text="✅ @(ModuleDlls->Count()) módulos copiados a $(ModulesOutDir)" Importance="high" />
+    <Message Text="✅ @(ModuleDlls-&gt;Count()) módulos copiados a $(ModulesOutDir)" Importance="high" />
   </Target>
 
   <!-- 🔥 Target para copiar módulos durante PUBLISH -->
@@ -103,14 +96,11 @@
       <ModuleProjects Include="$(ModulesSourceDir)**\*.csproj" />
     </ItemGroup>
 
-    <Message Text="📦 Compilando @(ModuleProjects->Count()) módulos para publicación..." Importance="high" />
+    <Message Text="📦 Compilando @(ModuleProjects-&gt;Count()) módulos para publicación..." Importance="high" />
     <Message Text="   %(ModuleProjects.Identity)" Importance="high" />
 
     <!-- 🔨 Compilar todos los módulos encontrados -->
-    <MSBuild Projects="@(ModuleProjects)" 
-             Targets="Build" 
-             Properties="Configuration=$(Configuration);Platform=$(Platform)" 
-             BuildInParallel="true" />
+    <MSBuild Projects="@(ModuleProjects)" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" BuildInParallel="true" />
 
     <!-- 📁 Crear carpeta Modules en la salida de publicación -->
     <RemoveDir Directories="$(PublishModulesDir)" ContinueOnError="true" />
@@ -118,29 +108,20 @@
 
     <!-- 📋 Buscar DLLs de módulos compilados (buscar específicamente VRM_Plugin.*.dll) -->
     <ItemGroup>
-      <PublishModuleDlls Include="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.*.dll" 
-                          Exclude="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.Core.*.dll" />
-      <PublishModulePdbs Include="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.*.pdb" 
-                          Exclude="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.Core.*.pdb" />
+      <PublishModuleDlls Include="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.*.dll" Exclude="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.Core.*.dll" />
+      <PublishModulePdbs Include="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.*.pdb" Exclude="$(ModulesSourceDir)**\bin\$(Configuration)\net8.0\VRM_Plugin.Core.*.pdb" />
     </ItemGroup>
 
     <Message Text="📋 Archivos DLL a copiar para publicación:" Importance="high" />
     <Message Text="   %(PublishModuleDlls.Identity)" Importance="high" />
 
     <!-- 📦 Copiar DLLs a la carpeta Modules de publicación -->
-    <Copy SourceFiles="@(PublishModuleDlls)" 
-          DestinationFolder="$(PublishModulesDir)" 
-          SkipUnchangedFiles="false" 
-          OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(PublishModuleDlls)" DestinationFolder="$(PublishModulesDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" />
 
     <!-- 📦 Copiar PDBs (para debugging) -->
-    <Copy SourceFiles="@(PublishModulePdbs)" 
-          DestinationFolder="$(PublishModulesDir)" 
-          SkipUnchangedFiles="false" 
-          OverwriteReadOnlyFiles="true" 
-          ContinueOnError="true" />
+    <Copy SourceFiles="@(PublishModulePdbs)" DestinationFolder="$(PublishModulesDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
 
-    <Message Text="✅ @(PublishModuleDlls->Count()) módulos copiados a $(PublishModulesDir)" Importance="high" />
+    <Message Text="✅ @(PublishModuleDlls-&gt;Count()) módulos copiados a $(PublishModulesDir)" Importance="high" />
   </Target>
   
 </Project>

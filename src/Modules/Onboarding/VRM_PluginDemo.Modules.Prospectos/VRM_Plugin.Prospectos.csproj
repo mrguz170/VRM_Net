@@ -16,6 +16,7 @@
   <ItemGroup>
     <!-- Actualizar ruta: Onboarding -> Modules -> src -> Core (4 niveles arriba) -->
     <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\Core\VRM_Plugin.Data\VRM_Plugin.Data.csproj" />
   </ItemGroup>
 
 </Project>

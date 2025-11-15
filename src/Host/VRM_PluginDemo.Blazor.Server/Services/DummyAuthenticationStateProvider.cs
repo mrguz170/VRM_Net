@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Security.Claims;
-
+using VRM_Plugin.Data;
+    
 namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
@@ -170,7 +171,8 @@ public class DummyAuthenticationStateProvider : AuthenticationStateProvider, IDi
             new Claim(ClaimTypes.NameIdentifier, usuario.Id),
             new Claim(ClaimTypes.Name, usuario.Username),
             new Claim(ClaimTypes.Email, usuario.Email),
-            new Claim("NombreCompleto", usuario.NombreCompleto)
+            new Claim("NombreCompleto", usuario.NombreCompleto),
+            new Claim("Permission", usuario.Permission)
         };
 
             // Agregar roles como claims
@@ -347,7 +349,7 @@ ClienteId = "cliente-001",
         }
     };
 
-    private User? GetDummyUserByEmail(string email, string password)
+    private User? GetDummyUserByEmail(string login, string password)
     {
         string? connectionString = _configuration.GetConnectionString("DefaultConnection");
         if (string.IsNullOrEmpty(connectionString))
@@ -357,9 +359,9 @@ ClienteId = "cliente-001",
         }
 
         DatabaseHelper Ds = new DatabaseHelper(connectionString);
-        var user = Ds.ExecuteStoredProcedure("ConsultaUsuarios", new Dictionary<string, object>
+        var user = Ds.ExecuteStoredProcedure("sp_get_user", new Dictionary<string, object>
         {
-            { "mail", email }
+            { "login", login }
             //,
             //{ "p_password", password },
             //{ "p_fecha_intento", DateTime.Now }
@@ -369,7 +371,7 @@ ClienteId = "cliente-001",
 
         if (user.Rows.Count > 0)
         {
-            bool DeshashedPassword = PasswordHasher.VerifyPassword(password, user.Rows[0]["PasswordHash"].ToString());
+            bool DeshashedPassword = PasswordHasher.VerifyPassword(password, user.Rows[0]["password"].ToString());
             if (DeshashedPassword)
             {
 
@@ -377,12 +379,12 @@ ClienteId = "cliente-001",
 
                 usuario = new User
                 {
-                    Id = row["Id"].ToString(),
-                    Username = row["Username"].ToString(),
-                    ClienteId = Convert.ToString(row["ClienteId"]),
+                    Id = row["user_id"].ToString(),
+                    Username = row["user_name"].ToString(),
                     NombreCompleto = row["NombreCompleto"].ToString(),
-                    Email = row["Email"].ToString(),
-                    Roles = row["Roles"].ToString()
+                    Email = row["email"].ToString(),
+                    Roles = row["role"].ToString(),
+                    Permission = row["permission"].ToString() 
                 };
             }
         }
@@ -420,8 +422,7 @@ public class User
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string NombreCompleto { get; set; } = string.Empty;
-    public string ClienteId { get; set; } = string.Empty;
     public string Roles { get; set; } = string.Empty;
-    public string PasswordHash { get; set; } = string.Empty; // A�adir esta propiedad
+    public string Permission { get; set; } = string.Empty; // A�adir esta propiedad
 }
 

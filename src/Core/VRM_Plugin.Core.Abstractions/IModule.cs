@@ -65,6 +65,7 @@ public interface IModule
     /// </summary>
     List<ModuleComponent> GetComponents();
 
+    void GetModule();
     // ==================== ACCIONES GRANULARES ====================
 
     /// <summary>
@@ -101,4 +102,6 @@ public interface IModule
     /// Útil para inicialización, migraciones de BD, carga de configuración, etc.
     /// </summary>
     Task OnModuleLoadedAsync() => Task.CompletedTask;
+
+    Dictionary<string, string[]> GetActionPermission(string id);
 }

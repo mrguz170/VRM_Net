@@ -69,7 +69,6 @@ else
             // Verificar que al menos un parámetro de identificación esté presente
             if (!IdComponent.HasValue && !IdModule.HasValue && string.IsNullOrEmpty(ModuleId))
             {
-                Logger.LogError("AuthorizeModule requiere IdComponent, IdModule o ModuleId");
                 _deniedReason = "Configuración inválida del componente de autorización";
                 _isAuthorized = false;
                 _isLoading = false;
@@ -83,7 +82,6 @@ else
             // Verificar si está autenticado
             if (!user.Identity?.IsAuthenticated ?? true)
             {
-                Logger.LogWarning("Usuario no autenticado intentó acceder al componente");
                 _deniedReason = "Debes iniciar sesión para acceder a este recurso";
                 _isAuthorized = false;
                 _isLoading = false;
@@ -98,18 +96,7 @@ else
                 
                 if (!_isAuthorized)
                 {
-                    Logger.LogWarning(
-                        "Usuario {User} sin permisos para componente IdComponent={IdComponent}",
-                        user.Identity.Name,
-                        IdComponent.Value);
                     _deniedReason = $"No tienes permisos para acceder al componente ID: {IdComponent.Value}";
-                }
-                else
-                {
-                    Logger.LogDebug(
-                        "Usuario {User} autorizado para componente IdComponent={IdComponent}",
-                        user.Identity.Name,
-                        IdComponent.Value);
                 }
             }
             else if (IdModule.HasValue)
@@ -120,19 +107,9 @@ else
 
                 if (!_isAuthorized)
                 {
-                    Logger.LogWarning(
-                        "Usuario {User} sin permisos para módulo IdModule={IdModule}",
-                        user.Identity.Name,
-                        IdModule.Value);
                     _deniedReason = $"No tienes permisos para acceder al módulo ID: {IdModule.Value}";
                 }
-                else
-                {
-                    Logger.LogDebug(
-                        "Usuario {User} autorizado para módulo IdModule={IdModule}",
-                        user.Identity.Name,
-                        IdModule.Value);
-                }
+
             }
             else if (!string.IsNullOrEmpty(ModuleId))
             {
@@ -152,14 +129,6 @@ else
                     // Fallback: buscar por ModuleName (lento, no recomendado)
                     _isAuthorized = false;
                     _deniedReason = "ModuleId debe ser un ID numérico válido";
-                }
-
-                if (!_isAuthorized)
-                {
-                    Logger.LogWarning(
-                        "Usuario {User} sin permisos para módulo ModuleId={ModuleId}",
-                        user.Identity.Name,
-                        ModuleId);
                 }
             }
 

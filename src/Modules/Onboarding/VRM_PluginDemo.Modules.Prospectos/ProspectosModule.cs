@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Data;
 using VRM_Plugin.Core.Abstractions;
 using VRM_Plugin.Core.Abstractions.Entities;
 using VRM_Plugin.Modules.Prospectos.Services;
-using VRM_Plugin.Modules.Prospectos.Components;
+using VRM_Plugin.Data;
 
 namespace VRM_Plugin.Modules.Prospectos;
 
@@ -15,12 +16,21 @@ namespace VRM_Plugin.Modules.Prospectos;
 /// </summary>
 public class ProspectosModule : IModule
 {
+
+    private readonly IConfiguration _configuration;
+    private string? _connectionString;
+    private Dictionary<string, string[]>? _cachedPermissions = new Dictionary<string, string[]>();
+
     public int IdModule { get; set; } = 2;
     public string ModuleName => "Prospectos";
     public string DisplayName => "Gestión de Prospectos";
     public string Description => "Módulo para gestionar solicitudes de proveedores. Permite recibir, revisar y aprobar empresas que desean ser proveedores.";
     public string Version => "1.0.0";
 
+    public void GetModule()
+    {
+
+    }
     public List<ModuleComponent> GetComponents()
     {
         return new List<ModuleComponent>
@@ -31,11 +41,9 @@ public class ProspectosModule : IModule
                 IdComponent = 4, 
                 IdModule = 2, 
                 IdParent = null,  // ✅ NULL = Aparece en raíz del menú
-                ComponentCode = "Prospectos.Root", 
                 Name = "Prospectos", 
                 Route = "/prospectos", 
-                Icon = "ri-list-check-3", 
-                ComponentType = typeof(VRM_Plugin.Modules.Prospectos.Components.Prospectos), 
+                Icon = "ri-list-check-3",              
                 ShowInMenu = true, 
                 MenuOrder = 10, 
                 RequiredPermissionIds = new List<int> { 1, 5, 6 }, 
@@ -44,6 +52,40 @@ public class ProspectosModule : IModule
         };
     }
 
+    public Dictionary<string, string[]> GetActionPermission(string id)
+    {
+        try
+        {
+            DatabaseHelper Ds = new DatabaseHelper(_connectionString);
+
+            var permissions = Ds.ExecuteStoredProcedure("ConsultaPermisos", new Dictionary<string, object>
+        {
+            { "Modulo", "Finanzas" }
+        });
+
+            foreach (DataRow row in permissions.Rows)
+            {
+                string key = row["PermisoId"].ToString()!;  // nombre de columna clave
+                string permisosStr = row["Roles"].ToString()!; // valores separados por coma
+
+                // convertir el string en arreglo
+                string[] valores = permisosStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                _cachedPermissions[key] = valores;
+            }
+
+            return _cachedPermissions;
+        }
+        catch (Exception ex)
+        {
+            // Si hay error, usar los permisos por defecto definidos en el código
+            return new Dictionary<string, string[]>
+            {
+                ["Finanzas.Facturas.Crear"] = new[] { "Admin", "GerenteFinanzas", "CoordinadorFinanzas" },
+                // ... resto de los permisos ...
+            };
+        }
+    }
     public List<ModuleAction> GetActions()
     {
         return new List<ModuleAction>

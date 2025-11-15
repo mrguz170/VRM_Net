@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MySqlConnector;
+using System.ComponentModel;
 using System.Data;
 using VRM_Plugin.Blazor.Server.Services;
 using VRM_Plugin.Core.Abstractions;
 using VRM_Plugin.Core.Abstractions.Entities;
-using VRM_Plugin.Modules.Finanzas.Services;
+using VRM_Plugin.Data;
 using VRM_Plugin.Modules.Finanzas.Components;
 using VRM_Plugin.Modules.Finanzas.Services;
 
@@ -23,74 +23,104 @@ public class FinanzasModule : IModule
     private readonly IConfiguration _configuration;
     private string? _connectionString;
     private Dictionary<string, string[]>? _cachedPermissions = new Dictionary<string, string[]>();
-    public string ModuleId => "Finanzas";
+    private List<ModuleComponent>? _ComponentValues = new List<ModuleComponent>();
+    private string? _namemodule;
+    private string? _displayname;
+    private string? _description;
+    private string? _version;
 
     public int IdModule { get; set; } = 1;
     public string ModuleName => "Finanzas";
-    public string DisplayName => "Gestión de Finanzas";
-    public string Description => "Módulo para gestionar operaciones financieras. Incluye facturas, pagos, conciliaciones y cuentas por pagar.";
-    public string Version => "1.0.0";
+    public string DisplayName => _displayname;
+    public string Description => _description;
+    public string Version => _version;
 
     public List<ModuleComponent> GetComponents()
     {
-        return new List<ModuleComponent>
+        try
         {
-            // ===== COMPONENTE RAÍZ (ACTÚA COMO CATEGORÍA) =====
-            new ModuleComponent 
-            { 
-                IdComponent = 1, 
-                IdModule = 1, 
-                IdParent = null,  // ✅ NULL = Categoría raíz en menú
-                ComponentCode = "Finanzas.Root", 
-                Name = "Finanzas", 
-                Description = "Módulo principal de finanzas", 
-                Route = "",  // Sin ruta, solo contenedor
-                Icon = "ri-money-dollar-circle-line", 
-                MenuOrder = 20, 
-                ShowInMenu = true, 
-                ComponentType = null,  // Sin componente Blazor, solo contenedor
-                RequiredPermissionIds = new List<int> { 1, 2, 3, 4 }, 
-                IsActive = true 
-            },
-            
-            // ===== SUBMENÚ: FACTURAS =====
-            new ModuleComponent 
-            { 
-                IdComponent = 2, 
-                IdModule = 1, 
-                IdParent = 1,  // ✅ Hijo de "Finanzas"
-                ComponentCode = "Finanzas.Facturas", 
-                Name = "Facturas", 
-                Description = "Gestión de facturas", 
-                Route = "/finanzas/facturas", 
-                Icon = "ri-file-list-3-line", 
-                MenuOrder = 1, 
-                ShowInMenu = true, 
-                ComponentType = typeof(Components.Facturas), 
-                RequiredPermissionIds = new List<int>(),  // Hereda del padre
-                IsActive = true 
-            },
-            
-            // ===== SUBMENÚ: COBROS Y PAGOS =====
-            new ModuleComponent 
-            { 
-                IdComponent = 3, 
-                IdModule = 1, 
-                IdParent = 1,  // ✅ Hijo de "Finanzas"
-                ComponentCode = "Finanzas.CobrosYPagos", 
-                Name = "Cobros y Pagos", 
-                Description = "Gestión de cobros y pagos", 
-                Route = "/finanzas/cobros-pagos", 
-                Icon = "ri-exchange-dollar-line", 
-                MenuOrder = 2, 
-                ShowInMenu = true, 
-                ComponentType = typeof(Components.CobrosYPagos), 
-                RequiredPermissionIds = new List<int> { 1, 2, 3 }, 
-                IsActive = true 
+            DatabaseHelper Ds = new DatabaseHelper(_connectionString);
+           
+                var component = Ds.ExecuteStoredProcedure("sp_get_component", new Dictionary<string, object>
+        {
+            { "module_id", 1 }
+        });
+
+            _ComponentValues = new List<ModuleComponent>();
+
+                      if (_ComponentValues.Count == 0)
+                        foreach (DataRow row in component.Rows)
+                        {
+
+                        var permisos = Convert.ToString(row["roles"]).Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        List<int> listaroles = permisos.Select(int.Parse).ToList();
+
+                        _ComponentValues.Add(new ModuleComponent
+                            {
+                                IdComponent = Convert.ToInt32(row["component_id"]),
+                                IdModule = Convert.ToInt32(row["module_id"]),
+                                IdParent = row["parent_id"] != DBNull.Value ? Convert.ToInt32(row["parent_id"]) : null,
+                                Name = row["component_name"].ToString()!,
+                                Description = row["description"].ToString()!,
+                                Route = row["route"].ToString()!,
+                                Icon = row["icon"].ToString()!,
+                                MenuOrder = Convert.ToInt32(row["menu_order"]),
+                                ShowInMenu = Convert.ToBoolean(row["show_in_menu"]),
+                                RequiredPermissionIds = permisos != null ? listaroles : new List<int>(1),
+                                IsActive = Convert.ToBoolean(row["is_active"])
+                            });
+                        
+                }
+
+                return _ComponentValues;
             }
-        };
+        catch (Exception ex)
+        {
+            return new List<ModuleComponent>
+            {
+                new ModuleComponent
+                {
+                    IdComponent = 1,
+                    IdModule = 1,
+                    IdParent = null,  // ✅ NULL = Categoría raíz en menú
+                    Name = "Finanzas",
+                    Description = "Módulo principal de finanzas",
+                    Route = "",  // Sin ruta, solo contenedor
+                    Icon = "ri-money-dollar-circle-line",
+                    MenuOrder = 20,
+                    ShowInMenu = true,
+                    RequiredPermissionIds = new List<int> { 1, 2, 3, 4 },
+                    IsActive = true
+                }
+            };
+        }
     }
 
+    public void GetModule() {
+
+        try
+        {
+            DatabaseHelper Ds = new DatabaseHelper(_connectionString);
+
+            var module_info = Ds.ExecuteStoredProcedure("sp_get_module_info", new Dictionary<string, object>
+        {
+            { "module_id", IdModule }
+        });
+
+            foreach (DataRow row in module_info.Rows)
+            {
+                _namemodule = row["module_name"].ToString()!;
+                _displayname = row["display_name"].ToString()!;
+                _version = row["version"].ToString()!;
+                _description    = row["description"].ToString()!;
+            }
+            
+            }
+        catch (Exception ex)
+        {
+
+        }
+        }
 
     public Dictionary<string, string[]> GetActionPermission(string id)
     {
@@ -157,9 +187,11 @@ public class FinanzasModule : IModule
     {
         // Actualizar la cadena de conexión si es necesario
         _connectionString ??= configuration.GetConnectionString("DefaultConnection");
+
         // Registrar servicios del módulo
         services.AddScoped<IFacturaService, FacturaService>();
         services.AddScoped<IPagoService, PagoService>();
+        services.AddScoped<IModule, FinanzasModule>();
     }
 
     public bool IsEnabledForClient(string clienteId) => true;
@@ -170,13 +202,5 @@ public class FinanzasModule : IModule
         Console.WriteLine($"[{ModuleName}] Componentes: {GetComponents().Count}, Acciones: {GetActions().Count}");
         await Task.CompletedTask;
     }
-
-    class ModulePermission { 
-    
-        public string ActionKey { get; set; } = string.Empty;
-        public string Roles { get; set; } = string.Empty;
-
-    }
-
 
 }

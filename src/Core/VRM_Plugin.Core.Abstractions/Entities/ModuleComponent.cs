@@ -25,14 +25,6 @@ public class ModuleComponent
     /// </summary>
     public int? IdParent { get; set; }
 
-    // ===== METADATA DEL COMPONENTE =====
-
-    /// <summary>
-    /// Código técnico del componente (UNIQUE en BD)
-    /// Ej: "Finanzas.Root", "Finanzas.Facturas"
-    /// </summary>
-    public string ComponentCode { get; set; } = string.Empty;
-
     /// <summary>
     /// Nombre del componente para mostrar en la UI
     /// </summary>
@@ -55,7 +47,6 @@ public class ModuleComponent
     /// Tipo del componente Blazor (Type del archivo .razor)
     /// ?? NO se persiste en BD, solo se usa en runtime
     /// </summary>
-    public Type? ComponentType { get; set; }
 
     // ===== PRESENTACIÓN EN MENÚ =====
 
@@ -94,50 +85,4 @@ public class ModuleComponent
     /// </summary>
     public bool IsActive { get; set; } = true;
 
-    // ===== AUDITORÍA =====
-
-    /// <summary>
-    /// ? Fecha y hora de creación del registro (UTC)
-    /// </summary>
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    /// <summary>
-    /// ? Fecha y hora de última actualización (UTC)
-    /// NULL si nunca se ha actualizado
-    /// </summary>
-    public DateTime? UpdatedAt { get; set; }
-
-    /// <summary>
-    /// ? ID del usuario que creó el registro
-    /// NULL si fue creado por el sistema o migración
-    /// </summary>
-    public int? CreatedBy { get; set; }
-
-    /// <summary>
-    /// ? ID del usuario que realizó la última actualización
-    /// NULL si nunca se ha actualizado
-    /// </summary>
-    public int? UpdatedBy { get; set; }
-
-    // ===== NAVEGACIÓN (Entity Framework) =====
-
-    /// <summary>
-    /// Módulo al que pertenece este componente
-    /// </summary>
-    public Module? Module { get; set; }
-
-    /// <summary>
-    /// Componente padre (si tiene)
-    /// </summary>
-    public ModuleComponent? Parent { get; set; }
-
-    /// <summary>
-    /// Componentes hijos
-    /// </summary>
-    public List<ModuleComponent> Children { get; set; } = new();
-
-    /// <summary>
-    /// Acciones asociadas a este componente
-    /// </summary>
-    public List<ModuleAction> Actions { get; set; } = new();
 }

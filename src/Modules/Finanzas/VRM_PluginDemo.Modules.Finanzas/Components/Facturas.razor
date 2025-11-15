@@ -1,6 +1,9 @@
 @page "/finanzas/facturas"
+@using VRM_Plugin.Blazor.Server.Components.Auth
 @rendermode InteractiveServer
-@attribute [Authorize]  
+@using Microsoft.AspNetCore.Components.Authorization
+@using VRM_Plugin.Modules.Finanzas.Services
+@using VRM_Plugin.Modules.Finanzas.Domain
 
 <PageTitle>Facturas</PageTitle>
 
@@ -43,14 +46,14 @@
                 </div>
                 <div class="col-md-3 text-end">
                     <!-- ? ACCIÓN: Crear Factura - Admin, Gerente, Coordinador -->
-                    <AuthorizeView Roles="Admin,GerenteFinanzas,CoordinadorFinanzas">
+                    <AuthorizeAction Action="Finanzas.Facturas.Nueva">
                         <Authorized>
                             <button class="btn btn-primary" @onclick="AbrirModalCrear">
                                 <i class="ri-add-line mr-1"></i>
                                 Nueva Factura
                             </button>
                         </Authorized>
-                    </AuthorizeView>
+                    </AuthorizeAction>
                 </div>
             </div>
         </div>

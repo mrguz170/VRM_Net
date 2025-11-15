@@ -3,6 +3,7 @@
   <Folder Name="/src/Core/">
     <Project Path="src/Core/VRM_Plugin.Core.Abstractions/VRM_Plugin.Core.Abstractions.csproj" />
     <Project Path="src/Core/VRM_Plugin.Core.Domain/VRM_Plugin.Core.Domain.csproj" />
+    <Project Path="src/Core/VRM_Plugin.Data/VRM_Plugin.Data.csproj" />
   </Folder>
   <Folder Name="/src/Host/">
     <Project Path="src/Host/VRM_PluginDemo.Blazor.Server/VRM_Plugin.Blazor.Server.csproj" />
