@@ -1,11 +1,12 @@
 ﻿@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.JSInterop
-@using VRM_Plugin.Core.Abstractions.Entities
+@using VRM_Plugin.Core.Abstractions
+@using VRM_Plugin.Core.Abstractions.Data.DTOs
 @using VRM_Plugin.Blazor.Server.Services
 @using Microsoft.Extensions.Logging
 @inject IModuleManager ModuleManager
-@inject IModuleAuthorizationService AuthService
+@inject IModuleAuthorizationService ModuleAuth
 @inject ILogger<Sidebar> Logger
 @inject IJSRuntime JsRuntime
 @inject AuthenticationStateProvider AuthStateProvider
@@ -56,10 +57,10 @@
 
                         @if (_visibleComponents != null && _visibleComponents.Any())
                         {
-                            @foreach (var rootComponent in _visibleComponents.Where(c => c.IdParent == null))
+                            @foreach (var rootComponent in _visibleComponents.Where(c => c.ParentId == null))
                             {
-                                var children = _visibleComponents.Where(c => c.IdParent == rootComponent.IdComponent && !string.IsNullOrEmpty(c.Route)).ToList();
-                                var menuId = $"module_{rootComponent.IdComponent}";
+                                var children = _visibleComponents.Where(c => c.ParentId == rootComponent.ComponentId && !string.IsNullOrEmpty(c.Route)).ToList();
+                                var menuId = $"module_{rootComponent.ComponentId}";
                                 
                                 @if (children.Any())
                                 {
@@ -259,7 +260,7 @@
 </script>
 
 @code {
-    private List<ModuleComponent>? _visibleComponents;
+    private List<ModuleComponentDto>? _visibleComponents;
     private bool _isLoading = true;
     private string? _currentUser;
 
@@ -284,12 +285,12 @@
                 "[Sidebar] Iniciando carga de componentes visibles para usuario: {User}",
                 _currentUser);
 
-            // ✅ Obtener componentes visibles
-            _visibleComponents = await AuthService.GetVisibleComponentsAsync();
+            // ✅ Obtener componentes visibles usando el servicio inyectado
+            _visibleComponents = await ModuleAuth.GetVisibleComponentsAsync();
 
             var componentsCount = _visibleComponents?.Count ?? 0;
-            var rootCount = _visibleComponents?.Count(c => c.IdParent == null) ?? 0;
-            var childCount = _visibleComponents?.Count(c => c.IdParent != null) ?? 0;
+            var rootCount = _visibleComponents?.Count(c => c.ParentId == null) ?? 0;
+            var childCount = _visibleComponents?.Count(c => c.ParentId != null) ?? 0;
 
             Logger.LogInformation(
                 "[Sidebar] Componentes cargados para usuario {User}: Total={TotalCount}, Raíz={RootCount}, Hijos={ChildCount}, Tiempo={ElapsedMs}ms",
@@ -318,7 +319,7 @@
                 "[Sidebar] Usuario {User} no tiene permisos para acceder a componentes",
                 _currentUser ?? "Unknown");
             
-            _visibleComponents = new List<ModuleComponent>();
+            _visibleComponents = new List<ModuleComponentDto>();
             _isLoading = false;
         }
         catch (Exception ex)
@@ -329,7 +330,7 @@
                 _currentUser ?? "Unknown",
                 (DateTime.UtcNow - startTime).TotalMilliseconds);
             
-            _visibleComponents = new List<ModuleComponent>();
+            _visibleComponents = new List<ModuleComponentDto>();
             _isLoading = false;
             
             // Re-throw si es un error crítico del sistema

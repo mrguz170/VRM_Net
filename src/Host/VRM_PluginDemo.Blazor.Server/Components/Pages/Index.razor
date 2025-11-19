@@ -8,7 +8,6 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject IModuleManager ModuleManager
 @inject IModuleAuthorizationService AuthService
-@inject IRoleDisplayNameService RoleService
 
 <PageTitle>Dashboard - VRM Plugin Demo</PageTitle>
 
@@ -133,7 +132,7 @@
                     </a>
                     
                     @* Badge para indicar si hereda permisos *@
-                    @if (component.IdParent.HasValue)
+                    @if (component.ParentId.HasValue)
                     {
                         <span class="ml-2 text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded">
                             <i class="ri-parent-line"></i> Inherits Permissions
@@ -187,7 +186,7 @@
 </div>
 
 @code {
-    private List<VRM_Plugin.Core.Abstractions.Entities.ModuleComponent>? _visibleComponents;
+    private List<VRM_Plugin.Core.Abstractions.Data.DTOs.ModuleComponentDto>? _visibleComponents;
     private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
@@ -204,27 +203,23 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading visible components: {ex.Message}");
-            _visibleComponents = new List<VRM_Plugin.Core.Abstractions.Entities.ModuleComponent>();
+            _visibleComponents = new List<VRM_Plugin.Core.Abstractions.Data.DTOs.ModuleComponentDto>();
             _isLoading = false;
         }
     }
 
     /// <summary>
-    /// ? Obtiene el nombre de visualización del rol del usuario.
-    /// Usa IRoleDisplayNameService para mapear IDs de roles a nombres amigables.
-    /// Sin roles hardcodeados en el componente.
+    /// ? SIMPLIFICADO: Obtiene el rol directamente del claim
+    /// El rol ya viene formateado desde BD (línea 170 de VRMAuthenticationStateProvider)
+    /// Sin necesidad de servicio intermedio ni llamadas adicionales a BD
     /// </summary>
     private string GetUserRole(AuthenticationState state)
     {
-        // Obtener el primer rol del usuario
-        var roleId = state.User.Claims
+        // ? El rol ya está guardado en el claim con el nombre de display correcto
+        // Ejemplo: "Administrator", "Finance Manager", "Prospects Manager", etc.
+        var role = state.User.Claims
             .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
         
-        // Si no tiene rol, mostrar "Guest"
-        if (string.IsNullOrWhiteSpace(roleId))
-            return "Guest";
-        
-        // ? Usar servicio para obtener nombre de visualización
-        return RoleService.GetDisplayName(roleId);
+        return role ?? "Guest";
     }
 }

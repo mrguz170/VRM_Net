@@ -1,87 +1,86 @@
 ﻿@page "/login"
-@layout AuthLayout
-@* ⚠️ SSR ESTÁTICO - NO USAR @rendermode InteractiveServer *@
-@* Login debe ser SSR para que SignInAsync pueda escribir cookies HTTP *@
-@using VRM_Plugin.Blazor.Server.Components.Layout
+@layout Layout.AuthLayout
 @using Microsoft.AspNetCore.Components.Authorization
-@using VRM_Plugin.Blazor.Server.Services
+@using Microsoft.AspNetCore.Components.Forms
 @using System.ComponentModel.DataAnnotations
-@inject DummyAuthenticationStateProvider AuthProvider
+@using VRM_Plugin.Blazor.Server.Authentication
 @inject NavigationManager Navigation
+@inject VRMAuthenticationStateProvider AuthProvider
+@inject ILogger<Login> Logger
 
 <PageTitle>Sign In - VRM</PageTitle>
 
 @* ✅ Meta Refresh para redirección después de login exitoso *@
 @if (shouldRedirect && !string.IsNullOrEmpty(redirectUrl))
 {
- <meta http-equiv="refresh" content="0;url=@redirectUrl" />
+    <meta http-equiv="refresh" content="0;url=@redirectUrl" />
 }
 
 <!-- Login Page - UI de Sliced integrada con autenticación VRM -->
 <div class="min-h-[calc(100vh-134px)] py-4 px-4 sm:px-12 flex justify-center items-center max-w-[1440px] mx-auto">
     <div class="max-w-[550px] flex-none w-full bg-white border border-black/10 p-6 sm:p-10 lg:px-10 lg:py-14 rounded-2xl loginform dark:bg-darklight dark:border-darkborder">
 
-      <!-- Título -->
+        <!-- Título -->
         <h1 class="mb-2 text-2xl font-semibold text-center dark:text-white">
             Sign In to VRM
         </h1>
         <p class="text-center text-muted mb-7 dark:text-darkmuted">
-   Enter your credentials to access the system
-  </p>
+            Enter your credentials to access the system
+        </p>
 
- @if (!string.IsNullOrEmpty(errorMessage))
-     {
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
             <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-    <p class="text-sm text-red-600">@errorMessage</p>
-        </div>
+                <p class="text-sm text-red-600">@errorMessage</p>
+            </div>
         }
 
         <!-- Formulario de Login -->
         <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin" FormName="LoginForm">
-         <DataAnnotationsValidator />
+            <DataAnnotationsValidator />
 
             <div class="space-y-4">
-    <!-- Email -->
-        <div>
-          <InputText @bind-Value="loginModel.Email" 
-     placeholder="Enter your email" 
-         class="form-input w-full px-4 py-3 border border-black/10 dark:border-darkborder rounded-lg focus:ring-2 focus:ring-purple focus:border-transparent dark:bg-dark dark:text-white" />
-  <ValidationMessage For="@(() => loginModel.Email)" class="text-red-500 text-sm mt-1" />
-     </div>
+                <!-- Email -->
+                <div>
+                    <InputText @bind-Value="loginModel.Email" 
+                               placeholder="Enter your email" 
+                               class="form-input w-full px-4 py-3 border border-black/10 dark:border-darkborder rounded-lg focus:ring-2 focus:ring-purple focus:border-transparent dark:bg-dark dark:text-white" />
+                    <ValidationMessage For="@(() => loginModel.Email)" class="text-red-500 text-sm mt-1" />
+                </div>
 
-         <!-- Password -->
-      <div>
-       <InputText @bind-Value="loginModel.Password" 
-       type="password"
-      placeholder="Enter your password" 
-      class="form-input w-full px-4 py-3 border border-black/10 dark:border-darkborder rounded-lg focus:ring-2 focus:ring-purple focus:border-transparent dark:bg-dark dark:text-white" />
-     <ValidationMessage For="@(() => loginModel.Password)" class="text-red-500 text-sm mt-1" />
-        </div>
+                <!-- Password -->
+                <div>
+                    <InputText @bind-Value="loginModel.Password" 
+                               type="password"
+                               placeholder="Enter your password" 
+                               class="form-input w-full px-4 py-3 border border-black/10 dark:border-darkborder rounded-lg focus:ring-2 focus:ring-purple focus:border-transparent dark:bg-dark dark:text-white" />
+                    <ValidationMessage For="@(() => loginModel.Password)" class="text-red-500 text-sm mt-1" />
+                </div>
 
                 <div class="ltr:text-right rtl:text-left">
-     <a href="/forgot-password" class="text-black dark:text-white hover:underline">Forgot Password?</a>
-         </div>
+                    <a href="/forgot-password" class="text-black dark:text-white hover:underline">Forgot Password?</a>
+                </div>
 
                 <!-- Submit Button -->
- <button type="submit" 
-        disabled="@isLoading"
-         class="btn w-full py-3.5 text-base bg-purple border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85] disabled:opacity-50">
-    @if (isLoading)
-  {
-          <span>Signing in...</span>
-    }
-        else
-    {
-      <span>Sign In</span>
-       }
+                <button type="submit" 
+                        disabled="@isLoading"
+                        class="btn w-full py-3.5 text-base bg-purple border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85] disabled:opacity-50">
+                    @if (isLoading)
+                    {
+                        <span>Signing in...</span>
+                    }
+                    else
+                    {
+                        <span>Sign In</span>
+                    }
                 </button>
-         </div>
+            </div>
         </EditForm>
 
         <p class="mt-5 text-center text-muted dark:text-darkmuted">
             <a href="/signup" class="text-black dark:text-white hover:underline">Registro de Prospectos</a>
         </p>
-</div>
+    </div>
 </div>
 
 @code {
@@ -98,39 +97,32 @@
 
     private async Task HandleLogin()
     {
-   isLoading = true;
+        isLoading = true;
         errorMessage = null;
 
         try
-     {
-    
-            // Intentar login con DummyAuthenticationStateProvider
-    var success = await AuthProvider.LoginAsync(loginModel.Email ?? "", loginModel.Password ?? "");
+        {
+            // ✅ Usa VRMAuthenticationStateProvider
+            var success = await AuthProvider.LoginAsync(loginModel.Email ?? "", loginModel.Password ?? "");
 
-   if (success)
-      {
-      // ✅ Determinar URL de redirección
-  redirectUrl = string.IsNullOrEmpty(ReturnUrl) ? "/index" : ReturnUrl;
-    
-    // ✅ SOLUCIÓN: Activar meta refresh para redirección
+            if (success)
+            {
+                redirectUrl = string.IsNullOrEmpty(ReturnUrl) ? "/index" : ReturnUrl;
                 shouldRedirect = true;
-    
-           // Forzar re-render para aplicar el meta tag
-     StateHasChanged();
-   }
-    else
-    {
-                // Console.WriteLine("🔴 [Login] Credenciales inválidas");
-  errorMessage = "Invalid email or password. Please check the demo credentials above.";
-          isLoading = false;
-  }
+                StateHasChanged();
+            }
+            else
+            {
+                errorMessage = "Invalid email or password. Please try again.";
+                isLoading = false;
+            }
         }
         catch (Exception ex)
-    {
-      Console.WriteLine($"🔴 [Login] Error: {ex.GetType().Name} - {ex.Message}");
-   errorMessage = $"An error occurred during login. Please try again.";
+        {
+            Console.WriteLine($"🔴 [Login] Error: {ex.GetType().Name} - {ex.Message}");
+            errorMessage = $"An error occurred during login. Please try again.";
             isLoading = false;
-     }
+        }
     }
 
     public class LoginModel

@@ -34,21 +34,21 @@ else
     /// Ejemplo: 2 (Facturas), 3 (Cobros y Pagos), 4 (Prospectos)
     /// </summary>
     [Parameter]
-    public int? IdComponent { get; set; }
+    public int? ComponentId { get; set; }
 
     /// <summary>
     /// ?? LEGACY: ID del módulo como string (obsoleto, se mantiene para compatibilidad).
-    /// Se recomienda usar IdComponent o IdModule en su lugar.
+    /// Se recomienda usar IdComponent o ModuleId en su lugar.
     /// </summary>
-    [Parameter]
-    public string? ModuleId { get; set; }
+    // [Parameter]
+    // public string? ModuleId { get; set; }
 
     /// <summary>
     /// ? NUEVO: ID numérico del módulo a verificar.
     /// Ejemplo: 1 (Finanzas), 2 (Prospectos)
     /// </summary>
     [Parameter]
-    public int? IdModule { get; set; }
+    public int? ModuleId { get; set; }
 
     /// <summary>
     /// Contenido a renderizar si el usuario tiene acceso
@@ -67,7 +67,7 @@ else
             _isLoading = true;
 
             // Verificar que al menos un parámetro de identificación esté presente
-            if (!IdComponent.HasValue && !IdModule.HasValue && string.IsNullOrEmpty(ModuleId))
+            if (!ComponentId.HasValue && !ModuleId.HasValue)
             {
                 _deniedReason = "Configuración inválida del componente de autorización";
                 _isAuthorized = false;
@@ -89,48 +89,48 @@ else
             }
 
             // Verificar acceso según el parámetro proporcionado
-            if (IdComponent.HasValue)
+            if (ComponentId.HasValue)
             {
                 // ? OPCIÓN 1: Verificar por IdComponent (más específico, recomendado)
-                _isAuthorized = await AuthService.CanAccessComponentAsync(IdComponent.Value);
+                _isAuthorized = await AuthService.CanAccessComponentAsync(ComponentId.Value);
                 
                 if (!_isAuthorized)
                 {
-                    _deniedReason = $"No tienes permisos para acceder al componente ID: {IdComponent.Value}";
+                    _deniedReason = $"No tienes permisos para acceder al componente ID: {ComponentId.Value}";
                 }
             }
-            else if (IdModule.HasValue)
+            else if (ModuleId.HasValue)
             {
-                // ? OPCIÓN 2: Verificar por IdModule (verifica acceso a cualquier componente del módulo)
+                // ? OPCIÓN 2: Verificar por ModuleId (verifica acceso a cualquier componente del módulo)
                 var visibleComponents = await AuthService.GetVisibleComponentsAsync();
-                _isAuthorized = visibleComponents.Any(c => c.IdModule == IdModule.Value);
+                _isAuthorized = visibleComponents.Any(c => c.ModuleId == ModuleId.Value);
 
                 if (!_isAuthorized)
                 {
-                    _deniedReason = $"No tienes permisos para acceder al módulo ID: {IdModule.Value}";
+                    _deniedReason = $"No tienes permisos para acceder al módulo ID: {ModuleId.Value}";
                 }
 
             }
-            else if (!string.IsNullOrEmpty(ModuleId))
-            {
-                // ?? OPCIÓN 3: LEGACY - Verificar por ModuleId (string, obsoleto)
-                Logger.LogWarning(
-                    "Uso de ModuleId (string) está obsoleto. Usa IdModule (int) o IdComponent (int) en su lugar.");
+            // else if (!string.IsNullOrEmpty(ModuleId))
+            // {
+            //     // ?? OPCIÓN 3: LEGACY - Verificar por ModuleId (string, obsoleto)
+            //     Logger.LogWarning(
+            //         "Uso de ModuleId (string) está obsoleto. Usa ModuleId (int) o IdComponent (int) en su lugar.");
 
-                var visibleComponents = await AuthService.GetVisibleComponentsAsync();
+            //     var visibleComponents = await AuthService.GetVisibleComponentsAsync();
                 
-                // Intentar parsear como int primero
-                if (int.TryParse(ModuleId, out var moduleIdInt))
-                {
-                    _isAuthorized = visibleComponents.Any(c => c.IdModule == moduleIdInt);
-                }
-                else
-                {
-                    // Fallback: buscar por ModuleName (lento, no recomendado)
-                    _isAuthorized = false;
-                    _deniedReason = "ModuleId debe ser un ID numérico válido";
-                }
-            }
+            //     // Intentar parsear como int primero
+            //     if (int.TryParse(ModuleId, out var moduleIdInt))
+            //     {
+            //         _isAuthorized = visibleComponents.Any(c => c.ModuleId == moduleIdInt);
+            //     }
+            //     else
+            //     {
+            //         // Fallback: buscar por ModuleName (lento, no recomendado)
+            //         _isAuthorized = false;
+            //         _deniedReason = "ModuleId debe ser un ID numérico válido";
+            //     }
+            // }
 
             _isLoading = false;
         }

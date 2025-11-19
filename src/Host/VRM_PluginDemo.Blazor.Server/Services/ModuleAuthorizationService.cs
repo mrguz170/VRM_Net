@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Logging;
+using VRM_Plugin.Core.Abstractions.Data.DTOs;
+using VRM_Plugin.Core.Abstractions;
 using System.Security.Claims;
-using VRM_Plugin.Core.Abstractions.Entities;
 
 namespace VRM_Plugin.Blazor.Server.Services;
 
@@ -159,7 +161,7 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
             
             // Buscar módulo por IdModule
             var module = _moduleManager.GetAllModules()
-                .FirstOrDefault(m => m.IdModule == idModule);
+                .FirstOrDefault(m => m.ModuleId == idModule);
 
             if (module == null)
             {
@@ -196,7 +198,7 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         {
             // Buscar módulo por IdModule
             var module = _moduleManager.GetAllModules()
-                .FirstOrDefault(m => m.IdModule == idModule);
+                .FirstOrDefault(m => m.ModuleId == idModule);
 
             if (module == null)
             {
@@ -253,7 +255,7 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
             foreach (var module in _moduleManager.GetAllModules())
             {
                 var component = module.GetComponents()
-                    .FirstOrDefault(c => c.IdComponent == idComponent && c.IsActive);
+                    .FirstOrDefault(c => c.ComponentId == idComponent && c.IsActive);
 
                 if (component != null)
                 {
@@ -274,7 +276,7 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
     /// <summary>
     /// Implementación de permisos para componentes IFM
     /// </summary>
-    public async Task<List<ModuleComponent>> GetVisibleComponentsAsync()
+    public async Task<List<ModuleComponentDto>> GetVisibleComponentsAsync()
     {
         try
         {
@@ -282,10 +284,10 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
             var user = authState.User;
 
             if (!user.Identity?.IsAuthenticated ?? true)
-                return new List<ModuleComponent>();
+                return new List<ModuleComponentDto>();
 
             var userPermissionIds = GetUserPermissionIds(user);
-            var visibleComponents = new List<ModuleComponent>();
+            var visibleComponents = new List<ModuleComponentDto>();
 
             foreach (var module in _moduleManager.GetAllModules())
             {
@@ -305,7 +307,7 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener componentes visibles");
-            return new List<ModuleComponent>();
+            return new List<ModuleComponentDto>();
         }
     }
 
@@ -370,7 +372,7 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         foreach (var module in _moduleManager.GetAllModules())
         {
             var action = module.GetActions()
-                .FirstOrDefault(a => a.IdAction == idAction && a.IsActive);
+                .FirstOrDefault(a => a.ActionKeyId == idAction && a.IsActive);
 
             if (action != null)
             {
@@ -385,7 +387,7 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
     /// <summary>
     /// Verifica permisos de componente con herencia desde el padre
     /// </summary>
-    private bool CheckComponentPermission(ModuleComponent component, List<int> userPermissionIds, List<ModuleComponent> allComponents)
+    private bool CheckComponentPermission(ModuleComponentDto component, List<int> userPermissionIds, List<ModuleComponentDto> allComponents)
     {
         // Si el componente tiene permisos definidos, usarlos
         if (component.RequiredPermissionIds.Any())
@@ -394,9 +396,9 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         }
 
         // Si no tiene permisos y tiene padre, heredar del padre
-        if (component.IdParent.HasValue)
+        if (component.ParentId.HasValue)
         {
-            var parent = allComponents.FirstOrDefault(c => c.IdComponent == component.IdParent.Value);
+            var parent = allComponents.FirstOrDefault(c => c.ComponentId == component.ParentId.Value);
             if (parent != null)
             {
                 return CheckComponentPermission(parent, userPermissionIds, allComponents);

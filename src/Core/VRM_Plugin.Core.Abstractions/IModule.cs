@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VRM_Plugin.Core.Abstractions.Entities;
+using VRM_Plugin.Core.Abstractions.Data.DTOs;
 
 namespace VRM_Plugin.Core.Abstractions;
 
@@ -21,7 +21,7 @@ public interface IModule
     /// Se asigna automáticamente al persistir en BD con IDENTITY.
     /// En código (desarrollo), se simula con valores como 1, 2, 3...
     /// </summary>
-    int IdModule { get; set; }
+    int ModuleId { get; set; }
 
     /// <summary>
     /// ✅ Nombre técnico/código del módulo (para código y logging).
@@ -63,9 +63,8 @@ public interface IModule
     ///     └─ Contabilidad (IdParent = 1)
     ///     └─ Tesorería (IdParent = 1)
     /// </summary>
-    List<ModuleComponent> GetComponents();
+    List<ModuleComponentDto> GetComponents();
 
-    void GetModule();
     // ==================== ACCIONES GRANULARES ====================
 
     /// <summary>
@@ -73,7 +72,7 @@ public interface IModule
     /// Las acciones representan operaciones específicas dentro de componentes.
     /// Cada acción tiene una relación explícita con su componente (IdComponent).
     /// </summary>
-    List<ModuleAction> GetActions();
+    List<ModuleActionDto> GetActions();
 
     // ==================== CONFIGURACIÓN E INYECCIÓN DE DEPENDENCIAS ====================
 

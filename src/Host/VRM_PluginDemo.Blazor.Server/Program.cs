@@ -6,8 +6,11 @@ using Serilog.Events;
 using System.Reflection;
 using VRM_Plugin.Blazor.Server.Components;
 using VRM_Plugin.Blazor.Server.Services;
-using VRM_Plugin.Blazor.Server.StateService;
+using VRM_Plugin.Blazor.Server.Authentication;
 using VRM_Plugin.Core.Abstractions;
+using VRM_Plugin.Core.Abstractions.Services;
+using VRM_Plugin.Core.Abstractions.Data.Repositories;
+using VRM_Plugin.Core.Abstractions.Common;
 
 // ==================== CONFIGURACIÓN DE SERILOG ====================
 // ✅ Configurar Serilog ANTES de crear el builder
@@ -50,16 +53,13 @@ try
     {
         options.DetailedErrors = builder.Environment.IsDevelopment();
         options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
-      options.DisconnectedCircuitMaxRetained = 100;
+        options.DisconnectedCircuitMaxRetained = 100;
         options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
     });
 
     // ==================== MUDBLAZOR ====================
-    // ⭐ NUEVO: Servicios de MudBlazor para componentes de UI
     builder.Services.AddMudServices();
-
-    // ==================== STATE SERVICES (SLICED) ====================
-    builder.Services.AddSingleton<ModeStateService>();
+        
 
     // ==================== AUTENTICACIÓN Y AUTORIZACIÓN ====================
     // ⚠️ AUTENTICACIÓN SIMULADA (SOLO DESARROLLO)
@@ -81,73 +81,88 @@ try
 
     builder.Services.AddAuthorization();
     builder.Services.AddCascadingAuthenticationState();
-
-    // ✅ NUEVO: HttpContextAccessor para acceder a cookies
     builder.Services.AddHttpContextAccessor();
 
-    // ⭐ CAMBIO CRÍTICO: Scoped con PersistentComponentState
-    // DummyAuthenticationStateProvider ahora usa PersistentComponentState
-    // para mantener autenticación entre SSR e Interactive Server
-    builder.Services.AddScoped<DummyAuthenticationStateProvider>();
+    builder.Services.AddScoped<VRMAuthenticationStateProvider>();
     builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
-        provider.GetRequiredService<DummyAuthenticationStateProvider>());
+        provider.GetRequiredService<VRMAuthenticationStateProvider>());
 
-    // ==================== AUTORIZACIÓN GRANULAR DE MÓDULOS ====================
-    // ⭐ NUEVO: Servicio para verificar permisos por acción
     builder.Services.AddScoped<IModuleAuthorizationService, ModuleAuthorizationService>();
 
-    // ✅ NUEVO: Servicio para obtener nombres de visualización de roles
-    builder.Services.AddSingleton<IRoleDisplayNameService, RoleDisplayNameService>();
-
+    // ==================== SERVICIOS DE DATOS ====================
+    
+    // ✅ Registrar DatabaseHelper (infraestructura compartida)
+    builder.Services.AddScoped<DatabaseHelper>(provider =>
+    {
+        var configuration = provider.GetRequiredService<IConfiguration>();
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("DefaultConnection not found in configuration");
+        return new DatabaseHelper(connectionString);
+    });
+    
+    // ✅ Registrar servicio de metadata de módulos
+    builder.Services.AddScoped<IModuleMetadataService, ModuleMetadataRepository>();
+    
+    // ✅ NUEVO: Registrar servicio de usuarios
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+    
+    Log.Information("✅ Servicios de datos registrados");
 
     // ==================== SISTEMA DE PLUGINS ====================
 
-    // Crear un ServiceProvider temporal solo para obtener el logger
-    using var loggerFactory = LoggerFactory.Create(loggingBuilder =>
-        loggingBuilder.AddConsole());
-    var logger = loggerFactory.CreateLogger<ModuleLoader>();
-
-    // Registrar el ModuleLoader como Singleton
-    var moduleLoader = new ModuleLoader(logger);
-
-    // Registrar IModuleManager para que otros servicios puedan consultarlo
-    builder.Services.AddSingleton<IModuleManager>(moduleLoader);
-
-    // ✅ CORREGIDO: Construir ruta absoluta a la carpeta Modules
-    var baseDirectory = AppContext.BaseDirectory; // bin\Debug\net8.0\
-    var modulesPath = Path.Combine(baseDirectory, "Modules");
-
-    Log.Information("🔍 Buscando módulos en: {ModulesPath}", modulesPath);
-    Log.Information("📂 Directorio base de aplicación: {BaseDirectory}", baseDirectory);
-
-    // Verificar si la carpeta existe antes de cargar
-    if (!Directory.Exists(modulesPath))
+    // ✅ Declarar moduleManager fuera del using para usarlo después
+    ModuleManager moduleManager;
+    
+    using (var scope = builder.Services.BuildServiceProvider().CreateScope())
     {
-        Log.Warning("⚠️ La carpeta Modules no existe: {ModulesPath}", modulesPath);
-        Log.Warning("⚠️ Creando carpeta Modules...");
-        Directory.CreateDirectory(modulesPath);
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<ModuleManager>>();
+        var metadataService = scope.ServiceProvider.GetRequiredService<IModuleMetadataService>();
+        
+        moduleManager = new ModuleManager(logger, metadataService);
+        
+        // Registrar IModuleManager para que otros servicios puedan consultarlo
+        builder.Services.AddSingleton<IModuleManager>(moduleManager);
+
+        // ✅ CORREGIDO: Construir ruta absoluta a la carpeta Modules
+        var baseDirectory = AppContext.BaseDirectory; // bin\Debug\net8.0\
+        var modulesPath = Path.Combine(baseDirectory, "Modules");
+
+        Log.Information("🔍 Buscando módulos en: {ModulesPath}", modulesPath);
+        Log.Information("📂 Directorio base de aplicación: {BaseDirectory}", baseDirectory);
+
+        // Verificar si la carpeta existe antes de cargar
+        if (!Directory.Exists(modulesPath))
+        {
+            Log.Warning("⚠️ La carpeta Modules no existe: {ModulesPath}", modulesPath);
+            Log.Warning("⚠️ Creando carpeta Modules...");
+            Directory.CreateDirectory(modulesPath);
+        }
+
+        // Listar archivos DLL en la carpeta
+        var dllFiles = Directory.GetFiles(modulesPath, "*.dll", SearchOption.AllDirectories);
+        Log.Information("📋 Archivos DLL encontrados en Modules: {DllCount}", dllFiles.Length);
+        foreach (var dll in dllFiles)
+        {
+            Log.Debug("   • {DllName}", Path.GetFileName(dll));
+        }
+
+        // ✅ Descubrir y cargar módulos con metadata desde BD
+        var modulosEncontrados = await moduleManager.DiscoverAndLoadModulesAsync(modulesPath);
+        
+        Log.Information(
+            "✅ {ModulosEncontrados} módulos cargados con metadata desde BD",
+            modulosEncontrados);
+
+        // ✅ Obtener módulos una sola vez
+        var modulos = moduleManager.GetAllModules();
+
+        foreach (var modulo in modulos)
+        {
+            // Cada módulo registra sus propios servicios
+            modulo.ConfigureServices(builder.Services, builder.Configuration);
+        }
     }
 
-    // Listar archivos DLL en la carpeta
-    var dllFiles = Directory.GetFiles(modulesPath, "*.dll", SearchOption.AllDirectories);
-    Log.Information("📋 Archivos DLL encontrados en Modules: {DllCount}", dllFiles.Length);
-    foreach (var dll in dllFiles)
-    {
-        Log.Debug("   • {DllName}", Path.GetFileName(dll));
-    }
-
-    // Descubrir y cargar módulos desde la carpeta "Modules"
-    var modulosEncontrados = await moduleLoader.DiscoverAndLoadModulesAsync(modulesPath);
-
-    // ==================== REGISTRAR SERVICIOS DE MÓDULOS ====================
-
-    var todosLosModulos = moduleLoader.GetAllModules();
-
-    foreach (var modulo in todosLosModulos)
-    {
-        // Cada módulo registra sus propios servicios (repositorios, validadores, etc.)
-        modulo.ConfigureServices(builder.Services, builder.Configuration);
-    }
     // ==================== CONSTRUIR LA APLICACIÓN ====================
 
     var app = builder.Build();
@@ -173,7 +188,9 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
-    // Obtener ensamblados de módulos para habilitar interactividad
+    // ✅ Obtener módulos del moduleManager (ya está fuera del using)
+    var todosLosModulos = moduleManager.GetAllModules();
+    
     var moduleAssemblies = todosLosModulos
         .Select(m => m.GetType().Assembly)
         .Distinct()
@@ -191,43 +208,45 @@ try
 
     app.Lifetime.ApplicationStarted.Register(() =>
     {
-        //Console.WriteLine("\n" + new string('=', 60));
-        //Console.WriteLine("🚀 APLICACIÓN INICIADA");
-        //Console.WriteLine(new string('=', 60));
-        //Console.WriteLine($"🌐 Entorno: {environmentName}");
-        //Console.WriteLine($"📍 URL: {urls.FirstOrDefault() ?? "No disponible"}");
-        //Console.WriteLine("\n📦 MÓDULOS CARGADOS:");
-        //Console.WriteLine(new string('-', 60));
+        Log.Information("\n" + new string('=', 60));
+        Log.Information("🚀 APLICACIÓN INICIADA");
+        Log.Information(new string('=', 60));
+        Log.Information("🌐 Entorno: {EnvironmentName}", environmentName);
+        Log.Information("📍 URL: {Url}", urls.FirstOrDefault() ?? "No disponible");
+        Log.Information("\n📦 MÓDULOS CARGADOS:");
+        Log.Information(new string('-', 60));
 
         foreach (var modulo in todosLosModulos)
         {
-            //Console.WriteLine($"  • {modulo.ModuleName,-20} (ID: {modulo.IdModule}) v{modulo.Version,-8}");
-            //Console.WriteLine($"    {modulo.DisplayName}");
-            //Console.WriteLine($"    Descripción: {modulo.Description}");
+            Log.Information("  • {ModuleName,-20} (ID: {ModuleId}) v{Version,-8}",
+                modulo.ModuleName,
+                modulo.ModuleId,
+                modulo.Version);
+            Log.Information("    {DisplayName}", modulo.DisplayName);
+            Log.Information("    Descripción: {Description}", modulo.Description);
             
             var components = modulo.GetComponents();
             var actions = modulo.GetActions();
             
-            //Console.WriteLine($"    📋 Componentes: {components.Count}");
-            //Console.WriteLine($"    ⚡ Acciones: {actions.Count}");
+            Log.Information("    📋 Componentes: {ComponentCount}", components.Count);
+            Log.Information("    ⚡ Acciones: {ActionCount}", actions.Count);
             
             // Mostrar componentes raíz (categorías)
-            var rootComponents = components.Where(c => c.IdParent == null && c.ShowInMenu);
+            var rootComponents = components.Where(c => c.ParentId == null && c.ShowInMenu);
             if (rootComponents.Any())
             {
-                //Console.WriteLine($"    Menú principal:");
+                Log.Information("    Menú principal:");
                 foreach (var rc in rootComponents)
                 {
-                    Console.WriteLine($"      └─ {rc.Name} ({rc.Icon})");
+                    Log.Information("      └─ {Name} ({Icon})", rc.Name, rc.Icon);
                 }
             }
         }
+        
+        Log.Information(new string('=', 60));
     });
 
-
     app.Run();
-    
-
 }
 catch (Exception ex)
 {

@@ -10,9 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Shared\**" />
+    <Content Remove="Components\Shared\**" />
+    <EmbeddedResource Remove="Components\Shared\**" />
+    <None Remove="Components\Shared\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Actualizar ruta: ahora Core está 2 niveles arriba -->
     <ProjectReference Include="..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Core\VRM_Plugin.Data\VRM_Plugin.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,10 +34,6 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Components\Shared\" />
   </ItemGroup>
 
   <!-- 🔥 Target para copiar módulos durante BUILD -->
