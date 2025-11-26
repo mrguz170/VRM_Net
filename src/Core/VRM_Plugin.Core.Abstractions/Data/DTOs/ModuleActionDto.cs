@@ -14,7 +14,7 @@ public class ModuleActionDto
     /// <summary>
     /// ID de la acción en BD (auto-generado por IDENTITY)
     /// </summary>
-    public int ActionKeyId { get; set; }
+    public long ActionKeyId { get; set; }
 
     /// <summary>
     /// ID del componente al que pertenece esta acción (FK)

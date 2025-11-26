@@ -1,0 +1,24 @@
+@inherits LayoutComponentBase
+@using VRM_Plugin.Core.Abstractions
+@using System.Reflection
+@inject IEnumerable<IModule> Modules
+
+@code {
+    private IModule? CurrentModule => Modules.FirstOrDefault(m => 
+        m.GetType().Assembly == GetType().Assembly);
+}
+
+@if (CurrentModule != null)
+{
+    <CascadingValue Value="@CurrentModule" Name="CurrentModule">
+        @Body
+    </CascadingValue>
+}
+else
+{
+    <div class="alert alert-danger m-3">
+        <h4>?? Error: Módulo no disponible</h4>
+        <p>No se pudo cargar el módulo desde el ensamblado actual.</p>
+        <small class="text-muted">Assembly: @GetType().Assembly.GetName().Name</small>
+    </div>
+}

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>VRM_Plugin.Module.Finanzas</RootNamespace>
+    <AssemblyName>VRM_Plugin.Module.Finanzas</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.20" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.20" />
+    <PackageReference Include="MySqlConnector" Version="2.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ruta: Finanzas -> Modules -> src -> Core (3 niveles arriba) -->
+    <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Shared\VRM_Plugin.Core.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

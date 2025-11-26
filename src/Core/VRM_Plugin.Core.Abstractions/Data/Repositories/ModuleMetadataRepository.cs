@@ -9,9 +9,6 @@ namespace VRM_Plugin.Core.Abstractions.Data.Repositories;
 
 /// <summary>
 /// Repositorio de metadata de módulos (infraestructura del SISTEMA)
-/// 
-/// ? Ubicación: Data/Repositories/ (homologado con módulos)
-/// ? Usa DatabaseHelper de Common/
 /// </summary>
 public class ModuleMetadataRepository : IModuleMetadataService
 {
@@ -39,7 +36,7 @@ public class ModuleMetadataRepository : IModuleMetadataService
         {
             _logger.LogDebug("Obteniendo metadata del módulo {ModuleId} desde sp_get_module_info", moduleId);
             
-            // ? Usar parseador genérico con ModuleDto
+            // Usar parseador genérico con ModuleDto
             var metadata = _db.ExecuteStoredProcedureSingle<ModuleDto>("sp_get_module_info", 
                 new Dictionary<string, object>
                 {
@@ -77,14 +74,14 @@ public class ModuleMetadataRepository : IModuleMetadataService
         {
             _logger.LogDebug("Obteniendo componentes del módulo {ModuleId} desde sp_get_component", moduleId);
             
-            // ? Usar parseador genérico (simplifica ~40 líneas de código)
+            
             var components = _db.ExecuteStoredProcedure<ModuleComponentDto>("sp_get_component", 
                 new Dictionary<string, object>
                 {
                     { "module_id", moduleId }
                 });
             
-            // ? Post-procesamiento: parsear roles de string a List<int>
+            // Post-procesamiento: parsear roles de string a List<int>
             foreach (var component in components)
             {
                 component.RequiredPermissionIds = ParseRolesString(component.RolesString);
@@ -114,14 +111,14 @@ public class ModuleMetadataRepository : IModuleMetadataService
         {
             _logger.LogDebug("Obteniendo acciones del módulo {ModuleId} desde sp_get_actions", moduleId);
             
-            // ? Usar parseador genérico
+            // Usar parseador genérico
             var actions = _db.ExecuteStoredProcedure<ModuleActionDto>("sp_get_actions", 
                 new Dictionary<string, object>
                 {
                     { "module_id", moduleId }
                 });
             
-            // ? Post-procesamiento: parsear roles de string a List<int>
+            // Post-procesamiento: parsear roles de string a List<int>
             foreach (var action in actions)
             {
                 action.RequiredPermissionIds = ParseRolesString(action.RolesString);
@@ -140,57 +137,12 @@ public class ModuleMetadataRepository : IModuleMetadataService
             return new List<ModuleActionDto>();
         }
     }
-    
-    /// <summary>
-    /// Obtiene permisos por acción desde BD
-    /// Llama al SP: ConsultaPermisos
-    /// </summary>
-    public Dictionary<string, string[]> GetActionPermissions(string moduleName)
-    {
-        try
-        {
-            _logger.LogDebug("Obteniendo permisos del módulo {ModuleName} desde ConsultaPermisos", moduleName);
-            
-            var result = _db.ExecuteStoredProcedure("ConsultaPermisos", new Dictionary<string, object>
-            {
-                { "Modulo", moduleName }
-            });
-            
-            var permissions = new Dictionary<string, string[]>();
-            
-            foreach (DataRow row in result.Rows)
-            {
-                string key = row["PermisoId"]?.ToString() ?? string.Empty;
-                string permisosStr = row["Roles"]?.ToString() ?? string.Empty;
-                
-                // Convertir el string separado por comas en arreglo
-                string[] valores = permisosStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                
-                if (!string.IsNullOrEmpty(key))
-                {
-                    permissions[key] = valores;
-                }
-            }
-            
-            _logger.LogInformation(
-                "Obtenidos {Count} permisos para el módulo {ModuleName}",
-                permissions.Count,
-                moduleName);
-            
-            return permissions;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error al obtener permisos del módulo {ModuleName}", moduleName);
-            return new Dictionary<string, string[]>();
-        }
-    }
+        
     
     // ==================== MÉTODOS HELPER PRIVADOS ====================
     
     /// <summary>
     /// Parsea un string de roles "1,2,3" a List&lt;int&gt;
-    /// Reutilizable para componentes y acciones
     /// </summary>
     private List<int> ParseRolesString(string? rolesString)
     {

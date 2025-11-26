@@ -483,3 +483,4 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 /src/Host/Sliced_web_app
+/src/Core/VRM_Plugin.Core.Abstractions/Data/Repositories/UserRepository.cs

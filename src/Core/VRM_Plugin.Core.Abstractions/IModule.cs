@@ -8,8 +8,7 @@ namespace VRM_Plugin.Core.Abstractions;
 /// Interfaz base que todos los módulos/plugins deben implementar.
 /// ✅ Arquitectura completamente basada en IDs numéricos para BD relacional.
 /// ✅ Permisos separados: Navegación (componentes) vs Acciones (business logic).
-/// ✅ Auditoría completa con CreatedAt, UpdatedAt, CreatedBy, UpdatedBy.
-/// ✅ Organización mediante jerarquía de componentes (IdParent) en lugar de Category.
+/// ✅ Organización mediante jerarquía de componentes (IdParent).
 /// ✅ Módulos completamente independientes (sin dependencias entre ellos).
 /// </summary>
 public interface IModule
@@ -18,16 +17,12 @@ public interface IModule
 
     /// <summary>
     /// ✅ ID numérico único del módulo (PK en BD).
-    /// Se asigna automáticamente al persistir en BD con IDENTITY.
-    /// En código (desarrollo), se simula con valores como 1, 2, 3...
+    /// Se asigna automáticamente al persistir en BD 
     /// </summary>
     int ModuleId { get; set; }
 
     /// <summary>
-    /// ✅ Nombre técnico/código del módulo (para código y logging).
-    /// Ej: "Finanzas", "Prospectos", "Inventario"
-    /// Se usa para identificación en código pero NO como PK.
-    /// En BD, se mapea a columna 'Codigo' en tabla Modulos con constraint UNIQUE.
+    /// ✅ Nombre técnico del módulo 
     /// </summary>
     string ModuleName { get; }
 
@@ -49,28 +44,22 @@ public interface IModule
     // ==================== COMPONENTES Y NAVEGACIÓN ====================
 
     /// <summary>
-    /// ✅ HOMOLOGADO: Obtiene componentes con IDs numéricos y permisos de navegación.
+    /// Obtiene componentes con IDs numéricos y permisos de navegación.
     /// Los componentes definen la jerarquía del menú (raíz → submenús → páginas).
-    /// Los IDs son simulados en código; en producción, vienen de BD.
     /// 
     /// ORGANIZACIÓN JERÁRQUICA:
     /// - Componentes raíz (IdParent = null) actúan como CATEGORÍAS en el menú
     /// - Componentes hijos (IdParent != null) son módulos dentro de la categoría
     /// - Soporta múltiples niveles de anidación
     /// 
-    /// Ejemplo:
-    ///   Finanzas (IdParent = null) → Categoría
-    ///     └─ Contabilidad (IdParent = 1)
-    ///     └─ Tesorería (IdParent = 1)
     /// </summary>
     List<ModuleComponentDto> GetComponents();
 
     // ==================== ACCIONES GRANULARES ====================
 
     /// <summary>
-    /// ✅ HOMOLOGADO: Obtiene acciones con IDs numéricos y permisos de ejecución.
+    /// Obtiene acciones con IDs numéricos y permisos de ejecución.
     /// Las acciones representan operaciones específicas dentro de componentes.
-    /// Cada acción tiene una relación explícita con su componente (IdComponent).
     /// </summary>
     List<ModuleActionDto> GetActions();
 
@@ -78,29 +67,16 @@ public interface IModule
 
     /// <summary>
     /// Registra los servicios del módulo en el contenedor de DI.
-    /// Aquí cada módulo registra sus repositorios, servicios, validadores, etc.
     /// </summary>
     /// <param name="services">Colección de servicios de ASP.NET Core</param>
     /// <param name="configuration">Configuración de la aplicación</param>
     void ConfigureServices(IServiceCollection services, IConfiguration configuration);
 
-    // ==================== HABILITACIÓN POR CLIENTE ====================
-
-    /// <summary>
-    /// Verifica si este módulo está habilitado para un cliente específico
-    /// según su ConfiguracionNegocio.
-    /// </summary>
-    /// <param name="clienteId">ID del cliente</param>
-    /// <returns>True si el módulo está habilitado para el cliente</returns>
-    bool IsEnabledForClient(string clienteId);
-
-    // ==================== CICLO DE VIDA (Opcional) ====================
-
+  
     /// <summary>
     /// Se ejecuta cuando el módulo se carga por primera vez en la aplicación.
     /// Útil para inicialización, migraciones de BD, carga de configuración, etc.
     /// </summary>
     Task OnModuleLoadedAsync() => Task.CompletedTask;
 
-    Dictionary<string, string[]> GetActionPermission(string id);
 }

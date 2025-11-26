@@ -15,4 +15,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\VRM_Plugin.Core.Domain\VRM_Plugin.Core.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

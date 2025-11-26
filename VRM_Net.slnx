@@ -3,12 +3,16 @@
   <Folder Name="/src/Core/">
     <Project Path="src/Core/VRM_Plugin.Core.Abstractions/VRM_Plugin.Core.Abstractions.csproj" />
     <Project Path="src/Core/VRM_Plugin.Core.Domain/VRM_Plugin.Core.Domain.csproj" />
+    <Project Path="src/Core/VRM_Plugin.Core.Shared/VRM_Plugin.Core.Shared.csproj" />
   </Folder>
   <Folder Name="/src/Host/">
-    <Project Path="src/Host/VRM_PluginDemo.Blazor.Server/VRM_Plugin.Blazor.Server.csproj" />
+    <Project Path="src/Host/VRM_Plugin.Blazor.Server/VRM_Plugin.Blazor.Server.csproj" />
   </Folder>
   <Folder Name="/src/Modules/">
-    <Project Path="src/Modules/Finanzas/VRM_PluginDemo.Modules.Finanzas/VRM_Plugin.Finanzas.csproj" />
-    <Project Path="src/Modules/Onboarding/VRM_PluginDemo.Modules.Prospectos/VRM_Plugin.Prospectos.csproj" />
+    <Project Path="src/Modules/Finanzas/VRM_Plugin.Module.Finanzas/VRM_Plugin.Module.Finanzas.csproj" />
+    <Project Path="src/Modules/Onboarding/VRM_Plugin.Module.Prospectos/VRM_Plugin.Module.Prospectos.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Logica/">
+    <Project Path="src/Modules/Logica/VRM_Plugin.Module.Pedidos/VRM_Plugin.Module.Pedidos.csproj" />
   </Folder>
 </Solution>

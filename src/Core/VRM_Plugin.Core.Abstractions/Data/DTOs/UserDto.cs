@@ -38,5 +38,5 @@ public class UserDto
     /// ID del permiso/rol (formato numérico del rol)
     /// Ejemplo: "1" para Admin, "2" para GerenteFinanzas
     /// </summary>
-    public string Permission { get; set; } = string.Empty;
+    public string RoleId { get; set; } = string.Empty;
 }

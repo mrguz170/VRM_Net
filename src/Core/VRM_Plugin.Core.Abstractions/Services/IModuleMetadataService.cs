@@ -22,8 +22,4 @@ public interface IModuleMetadataService
     /// </summary>
     List<ModuleActionDto> GetActionsByModuleId(int moduleId);
     
-    /// <summary>
-    /// Obtiene los permisos por acción para un módulo
-    /// </summary>
-    Dictionary<string, string[]> GetActionPermissions(string moduleName);
-}
+    }

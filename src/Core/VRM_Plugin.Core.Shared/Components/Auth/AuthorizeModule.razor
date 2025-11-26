@@ -1,0 +1,119 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.Extensions.Logging
+@using VRM_Plugin.Core.Abstractions.Services
+@inject IModuleAuthorizationService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILogger<AuthorizeModule> Logger
+
+@* Renderizar contenido solo si el usuario tiene acceso al componente *@
+@if (_isAuthorized)
+{
+    @ChildContent
+}
+else if (_isLoading)
+{
+    <p><em>Verificando permisos...</em></p>
+}
+else
+{
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">?? Acceso Denegado</h4>
+        <p>No tienes permisos para acceder a este componente.</p>
+        @if (!string.IsNullOrEmpty(_deniedReason))
+        {
+            <hr>
+            <p class="mb-0 text-muted"><small>@_deniedReason</small></p>
+        }
+        <hr>
+        <p class="mb-0">Contacta al administrador si crees que esto es un error.</p>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// ? ID numérico del componente a verificar.
+    /// </summary>
+    [Parameter]
+    public int? ComponentId { get; set; }
+
+    
+    /// <summary>
+    /// ID numérico del módulo a verificar.
+    /// </summary>
+    [Parameter]
+    public int? ModuleId { get; set; }
+
+    /// <summary>
+    /// Contenido a renderizar si el usuario tiene acceso
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private bool _isAuthorized = false;
+    private bool _isLoading = true;
+    private string? _deniedReason;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _isLoading = true;
+
+            // Verificar que al menos un parámetro de identificación esté presente
+            if (!ComponentId.HasValue && !ModuleId.HasValue)
+            {
+                _deniedReason = "Configuración inválida del componente de autorización";
+                _isAuthorized = false;
+                _isLoading = false;
+                return;
+            }
+
+            // Obtener estado de autenticación
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            // Verificar si está autenticado
+            if (!user.Identity?.IsAuthenticated ?? true)
+            {
+                _deniedReason = "Debes iniciar sesión para acceder a este recurso";
+                _isAuthorized = false;
+                _isLoading = false;
+                return;
+            }
+
+            // Verificar acceso según el parámetro proporcionado
+            if (ComponentId.HasValue)
+            {
+                // ? OPCIÓN 1: Verificar por IdComponent (más específico, recomendado)
+                _isAuthorized = await AuthService.CanAccessComponentAsync(ComponentId.Value);
+                
+                if (!_isAuthorized)
+                {
+                    _deniedReason = $"No tienes permisos para acceder al componente ID: {ComponentId.Value}";
+                }
+            }
+            else if (ModuleId.HasValue)
+            {
+                // ? OPCIÓN 2: Verificar por ModuleId (verifica acceso a cualquier componente del módulo)
+                var visibleComponents = await AuthService.GetVisibleComponentsAsync();
+                _isAuthorized = visibleComponents.Any(c => c.ModuleId == ModuleId.Value);
+
+                if (!_isAuthorized)
+                {
+                    _deniedReason = $"No tienes permisos para acceder al módulo ID: {ModuleId.Value}";
+                }
+
+            }
+            
+
+            _isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error al verificar permisos");
+            _deniedReason = "Error al verificar permisos. Intenta nuevamente.";
+            _isAuthorized = false;
+            _isLoading = false;
+        }
+    }
+}

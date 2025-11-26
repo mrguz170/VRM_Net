@@ -1,54 +1,18 @@
-<#
+ï»¿<#
 .SYNOPSIS
-    Crea la estructura completa de un módulo VRM sin servicio base (solo contenedor).
-
-.DESCRIPTION
-    Crea la estructura completa de un módulo VRM:
-    - Proyecto Razor Class Library
-    - Carpetas: Domain, Services, Components
-    - Archivos base con IDs únicos
-    - NUEVO: NO crea servicio base del módulo (es solo contenedor)
-    - NUEVO: Opción -FirstComponent para crear primer componente con servicio
-    - Compila y copia al Host automáticamente
+    Crea la estructura completa de un mÃ³dulo VRM con arquitectura homologada v3.0
 
 .PARAMETER ModuleName
-    Nombre del módulo (ej: Inventario, Ventas, RRHH)
+    Nombre del mÃ³dulo (ej: Inventario, Ventas, RRHH)
 
-.PARAMETER IdModule
-    ID numérico único del módulo (debe ser diferente a los existentes)
+.PARAMETER ModuleId
+    ID numÃ©rico Ãºnico del mÃ³dulo (debe coincidir con el ID en BD)
 
-.PARAMETER Category
-    Categoría del módulo (ej: Finanzas, Operaciones, Administración)
-
-.PARAMETER StartIdComponent
-    ID inicial para componentes (ej: 100, 200, 300)
-
-.PARAMETER StartIdAction
-    ID inicial para acciones (ej: 100, 200, 300)
-
-.PARAMETER IconRoot
-    Icono Remix Icon para la categoría raíz (ej: ri-box-line)
-
-.PARAMETER FirstComponent
-    [OPCIONAL] Nombre del primer componente a crear (ej: Facturas, Productos)
-    Si se especifica, se creará el componente con entidad y servicio automáticamente
+.PARAMETER FolderOrganization
+    Carpeta de organizaciÃ³n (ej: Finanzas, Operaciones, Onboarding)
 
 .EXAMPLE
-    # Crear módulo Finanzas SOLO como contenedor (sin componentes)
-    .\New-VRMPlugin.ps1 -ModuleName Finanzas -IdModule 1 -Category Finanzas `
-        -StartIdComponent 1 -StartIdAction 1 -IconRoot "ri-money-dollar-circle-line"
-
-.EXAMPLE
-    # Crear módulo Finanzas CON primer componente "Facturas"
-    .\New-VRMPlugin.ps1 -ModuleName Finanzas -IdModule 1 -Category Finanzas `
-        -StartIdComponent 1 -StartIdAction 1 -IconRoot "ri-money-dollar-circle-line" `
-        -FirstComponent "Facturas"
-
-.EXAMPLE
-    # Crear módulo Inventario con componente "Productos"
-    .\New-VRMPlugin.ps1 -ModuleName Inventario -IdModule 3 -Category Operaciones `
-        -StartIdComponent 100 -StartIdAction 100 -IconRoot "ri-box-line" `
-        -FirstComponent "Productos"
+    .\scripts\New-VRMPlugin.ps1 -ModuleName Ventas -ModuleId 3 -FolderOrganization Comercial
 #>
 
 param(
@@ -56,50 +20,38 @@ param(
     [string]$ModuleName,
     
     [Parameter(Mandatory=$true)]
-    [int]$IdModule,
+    [int]$ModuleId,
     
     [Parameter(Mandatory=$true)]
-    [string]$Category,
-    
-    [Parameter(Mandatory=$true)]
-    [int]$StartIdComponent,
-    
-    [Parameter(Mandatory=$true)]
-    [int]$StartIdAction,
-    
-    [Parameter(Mandatory=$true)]
-    [string]$IconRoot,
-    
-    # ?? NUEVO: Componente inicial opcional
-    [Parameter(Mandatory=$false)]
-    [string]$FirstComponent = ""
+    [string]$FolderOrganization
 )
 
-# ==================== CONFIGURACIÓN ====================
+# ==================== CONFIGURACIÃ“N ====================
 
 $RootPath = Get-Location
-$ModulesPath = Join-Path $RootPath "src\Modules\$Category"
-$ModuleProjectName = "VRM_Plugin.Modules.$ModuleName"
-$ModuleFullPath = Join-Path $ModulesPath $ModuleProjectName
+$ModulesPath = Join-Path $RootPath "src\Modules\$FolderOrganization"
 
-Write-Host "`n??????????????????????????????????????????????????????????" -ForegroundColor Cyan
-Write-Host "?  ?? GENERADOR DE PLUGINS VRM                            ?" -ForegroundColor Cyan
-Write-Host "?  Módulo: $ModuleName".PadRight(60) + "?" -ForegroundColor Cyan
-if ($FirstComponent) {
-    Write-Host "?  Primer Componente: $FirstComponent".PadRight(60) + "?" -ForegroundColor Cyan
-}
-Write-Host "??????????????????????????????????????????????????????????`n" -ForegroundColor Cyan
+# ? SIN "Demo" ni "Modules" en nombre de carpeta
+$ModuleProjectName = "VRM_Plugin.Module.$ModuleName"
+$ModuleFullPath = Join-Path $ModulesPath $ModuleProjectName
+$AssemblyName = "VRM_Plugin.Module.$ModuleName"
+$RootNamespace = "VRM_Plugin.Module.$ModuleName"
+
+Write-Host "`n??????????????????????????????????????????????????" -ForegroundColor Cyan
+Write-Host "  GENERADOR DE PLUGINS VRM v3.0" -ForegroundColor Cyan
+Write-Host "  MÃ³dulo: $ModuleName (ID: $ModuleId)" -ForegroundColor Cyan
+Write-Host "  Proyecto: $ModuleProjectName" -ForegroundColor Cyan
+Write-Host "??????????????????????????????????????????????????`n" -ForegroundColor Cyan
 
 # ==================== 1. CREAR PROYECTO ====================
 
-Write-Host "?? [1/7] Creando proyecto Razor Class Library..." -ForegroundColor Yellow
+Write-Host "?? [1/5] Creando proyecto..." -ForegroundColor Yellow
 
 if (!(Test-Path $ModulesPath)) {
     New-Item -ItemType Directory -Path $ModulesPath -Force | Out-Null
 }
 
 Set-Location $ModulesPath
-
 dotnet new razorclasslib -n $ModuleProjectName -o $ModuleProjectName --framework net8.0
 
 if ($LASTEXITCODE -ne 0) {
@@ -108,298 +60,295 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host "? Proyecto creado: $ModuleProjectName" -ForegroundColor Green
+Write-Host "? Proyecto creado" -ForegroundColor Green
 
-# ==================== 2. ESTRUCTURA DE CARPETAS ====================
+# ==================== 2. CREAR .CSPROJ ====================
 
-Write-Host "`n?? [2/7] Creando estructura de carpetas..." -ForegroundColor Yellow
-
-$Folders = @(
-    "Domain",
-    "Services",
-    "Components"
-)
-
-foreach ($folder in $Folders) {
-    $folderPath = Join-Path $ModuleFullPath $folder
-    New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
-    Write-Host "  ? Creada carpeta: $folder" -ForegroundColor Gray
-}
-
-# Eliminar archivos de plantilla innecesarios
-$filesToRemove = @(
-    "Component1.razor",
-    "ExampleJsInterop.cs"
-)
-
-foreach ($file in $filesToRemove) {
-    $filePath = Join-Path $ModuleFullPath $file
-    if (Test-Path $filePath) {
-        Remove-Item $filePath -Force
-        Write-Host "  ? Eliminado: $file" -ForegroundColor Gray
-    }
-}
-
-# Eliminar carpeta wwwroot si existe
-$wwwrootPath = Join-Path $ModuleFullPath "wwwroot"
-if (Test-Path $wwwrootPath) {
-    Remove-Item $wwwrootPath -Recurse -Force
-    Write-Host "  ? Eliminada carpeta: wwwroot" -ForegroundColor Gray
-}
-
-# ==================== 3. MODIFICAR .CSPROJ ====================
-
-Write-Host "`n?? [3/7] Configurando referencias del proyecto..." -ForegroundColor Yellow
-
-$csprojPath = Join-Path $ModuleFullPath "$ModuleProjectName.csproj"
+Write-Host "`n?? [2/5] Configurando proyecto..." -ForegroundColor Yellow
 
 $csprojContent = @"
 <Project Sdk="Microsoft.NET.Sdk.Razor">
-
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <RootNamespace>$RootNamespace</RootNamespace>
+    <AssemblyName>$AssemblyName</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.*" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.*" />
+    <PackageReference Include="MySqlConnector" Version="2.5.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Shared\VRM_Plugin.Core.Shared.csproj" />
   </ItemGroup>
-
 </Project>
 "@
 
-Set-Content -Path $csprojPath -Value $csprojContent -Force
-Write-Host "? Archivo .csproj actualizado" -ForegroundColor Green
+Set-Content -Path (Join-Path $ModuleFullPath "$ModuleProjectName.csproj") -Value $csprojContent -Force
+Write-Host "? Proyecto configurado" -ForegroundColor Green
 
-# ==================== 4. GENERAR ARCHIVOS BASE ====================
+# =============================================================
+#2.1 Agregar referencia al proyecto Core.Shared en el archivo .sln principal
+Set-Location $RootPath
 
-Write-Host "`n?? [4/7] Generando archivos base del módulo..." -ForegroundColor Yellow
-
-# --- 4.1 ModuleClass.cs (SIN SERVICIO BASE) ---
-
-$moduleClassPath = Join-Path $ModuleFullPath "${ModuleName}Module.cs"
-
-# ?? Determinar qué componentes incluir en GetComponents()
-if ($FirstComponent) {
-    $firstComponentLower = $FirstComponent.ToLower()
-    $getComponentsCode = @"
-        return new List<ModuleComponent>
-        {
-            // ===== COMPONENTE RAÍZ (ACTÚA COMO CATEGORÍA) =====
-            new ModuleComponent 
-            { 
-                IdComponent = $StartIdComponent, 
-                IdModule = $IdModule, 
-                IdParent = null,  // NULL = Categoría raíz en menú
-                ComponentCode = "$ModuleName.Root", 
-                Name = "$ModuleName", 
-                Description = "Módulo principal de $ModuleName", 
-                Route = "",  // Sin ruta, solo contenedor
-                Icon = "$IconRoot", 
-                MenuOrder = 100, 
-                ShowInMenu = true, 
-                ComponentType = null,  // Sin componente Blazor, solo contenedor
-                ComponentTypeName = null,
-                RequiredPermissionIds = new List<int> { 1 },  // Solo Admin por defecto
-                IsActive = true 
-            },
-            
-            // ===== PRIMER COMPONENTE: $FirstComponent =====
-            new ModuleComponent 
-            { 
-                IdComponent = $($StartIdComponent + 1), 
-                IdModule = $IdModule, 
-                IdParent = $StartIdComponent,  // Hijo de la categoría raíz
-                ComponentCode = "$ModuleName.$FirstComponent", 
-                Name = "$FirstComponent", 
-                Description = "Gestión de $FirstComponent", 
-                Route = "/$($ModuleName.ToLower())/$firstComponentLower", 
-                Icon = "$IconRoot", 
-                MenuOrder = 1, 
-                ShowInMenu = true, 
-                ComponentType = typeof(Components.$FirstComponent), 
-                ComponentTypeName = "VRM_Plugin.Modules.$ModuleName.Components.$FirstComponent",
-                RequiredPermissionIds = new List<int> { 1 }, 
-                IsActive = true 
-            }
-        };
-"@
-
-    $getActionsCode = @"
-        return new List<ModuleAction>
-        {
-            // Acciones del componente: $FirstComponent
-            new ModuleAction 
-            { 
-                IdAction = $StartIdAction, 
-                IdComponent = $($StartIdComponent + 1), 
-                ActionKey = "$ModuleName.$FirstComponent.Ver", 
-                Name = "Ver $FirstComponent", 
-                Description = "Permite visualizar $FirstComponent", 
-                IdActionType = 1,  // Lectura
-                RequiredPermissionIds = new List<int> { 1 }, 
-                IsActive = true 
-            },
-            
-            new ModuleAction 
-            { 
-                IdAction = $($StartIdAction + 1), 
-                IdComponent = $($StartIdComponent + 1), 
-                ActionKey = "$ModuleName.$FirstComponent.Crear", 
-                Name = "Crear $FirstComponent", 
-                Description = "Permite crear nuevos registros de $FirstComponent", 
-                IdActionType = 2,  // Escritura
-                RequiredPermissionIds = new List<int> { 1 }, 
-                IsActive = true 
-            },
-            
-            new ModuleAction 
-            { 
-                IdAction = $($StartIdAction + 2), 
-                IdComponent = $($StartIdComponent + 1), 
-                ActionKey = "$ModuleName.$FirstComponent.Editar", 
-                Name = "Editar $FirstComponent", 
-                Description = "Permite modificar registros de $FirstComponent", 
-                IdActionType = 2,  // Escritura
-                RequiredPermissionIds = new List<int> { 1 }, 
-                IsActive = true 
-            },
-            
-            new ModuleAction 
-            { 
-                IdAction = $($StartIdAction + 3), 
-                IdComponent = $($StartIdComponent + 1), 
-                ActionKey = "$ModuleName.$FirstComponent.Eliminar", 
-                Name = "Eliminar $FirstComponent", 
-                Description = "Permite eliminar registros de $FirstComponent", 
-                IdActionType = 3,  // Crítica
-                RequiredPermissionIds = new List<int> { 1 }, 
-                IsActive = true 
-            }
-        };
-"@
-
-    $configureServicesCode = @"
-        // ? Registrar servicios de componentes hijos
-        services.AddScoped<I${FirstComponent}Service, ${FirstComponent}Service>();
-        
-        // ?? NO hay servicio base del módulo raíz (es solo contenedor)
-"@
+$solution = Get-ChildItem -Path $RootPath -Filter '*.sln' -File -Recurse | Select-Object -First 1
+if ($null -eq $solution) {
+    Write-Host "? No se encontrÃ³ archivo .sln en $RootPath" -ForegroundColor Yellow
 } else {
-    $getComponentsCode = @"
-        return new List<ModuleComponent>
-        {
-            // ===== COMPONENTE RAÍZ (ACTÚA COMO CATEGORÍA) =====
-            new ModuleComponent 
-            { 
-                IdComponent = $StartIdComponent, 
-                IdModule = $IdModule, 
-                IdParent = null,  // NULL = Categoría raíz en menú
-                ComponentCode = "$ModuleName.Root", 
-                Name = "$ModuleName", 
-                Description = "Módulo principal de $ModuleName", 
-                Route = "",  // Sin ruta, solo contenedor
-                Icon = "$IconRoot", 
-                MenuOrder = 100, 
-                ShowInMenu = true, 
-                ComponentType = null,  // Sin componente Blazor, solo contenedor
-                ComponentTypeName = null,
-                RequiredPermissionIds = new List<int> { 1 },  // Solo Admin por defecto
-                IsActive = true 
-            }
-            
-            // TODO: Agregar componentes hijos usando Add-VRMComponent.ps1
-        };
-"@
-
-    $getActionsCode = @"
-        return new List<ModuleAction>
-        {
-            // TODO: Agregar acciones cuando se agreguen componentes
-        };
-"@
-
-    $configureServicesCode = @"
-        // ?? NO hay servicio base del módulo raíz (es solo contenedor)
-        // Los servicios se registrarán al agregar componentes con Add-VRMComponent.ps1
+    Write-Host "?? Agregando proyecto y dependencias a la soluciÃ³n: $($solution.FullName)" -ForegroundColor Yellow
         
-        // Ejemplo al agregar componente "Facturas":
-        // services.AddScoped<IFacturaService, FacturaService>();
+    # Agregar proyecto a la soluciÃ³n (SIN crear solution-folder => no se verÃ¡ la carpeta en Solution Explorer)
+    $moduleCsproj = Join-Path $ModuleFullPath "$ModuleProjectName.csproj"
+    if (Test-Path $moduleCsproj) {
+        
+        dotnet sln $solution.FullName add $moduleCsproj --solution-folder "src/Modules" | Out-Null
+
+    }
+
+    Write-Host "? Proyectos agregados a la soluciÃ³n" -ForegroundColor Green
+}
+
+# ==================== 3. CREAR CARPETAS ====================
+
+Write-Host "`n?? [3/5] Creando estructura..." -ForegroundColor Yellow
+
+# Asegurar que exista la carpeta raÃ­z del mÃ³dulo
+if (!(Test-Path $ModuleFullPath)) {
+    Write-Host "?? Carpeta del mÃ³dulo no encontrada. Creando: $ModuleFullPath" -ForegroundColor Yellow
+    New-Item -ItemType Directory -Path $ModuleFullPath -Force | Out-Null
+}
+
+# Normalizar a ruta absoluta para evitar problemas de contexto
+try {
+    $ModuleFullPath = (Resolve-Path -Path $ModuleFullPath).ProviderPath
+} catch {
+    Write-Host "âš  No se pudo resolver ruta absoluta: $ModuleFullPath" -ForegroundColor Yellow
+}
+
+$Folders = @("Components", "Domain", "Services", "Data", "Data\DTOs", "Data\Repositories", "wwwroot\assets", "wwwroot\assets\images", "wwwroot\assets\css", "wwwroot\assets\js")
+
+foreach ($folder in $Folders) {
+    $target = Join-Path $ModuleFullPath $folder
+    if (!(Test-Path $target)) {
+        New-Item -ItemType Directory -Path $target -Force | Out-Null
+    }
+}
+
+# Crear README.md informativos en cada carpeta para que Visual Studio y Git los muestren
+$folderDescriptions = @{
+    "Components"               = "Componentes Blazor del mÃ³dulo."
+    "Domain"                   = "Modelos y entidades del dominio del mÃ³dulo."
+    "Services"                 = "Servicios de negocio y lÃ³gica de aplicaciÃ³n."
+    "Data\DTOs"                = "DTOs (Data Transfer Objects) usados por el mÃ³dulo."
+    "Data\Repositories"        = "Implementaciones y contratos de repositorios."   
+    "wwwroot\assets\images"    = "ImÃ¡genes del mÃ³dulo."
+    "wwwroot\assets\css"       = "Hojas de estilo (CSS) del mÃ³dulo."
+    "wwwroot\assets\js"        = "Scripts JavaScript del mÃ³dulo."
+}
+
+# Crear README.md informativos sÃ³lo en carpetas listadas en $folderDescriptions
+foreach ($folder in $folderDescriptions.Keys) {
+    $target = Join-Path $ModuleFullPath $folder
+    if (!(Test-Path $target)) {
+        New-Item -ItemType Directory -Path $target -Force | Out-Null
+    }
+
+    $readmePath = Join-Path $target "README.md"
+    if (!(Test-Path $readmePath)) {
+        $desc = $folderDescriptions[$folder]
+        if ([string]::IsNullOrWhiteSpace($desc)) {
+            $desc = "Carpeta para $folder."
+        }
+        Set-Content -Path $readmePath -Value $desc -Encoding UTF8 -Force
+    }
+}
+
+# Crear archivos placeholder .cs para asegurar namespaces en IDE
+$placeholders = @{
+    "Domain" = @"
+// REUTILIZAR Namespace para Domain en futuras clases
+// ELIMINAR este archivo cuando se agreguen nuevas clases en este namespace
+namespace $RootNamespace.Domain
+{
+    internal static class NamespacePlaceholder
+    {
+        private const string Purpose = "Placeholder para $RootNamespace.Domain";
+    }
+}
+"@
+    "Services" = @"
+// REUTILIZAR Namespace para Domain en futuras clases
+// ELIMINAR este archivo cuando se agreguen nuevas clases en este namespace
+namespace $RootNamespace.Services
+{
+    internal static class NamespacePlaceholder
+    {
+        private const string Purpose = "Placeholder para $RootNamespace.Services";
+    }
+}
 "@
 }
 
-$moduleClassContent = @"
+foreach ($kv in $placeholders.GetEnumerator()) {
+    $relFolder = $kv.Key
+    $content = $kv.Value
+    $folderPath = Join-Path $ModuleFullPath $relFolder
+    if (!(Test-Path $folderPath)) {
+        New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
+    }
+    $filePath = Join-Path $folderPath "NamespacePlaceholder.cs"
+    if (!(Test-Path $filePath)) {
+        Set-Content -Path $filePath -Value $content -Encoding UTF8 -Force
+    }
+}
+
+# Limpiar archivos de plantilla
+Remove-Item (Join-Path $ModuleFullPath "Component1.razor.css") -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $ModuleFullPath "Component1.razor") -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $ModuleFullPath "ExampleJsInterop.cs") -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $ModuleFullPath "_Imports.razor") -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $ModuleFullPath "wwwroot/background.png") -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $ModuleFullPath "wwwroot/exampleJsInterop.js") -ErrorAction SilentlyContinue
+
+
+Write-Host "? Estructura creada" -ForegroundColor Green
+
+
+# ==================== 4. CREAR CLASE MÃ“DULO ====================
+
+Write-Host "`n?? [4/5] Generando clase mÃ³dulo..." -ForegroundColor Yellow
+
+$moduleContent = @"
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VRM_Plugin.Core.Abstractions;
-using VRM_Plugin.Core.Abstractions.Entities;
-$(if ($FirstComponent) { "using VRM_Plugin.Modules.$ModuleName.Services;" } else { "// using VRM_Plugin.Modules.$ModuleName.Services;  // Se descomentará al agregar servicios" })
+using VRM_Plugin.Core.Abstractions.Data.DTOs;
 
-namespace VRM_Plugin.Modules.$ModuleName;
+namespace VRM_Plugin.Module.$ModuleName;
 
-/// <summary>
-/// Módulo de $ModuleName
-/// Implementa IModule para integrarse en el sistema de plugins.
-/// 
-/// ?? ARQUITECTURA:
-/// - Este módulo es un CONTENEDOR ORGANIZACIONAL (no tiene lógica propia)
-/// - Los servicios se crean SOLO para componentes hijos
-/// - Ejemplo: FacturaService, PagoService (no FinanzasService)
-/// </summary>
 public class ${ModuleName}Module : IModule
 {
-    public int IdModule { get; set; } = $IdModule;
-    public string ModuleName => "$ModuleName";
-    public string DisplayName => "Gestión de $ModuleName";
-    public string Description => "Módulo para gestionar operaciones de $ModuleName.";
-    public string Version => "1.0.0";
+    // ==================== CAMPOS PRIVADOS ====================
+    
+    // Datos inyectados por el Host (desde BD)
+    private List<ModuleComponentDto> _components = new();
+    private List<ModuleActionDto> _actions = new();
+    
+    // Metadata del mÃ³dulo (se inyectan desde BD, valores vacÃ­os por defecto)
+    private string _moduleName = string.Empty;
+    private string _displayName = string.Empty;
+    private string _description = string.Empty;
+    private string _version = string.Empty;
+        
+// ==================== PROPIEDADES PÃšBLICAS ====================
+    
+    /// <summary>
+    /// ID numÃ©rico del mÃ³dulo
+    /// </summary>
+    public int ModuleId { get; set; } = $ModuleId;
+    
+    public string ModuleName => _moduleName;
+    public string DisplayName => _displayName;
+    public string Description => _description;
+    public string Version => _version;
 
-    public List<ModuleComponent> GetComponents()
+// ==================== MÃ‰TODOS PÃšBLICOS ====================
+
+    /// <summary>
+    /// Devuelve los componentes inyectados por el Host
+    /// </summary>
+    public List<ModuleComponentDto> GetComponents()
     {
-$getComponentsCode
+        if (_components.Count > 0)
+        {
+            return _components;
+        }
+
+        // Fallback: valores por defecto si no se cargaron desde BD
+        return new List<ModuleComponentDto>();
+    }
+    
+    /// <summary>
+    /// Devuelve las acciones inyectadas por el Host
+    /// </summary>
+    public List<ModuleActionDto> GetActions()
+    {
+        if (_actions.Count > 0)
+        {
+            return _actions;
+        }
+
+        return new List<ModuleActionDto>();
+    }
+        
+    // ==================== MÃ‰TODOS DE INYECCIÃ“N (Llamados por el Host) ====================
+    
+    /// <summary>
+    /// El Host llama este mÃ©todo para inyectar componentes desde BD
+    /// </summary>
+    public void SetComponents(List<ModuleComponentDto> components)
+    {
+        _components = components ?? new List<ModuleComponentDto>();
+    }
+    
+    /// <summary>
+    /// El Host llama este mÃ©todo para inyectar acciones desde BD
+    /// </summary>
+    public void SetActions(List<ModuleActionDto> actions)
+    {
+        _actions = actions ?? new List<ModuleActionDto>();
+    }
+    
+    /// <summary>
+    /// El Host llama este mÃ©todo para inyectar metadata desde BD
+    /// </summary>    
+    public void SetMetadata(string moduleName, string displayName, string description, string version)
+    {
+        _moduleName = moduleName ?? _moduleName;
+        _displayName = displayName ?? _displayName;
+        _description = description ?? _description;
+        _version = version ?? _version;
     }
 
-    public List<ModuleAction> GetActions()
-    {
-$getActionsCode
-    }
-
+// ==================== CONFIGURACIÃ“N DE SERVICIOS ====================
+    
+    /// <summary>
+    /// Registra servicios de NEGOCIO y REPOSITORIOS del mÃ³dulo
+    /// </summary>
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-$configureServicesCode
+        //  Registrar repositorios del mÃ³dulo (capa de datos)
+        //services.AddScoped<IRepositoryInterface, RepositoryInterfaceImplemented>();
+                
+        //  Registrar servicios de negocio del mÃ³dulo
+        //services.AddScoped<IServiceInterface,ServiceInterfaceImplemented>();
+        
+        //  Registrar el mÃ³dulo como IModule para inyecciÃ³n en layouts/componentes
+        services.AddSingleton<IModule>(this);
+        services.AddSingleton(this); 
     }
-
-    public bool IsEnabledForClient(string clienteId) => true;
-
+        
     public async Task OnModuleLoadedAsync()
     {
-        Console.WriteLine(`$"[{ModuleName}] Módulo cargado - IdModule: {IdModule}");
-        Console.WriteLine(`$"[{ModuleName}] Componentes: {GetComponents().Count}, Acciones: {GetActions().Count}");
+        Console.WriteLine($"[{ModuleName}] MÃ³dulo cargado - ModuleId: {ModuleId}");
+        Console.WriteLine($"[{ModuleName}] DisplayName: {DisplayName}");
+        Console.WriteLine($"[{ModuleName}] Componentes: {_components.Count}, Acciones: {_actions.Count}");
         await Task.CompletedTask;
     }
+
 }
 "@
 
-Set-Content -Path $moduleClassPath -Value $moduleClassContent -Force
-Write-Host "  ? Generado: ${ModuleName}Module.cs" -ForegroundColor Gray
-if (!$FirstComponent) {
-    Write-Host "    ??  Sin servicio base (módulo es solo contenedor)" -ForegroundColor DarkGray
-}
+Set-Content -Path (Join-Path $ModuleFullPath "${ModuleName}Module.cs") -Value $moduleContent -Force
 
-# --- 4.2 _Imports.razor ---
-
-$importsPath = Join-Path $ModuleFullPath "Components\_Imports.razor"
+# Crear _Imports.razor
 $importsContent = @"
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
@@ -408,189 +357,37 @@ $importsContent = @"
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Authorization
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
-@using VRM_Plugin.Modules.$ModuleName.Domain
-@using VRM_Plugin.Modules.$ModuleName.Services
-
-@namespace VRM_Plugin.Modules.$ModuleName.Components
+@using VRM_Plugin.Core.Shared.Components.Auth
+@using VRM_Plugin.Module.$ModuleName.Domain
+@using VRM_Plugin.Module.$ModuleName.Services
+@namespace VRM_Plugin.Module.$ModuleName.Components
 "@
 
-Set-Content -Path $importsPath -Value $importsContent -Force
-Write-Host "  ? Generado: Components/_Imports.razor" -ForegroundColor Gray
+Set-Content -Path (Join-Path $ModuleFullPath "Components\_Imports.razor") -Value $importsContent -Force
 
-# ==================== 5. CREAR PRIMER COMPONENTE (OPCIONAL) ====================
+Write-Host "? Clase mÃ³dulo generada" -ForegroundColor Green
 
-if ($FirstComponent) {
-    Write-Host "`n?? [5/7] Creando primer componente: $FirstComponent..." -ForegroundColor Yellow
-    
-    # Llamar a Add-VRMComponent.ps1 para crear el componente con servicio
-    $addComponentScriptPath = Join-Path $RootPath "Add-VRMComponent.ps1"
-    
-    if (Test-Path $addComponentScriptPath) {
-        # Ejecutar Add-VRMComponent internamente
-        & $addComponentScriptPath -ModuleName $ModuleName -ComponentName $FirstComponent -CreateEntity -CreateService
-        
-        Write-Host "? Primer componente '$FirstComponent' creado con éxito" -ForegroundColor Green
-    } else {
-        Write-Host "??  No se encontró Add-VRMComponent.ps1" -ForegroundColor Yellow
-        Write-Host "    Crea el componente manualmente después" -ForegroundColor Gray
-    }
-} else {
-    Write-Host "`n?? [5/7] Sin primer componente (módulo vacío)" -ForegroundColor Yellow
-    Write-Host "    Usa Add-VRMComponent.ps1 para agregar componentes" -ForegroundColor Gray
-}
+# ==================== 5. COMPILAR ====================
 
-# ==================== 6. COMPILAR PROYECTO ====================
-
-Write-Host "`n?? [6/7] Compilando proyecto..." -ForegroundColor Yellow
+Write-Host "`n?? [5/5] Compilando..." -ForegroundColor Yellow
 
 Set-Location $ModuleFullPath
-
-dotnet build --configuration Release
+dotnet build --configuration Debug
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "? Error al compilar proyecto" -ForegroundColor Red
+    Write-Host "? Error al compilar" -ForegroundColor Red
     Set-Location $RootPath
     exit 1
 }
 
-Write-Host "? Proyecto compilado correctamente" -ForegroundColor Green
-
-# ==================== 7. COPIAR DLL AL HOST ====================
-
-Write-Host "`n?? [7/7] Copiando DLL al Host..." -ForegroundColor Yellow
-
-$sourceDll = Join-Path $ModuleFullPath "bin\Release\net8.0\$ModuleProjectName.dll"
-$hostModulesPath = Join-Path $RootPath "src\Host\VRM_Plugin.Blazor.Server\bin\Debug\net8.0\Modules"
-
-if (!(Test-Path $hostModulesPath)) {
-    New-Item -ItemType Directory -Path $hostModulesPath -Force | Out-Null
-}
-
-Copy-Item $sourceDll $hostModulesPath -Force
-
-Write-Host "? DLL copiada a: $hostModulesPath" -ForegroundColor Green
-
-# ==================== 8. GENERAR DOCUMENTACIÓN ====================
-
-$readmePath = Join-Path $ModuleFullPath "README.md"
-$readmeContent = @"
-# $ModuleName Module - VRM System
-
-## ?? Información del Módulo
-
-| Propiedad | Valor |
-|-----------|-------|
-| **Nombre** | $ModuleName |
-| **ID Módulo** | $IdModule |
-| **Categoría** | $Category |
-| **Versión** | 1.0.0 |
-$(if ($FirstComponent) { "| **Primer Componente** | $FirstComponent |" })
-
----
-
-## ?? IDs Asignados
-
-### Componentes
-- **$StartIdComponent**: Categoría raíz ($ModuleName) - Solo contenedor
-$(if ($FirstComponent) { "- **$($StartIdComponent + 1)**: $FirstComponent" })
-
-### Acciones
-$(if ($FirstComponent) { 
-"- **$StartIdAction**: Ver $FirstComponent
-- **$($StartIdAction + 1)**: Crear $FirstComponent
-- **$($StartIdAction + 2)**: Editar $FirstComponent
-- **$($StartIdAction + 3)**: Eliminar $FirstComponent"
-} else {
-"- *Pendiente: Agregar componentes primero*"
-})
-
----
-
-## ?? Arquitectura
-
-?? **Este módulo NO tiene servicio base** porque es solo un contenedor organizacional.
-
-Los servicios se crean para cada componente hijo:
-$(if ($FirstComponent) {
-"- ? ``I${FirstComponent}Service`` ? Lógica de $FirstComponent"
-} else {
-"- Ejemplo: ``IFacturaService`` ? Lógica de Facturas
-- Ejemplo: ``IPagoService`` ? Lógica de Pagos"
-})
-
----
-
-## ?? Próximos Pasos
-
-$(if ($FirstComponent) {
-"1. Revisar y personalizar el componente ``$FirstComponent.razor``
-2. Agregar más componentes:
-   ``````powershell
-   .\Add-VRMComponent.ps1 -ModuleName $ModuleName -ComponentName NuevoComponente -CreateEntity -CreateService
-   ``````"
-} else {
-"1. Agregar componentes al módulo:
-   ``````powershell
-   .\Add-VRMComponent.ps1 -ModuleName $ModuleName -ComponentName MiComponente -CreateEntity -CreateService
-   ``````"
-})
-
-3. Registrar servicios en ``ConfigureServices()`` de ``${ModuleName}Module.cs``
-4. Compilar y probar
-
----
-
-**Generado automáticamente por VRM Plugin Generator v2.0**
-"@
-
-Set-Content -Path $readmePath -Value $readmeContent -Force
-
 # ==================== RESUMEN ====================
 
-Write-Host "`n??????????????????????????????????????????????????????????" -ForegroundColor Green
-Write-Host "?  ? MÓDULO CREADO EXITOSAMENTE                          ?" -ForegroundColor Green
-Write-Host "??????????????????????????????????????????????????????????" -ForegroundColor Green
-
-Write-Host "`n?? RESUMEN:" -ForegroundColor Cyan
-Write-Host "  • Nombre: $ModuleName" -ForegroundColor White
-Write-Host "  • ID Módulo: $IdModule" -ForegroundColor White
-Write-Host "  • Categoría: $Category" -ForegroundColor White
-if ($FirstComponent) {
-    Write-Host "  • Primer Componente: $FirstComponent" -ForegroundColor White
-    Write-Host "  • Ruta: /$($ModuleName.ToLower())/$($FirstComponent.ToLower())" -ForegroundColor White
-} else {
-    Write-Host "  • Estado: Módulo vacío (solo contenedor)" -ForegroundColor Yellow
-}
-Write-Host "  • Ubicación: $ModuleFullPath" -ForegroundColor White
-
-Write-Host "`n?? ARQUITECTURA:" -ForegroundColor Cyan
-if ($FirstComponent) {
-    Write-Host "  ? Módulo creado CON primer componente '$FirstComponent'" -ForegroundColor Green
-    Write-Host "  ? Servicio I${FirstComponent}Service registrado" -ForegroundColor Green
-} else {
-    Write-Host "  ??  Módulo creado SIN componentes (solo contenedor)" -ForegroundColor Yellow
-    Write-Host "  ??  Sin servicio base (no es necesario)" -ForegroundColor Gray
-}
-
-Write-Host "`n?? PRÓXIMOS PASOS:" -ForegroundColor Cyan
-
-if ($FirstComponent) {
-    Write-Host "  1. Personalizar componente $FirstComponent.razor" -ForegroundColor Yellow
-    Write-Host "`n  2. Agregar más componentes (opcional):" -ForegroundColor Yellow
-    Write-Host "     .\Add-VRMComponent.ps1 -ModuleName $ModuleName -ComponentName NuevoComponente -CreateEntity -CreateService" -ForegroundColor White
-} else {
-    Write-Host "  1. Agregar componentes al módulo:" -ForegroundColor Yellow
-    Write-Host "     .\Add-VRMComponent.ps1 -ModuleName $ModuleName -ComponentName MiComponente -CreateEntity -CreateService" -ForegroundColor White
-}
-
-Write-Host "`n  $(if ($FirstComponent) { '3' } else { '2' }). Reiniciar la aplicación VRM:" -ForegroundColor Yellow
-Write-Host "     cd src\Host\VRM_Plugin.Blazor.Server" -ForegroundColor White
-Write-Host "     dotnet run" -ForegroundColor White
-
-if ($FirstComponent) {
-    Write-Host "`n  4. Navegar a: http://localhost:5000/$($ModuleName.ToLower())/$($FirstComponent.ToLower())" -ForegroundColor Yellow
-}
-
-Write-Host "`n? ¡Módulo listo para desarrollo!" -ForegroundColor Green
+Write-Host "`n??????????????????????????????????????????????????" -ForegroundColor Green
+Write-Host "  ? MÃ“DULO CREADO EXITOSAMENTE" -ForegroundColor Green
+Write-Host "??????????????????????????????????????????????????" -ForegroundColor Green
+Write-Host "`n?? Carpeta: $ModuleProjectName" -ForegroundColor Cyan
+Write-Host "?? DLL: $AssemblyName.dll" -ForegroundColor Cyan
+Write-Host "?? Namespace: $RootNamespace" -ForegroundColor Cyan
+Write-Host "`n? MÃ³dulo listo para desarrollo`n" -ForegroundColor Green
 
 Set-Location $RootPath
