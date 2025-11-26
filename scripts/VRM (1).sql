@@ -63,7 +63,7 @@ CREATE TABLE `cat_components` (
   `description` varchar(500) NOT NULL,
   `route` varchar(300) NOT NULL,
   `icon` varchar(100) NOT NULL,
-  `show_in_menu` bit(1) NOT NULL DEFAULT b'0',
+  `show_in_menu` tinyint(1) NOT NULL DEFAULT b'0',
   `menu_order` int NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '0',
   `created_date` datetime DEFAULT CURRENT_TIMESTAMP,

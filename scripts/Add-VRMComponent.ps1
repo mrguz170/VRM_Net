@@ -319,12 +319,12 @@ if (Test-Path $componentPath) {
     $routeName = $ComponentName.ToLower()
     $moduleLower = $ModuleName.ToLower()
     $componentContent = @"
-@page ""/$moduleLower/$routeName""
+@page "/$moduleLower/$routeName"
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject ${ModuleName}Module CurrentModule
 
-<CascadingValue Value=""@CurrentModule"" Name=""CurrentModule"">
+<CascadingValue Value="@CurrentModule" Name="CurrentModule">
     <div>
         <!-- Contenido base mínimo; reemplaza según la UI requerida -->
     </div>
