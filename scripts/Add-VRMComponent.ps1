@@ -1,408 +1,410 @@
-<#
+Ôªø<#
 .SYNOPSIS
-    Agrega un nuevo componente Blazor a un mÛdulo VRM existente.
+    Agrega un nuevo componente Blazor a un m√≥dulo VRM existente.
 
 .DESCRIPTION
-    Este script facilita agregar:
-    - Componente Blazor (.razor)
-    - Entidad de dominio (opcional)
-    - Servicio e interfaz (opcional)
-    
-    Los IDs deben obtenerse de la BD antes de actualizar el mÛdulo.
-
-.PARAMETER ModuleName
-    Nombre del mÛdulo existente (ej: Inventario, Finanzas)
-
-.PARAMETER ComponentName
-    Nombre del nuevo componente (ej: Productos, Clientes)
-
-.PARAMETER CreateEntity
-    Si es $true, crea una entidad de dominio para el componente
-
-.PARAMETER CreateService
-    Si es $true, crea interfaz y servicio para el componente
-
-.EXAMPLE
-    .\Add-VRMComponent.ps1 -ModuleName Inventario -ComponentName Productos
-
-.EXAMPLE
-    .\Add-VRMComponent.ps1 -ModuleName Inventario -ComponentName Productos -CreateEntity -CreateService
+    Crea componente .razor, entidad (opcional), service (por defecto), repository + DTO (opcional).
+    Convierte autom√°ticamente el nombre plural a singular para DTO/Entity/Repository/Service y pregunta solo si la conversi√≥n es ambigua.
 #>
 
 param(
     [Parameter(Mandatory=$true)]
     [string]$ModuleName,
-    
+
     [Parameter(Mandatory=$true)]
     [string]$ComponentName,
-    
+
     [Parameter(Mandatory=$false)]
-    [switch]$CreateEntity,
-    
+    [bool]$CreateEntity = $false,
+
+    # Crear servicio por defecto (true). Pasar -CreateService:$false para omitir.
     [Parameter(Mandatory=$false)]
-    [switch]$CreateService
+    [bool]$CreateService = $true,
+
+    # Crear repository y DTO (opcional)
+    [Parameter(Mandatory=$false)]
+    [bool]$CreateRepository = $false,
+
+    # Forzar nombre singular si se desea (opcional)
+    [Parameter(Mandatory=$false)]
+    [string]$SingularName
 )
 
-# ==================== CONFIGURACI”N ====================
+# ==================== Helpers ====================
+function To-Singular([string]$name) {
+    if ([string]::IsNullOrWhiteSpace($name)) { return $name }
+    $n = $name.Trim()
 
+    # Reglas simples (ES + EN heur√≠sticas)
+    if ($n.Length -gt 3 -and $n.ToLower().EndsWith("ces")) {
+        return $n.Substring(0, $n.Length - 3) + "z"
+    }
+    if ($n.Length -gt 3 -and $n.ToLower().EndsWith("ies")) {
+        return $n.Substring(0, $n.Length - 3) + "y"
+    }
+    if ($n.Length -gt 2 -and $n.ToLower().EndsWith("es")) {
+        return $n.Substring(0, $n.Length - 2)
+    }
+    if ($n.Length -gt 1 -and $n.ToLower().EndsWith("s")) {
+        return $n.Substring(0, $n.Length - 1)
+    }
+    return $n
+}
+
+# ==================== Preparaci√≥n ====================
 $RootPath = Get-Location
 $ModulesPath = Join-Path $RootPath "src\Modules"
 
-# Buscar el mÛdulo en todas las subcarpetas
-$ModuleProjectName = "VRM_Plugin.Modules.$ModuleName"
-$ModuleFullPath = Get-ChildItem -Path $ModulesPath -Recurse -Directory | 
-                  Where-Object { $_.Name -eq $ModuleProjectName } | 
-                  Select-Object -First 1 -ExpandProperty FullName
+# Buscar el m√≥dulo en todas las subcarpetas
+$ModuleProjectName = "VRM_Plugin.Module.$ModuleName"
+$ModuleFullPath = Get-ChildItem -Path $ModulesPath -Recurse -Directory -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -eq $ModuleProjectName } |
+    Select-Object -First 1 -ExpandProperty FullName
 
 if (-not $ModuleFullPath) {
-    Write-Host "? ERROR: No se encontrÛ el mÛdulo '$ModuleName'" -ForegroundColor Red
-    Write-Host "Buscar en: $ModulesPath" -ForegroundColor Gray
+    Write-Host "? ERROR: No se encontr√≥ el m√≥dulo '$ModuleName' en $ModulesPath" -ForegroundColor Red
     exit 1
 }
 
+# Determinar nombre base en singular (para DTO/Entity/Repo/Service)
+if ($SingularName) {
+    $BaseName = $SingularName.Trim()
+} else {
+    $BaseName = To-Singular $ComponentName
+    # Si no cambi√≥ mucho, pedir confirmaci√≥n
+    if ($BaseName -eq $ComponentName -or ($ComponentName.Length - $BaseName.Length) -lt 1) {
+        $resp = Read-Host "Usar '$BaseName' como nombre singular para DTO/Entity/Repo/Service? (S/n)"
+        if ($resp -match '^[Nn]') {
+            $entered = Read-Host "Introduce el nombre en singular (ej: Factura)"
+            if (-not [string]::IsNullOrWhiteSpace($entered)) { $BaseName = $entered.Trim() }
+        }
+    }
+}
+
 Write-Host "`n???????????????????????????????????????????????????????????" -ForegroundColor Cyan
-Write-Host "  ?? AGREGAR COMPONENTE A M”DULO VRM" -ForegroundColor Cyan
-Write-Host "  MÛdulo: $ModuleName" -ForegroundColor Cyan
-Write-Host "  Componente: $ComponentName" -ForegroundColor Cyan
+Write-Host "  ?? AGREGAR COMPONENTE A M√ìDULO VRM" -ForegroundColor Cyan
+Write-Host "  M√≥dulo: $ModuleName" -ForegroundColor Cyan
+Write-Host "  Componente UI: $ComponentName" -ForegroundColor Cyan
+Write-Host "  Base (singular): $BaseName" -ForegroundColor Cyan
+Write-Host "  CrearEntity: $CreateEntity, CreateService: $CreateService, CreateRepository: $CreateRepository" -ForegroundColor Cyan
 Write-Host "???????????????????????????????????????????????????????????`n" -ForegroundColor Cyan
 
 # ==================== 1. CREAR ENTIDAD (OPCIONAL) ====================
-
 if ($CreateEntity) {
     Write-Host "?? [1] Creando entidad de dominio..." -ForegroundColor Yellow
-    
-    $entityPath = Join-Path $ModuleFullPath "Domain\$ComponentName.cs"
-    
+
+    $entityFolder = Join-Path $ModuleFullPath "Domain"
+    if (!(Test-Path $entityFolder)) { New-Item -ItemType Directory -Path $entityFolder -Force | Out-Null }
+
+    $entityPath = Join-Path $entityFolder "${BaseName}.cs"
     if (Test-Path $entityPath) {
-        Write-Host "??  La entidad ya existe: $ComponentName.cs" -ForegroundColor Yellow
+        Write-Host "??  La entidad ya existe: $($entityPath.Substring($ModuleFullPath.Length + 1))" -ForegroundColor Yellow
     } else {
         $entityContent = @"
-namespace VRM_Plugin.Modules.$ModuleName.Domain;
+namespace VRM_Plugin.Module.$ModuleName.Domain;
 
 /// <summary>
-/// Entidad $ComponentName del mÛdulo $ModuleName
+/// Entidad $BaseName del m√≥dulo $ModuleName
 /// </summary>
-public class $ComponentName
+public class $BaseName
 {
     public int Id { get; set; }
-    
     public string Nombre { get; set; } = string.Empty;
-    
     public string Descripcion { get; set; } = string.Empty;
-    
     public bool Activo { get; set; } = true;
-    
-    public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
-    
-    public DateTime? FechaModificacion { get; set; }
-    
-    public string CreadoPor { get; set; } = string.Empty;
-    
-    public string? ModificadoPor { get; set; }
 }
 "@
-        
-        Set-Content -Path $entityPath -Value $entityContent -Force
-        Write-Host "? Entidad creada: Domain/$ComponentName.cs" -ForegroundColor Green
+        Set-Content -Path $entityPath -Value $entityContent -Encoding UTF8 -Force
+        Write-Host "? Entidad creada: Domain/$BaseName.cs" -ForegroundColor Green
     }
 }
 
-# ==================== 2. CREAR SERVICIO (OPCIONAL) ====================
-
+# ==================== 2. CREAR SERVICIO (RECOMENDADO) ====================
 if ($CreateService) {
-    Write-Host "`n??  [2] Creando servicio..." -ForegroundColor Yellow
-    
-    # Interfaz
-    $interfacePath = Join-Path $ModuleFullPath "Services\I${ComponentName}Service.cs"
-    
+    Write-Host "`n??  [2] Creando service e interfaz..." -ForegroundColor Yellow
+
+    $servicesFolder = Join-Path $ModuleFullPath "Services"
+    if (!(Test-Path $servicesFolder)) { New-Item -ItemType Directory -Path $servicesFolder -Force | Out-Null }
+
+    $interfacePath = Join-Path $servicesFolder "I${BaseName}Service.cs"
     if (Test-Path $interfacePath) {
-        Write-Host "??  La interfaz ya existe: I${ComponentName}Service.cs" -ForegroundColor Yellow
+        Write-Host "??  La interfaz ya existe: Services/I${BaseName}Service.cs" -ForegroundColor Yellow
     } else {
         $interfaceContent = @"
-using VRM_Plugin.Modules.$ModuleName.Domain;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using VRM_Plugin.Module.$ModuleName.Domain;
+using VRM_Plugin.Module.$ModuleName.Data.DTOs;
 
-namespace VRM_Plugin.Modules.$ModuleName.Services;
+namespace VRM_Plugin.Module.$ModuleName.Services;
 
 /// <summary>
-/// Servicio para gestionar $ComponentName
+/// Servicio base para gestionar $BaseName
+/// Cambia la implementaci√≥n seg√∫n las necesidades del componente.
 /// </summary>
-public interface I${ComponentName}Service
+public interface I${BaseName}Service
 {
-    /// <summary>
-    /// Obtiene todos los registros de $ComponentName
-    /// </summary>
-    Task<List<$ComponentName>> GetAllAsync();
-    
-    /// <summary>
-    /// Obtiene un registro de $ComponentName por ID
-    /// </summary>
-    Task<$ComponentName?> GetByIdAsync(int id);
-    
-    /// <summary>
-    /// Crea un nuevo registro de $ComponentName
-    /// </summary>
-    Task<$ComponentName> CreateAsync($ComponentName entity);
-    
-    /// <summary>
-    /// Actualiza un registro existente de $ComponentName
-    /// </summary>
-    Task<$ComponentName> UpdateAsync($ComponentName entity);
-    
-    /// <summary>
-    /// Elimina un registro de $ComponentName
-    /// </summary>
+    Task<List<${BaseName}Dto>> GetAllAsync();
+    Task<${BaseName}Dto?> GetByIdAsync(int id);
+    Task<${BaseName}Dto> CreateAsync(${BaseName}Dto dto);
+    Task<${BaseName}Dto> UpdateAsync(${BaseName}Dto dto);
     Task<bool> DeleteAsync(int id);
 }
 "@
-        
-        Set-Content -Path $interfacePath -Value $interfaceContent -Force
-        Write-Host "? Interfaz creada: Services/I${ComponentName}Service.cs" -ForegroundColor Green
+        Set-Content -Path $interfacePath -Value $interfaceContent -Encoding UTF8 -Force
+        Write-Host "? Interfaz creada: Services/I${BaseName}Service.cs" -ForegroundColor Green
     }
-    
-    # ImplementaciÛn
-    $servicePath = Join-Path $ModuleFullPath "Services\${ComponentName}Service.cs"
-    
+
+    $servicePath = Join-Path $servicesFolder "${BaseName}Service.cs"
     if (Test-Path $servicePath) {
-        Write-Host "??  La implementaciÛn ya existe: ${ComponentName}Service.cs" -ForegroundColor Yellow
+        Write-Host "??  La implementaci√≥n ya existe: Services/${BaseName}Service.cs" -ForegroundColor Yellow
     } else {
         $serviceContent = @"
-using VRM_Plugin.Modules.$ModuleName.Domain;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using VRM_Plugin.Module.$ModuleName.Data.DTOs;
+using VRM_Plugin.Module.$ModuleName.Data.Repositories;
+using VRM_Plugin.Module.$ModuleName.Domain;
 
-namespace VRM_Plugin.Modules.$ModuleName.Services;
+namespace VRM_Plugin.Module.$ModuleName.Services;
 
 /// <summary>
-/// ImplementaciÛn del servicio de $ComponentName
-/// TODO: Conectar con base de datos real mediante DbContext
+/// Implementaci√≥n base del servicio de $BaseName
+/// Cambia la implementaci√≥n seg√∫n las necesidades del componente.
 /// </summary>
-public class ${ComponentName}Service : I${ComponentName}Service
+public class ${BaseName}Service : I${BaseName}Service
 {
-    // TODO: Inyectar DbContext cuando estÈ disponible
-    // private readonly ApplicationDbContext _context;
-    
-    // Lista temporal en memoria (SOLO PARA DESARROLLO)
-    private readonly List<$ComponentName> _items = new();
-    
-    public Task<List<$ComponentName>> GetAllAsync()
+    private readonly I${BaseName}Repository? _repo;
+
+    public ${BaseName}Service(I${BaseName}Repository? repo = null)
     {
-        // TODO: Reemplazar con: await _context.$ComponentName.ToListAsync();
-        return Task.FromResult(_items);
+        _repo = repo;
     }
-    
-    public Task<$ComponentName?> GetByIdAsync(int id)
+
+    public async Task<List<${BaseName}Dto>> GetAllAsync()
     {
-        // TODO: Reemplazar con: await _context.$ComponentName.FindAsync(id);
-        var item = _items.FirstOrDefault(x => x.Id == id);
-        return Task.FromResult(item);
+        if (_repo != null) return await _repo.GetSampleAsync();
+        return await Task.FromResult(new List<${BaseName}Dto>());
     }
-    
-    public Task<$ComponentName> CreateAsync($ComponentName entity)
+
+    public async Task<${BaseName}Dto?> GetByIdAsync(int id)
     {
-        // TODO: Reemplazar con:
-        // _context.$ComponentName.Add(entity);
-        // await _context.SaveChangesAsync();
+        var list = await GetAllAsync();
+        return list.FirstOrDefault(x => x.Id == id);
+    }
+
+    public async Task<${BaseName}Dto> CreateAsync(${BaseName}Dto dto)
+    {
         
-        entity.Id = _items.Count > 0 ? _items.Max(x => x.Id) + 1 : 1;
-        entity.FechaCreacion = DateTime.UtcNow;
-        _items.Add(entity);
-        return Task.FromResult(entity);
+        return await Task.FromResult(dto);
     }
-    
-    public Task<$ComponentName> UpdateAsync($ComponentName entity)
+
+    public async Task<${BaseName}Dto> UpdateAsync(${BaseName}Dto dto)
     {
-        // TODO: Reemplazar con:
-        // _context.$ComponentName.Update(entity);
-        // await _context.SaveChangesAsync();
         
-        var existing = _items.FirstOrDefault(x => x.Id == entity.Id);
-        if (existing != null)
-        {
-            var index = _items.IndexOf(existing);
-            entity.FechaModificacion = DateTime.UtcNow;
-            _items[index] = entity;
-        }
-        return Task.FromResult(entity);
+        return await Task.FromResult(dto);
     }
-    
-    public Task<bool> DeleteAsync(int id)
+
+    public async Task<bool> DeleteAsync(int id)
     {
-        // TODO: Reemplazar con:
-        // var entity = await _context.$ComponentName.FindAsync(id);
-        // if (entity != null) { _context.$ComponentName.Remove(entity); await _context.SaveChangesAsync(); }
         
-        var item = _items.FirstOrDefault(x => x.Id == id);
-        if (item != null)
-        {
-            _items.Remove(item);
-            return Task.FromResult(true);
-        }
-        return Task.FromResult(false);
+        return await Task.FromResult(false);
     }
 }
 "@
-        
-        Set-Content -Path $servicePath -Value $serviceContent -Force
-        Write-Host "? Servicio creado: Services/${ComponentName}Service.cs" -ForegroundColor Green
+        Set-Content -Path $servicePath -Value $serviceContent -Encoding UTF8 -Force
+        Write-Host "? Servicio creado: Services/${BaseName}Service.cs" -ForegroundColor Green
     }
 }
 
-# ==================== 3. CREAR COMPONENTE BLAZOR ====================
+# ==================== 2.1 CREAR REPOSITORY + DTO (OPCIONAL) ====================
+if ($CreateRepository) {
+    Write-Host "`n??  [2.1] Creando repository y DTO..." -ForegroundColor Yellow
 
+    # DTO
+    $dtoFolder = Join-Path $ModuleFullPath "Data\DTOs"
+    if (!(Test-Path $dtoFolder)) { New-Item -ItemType Directory -Path $dtoFolder -Force | Out-Null }
+    $dtoPath = Join-Path $dtoFolder "${BaseName}Dto.cs"
+    if (Test-Path $dtoPath) {
+        Write-Host "?? DTO ya existe: Data/DTOs/${BaseName}Dto.cs" -ForegroundColor Yellow
+    } else {
+        $dtoContent = @"
+namespace VRM_Plugin.Module.$ModuleName.Data.DTOs;
+
+/// <summary>
+/// DTO b√°sico para $BaseName
+/// </summary>
+public class ${BaseName}Dto
+{
+    public int Id { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+}
+"@
+        Set-Content -Path $dtoPath -Value $dtoContent -Encoding UTF8 -Force
+        Write-Host "? DTO creado: Data/DTOs/${BaseName}Dto.cs" -ForegroundColor Green
+    }
+
+    # Repository interface
+    $repoFolder = Join-Path $ModuleFullPath "Data\Repositories"
+    if (!(Test-Path $repoFolder)) { New-Item -ItemType Directory -Path $repoFolder -Force | Out-Null }
+    $repoInterfacePath = Join-Path $repoFolder "I${BaseName}Repository.cs"
+    if (Test-Path $repoInterfacePath) {
+        Write-Host "?? Interface repository ya existe: Data/Repositories/I${BaseName}Repository.cs" -ForegroundColor Yellow
+    } else {
+        $repoInterfaceContent = @"
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using VRM_Plugin.Module.$ModuleName.Data.DTOs;
+
+namespace VRM_Plugin.Module.$ModuleName.Data.Repositories;
+
+/// <summary>
+/// Acceso a datos de $BaseName (contrato)
+/// </summary>
+public interface I${BaseName}Repository
+{
+    /// <summary>
+    /// M√©todo de ejemplo que devuelve una lista de DTOs
+    /// </summary>
+    Task<List<${BaseName}Dto>> GetSampleAsync();
+}
+"@
+        Set-Content -Path $repoInterfacePath -Value $repoInterfaceContent -Encoding UTF8 -Force
+        Write-Host "? Interface repository creada: Data/Repositories/I${BaseName}Repository.cs" -ForegroundColor Green
+    }
+
+    # Repository implementaci√≥n (base, en memoria)
+    $repoImplPath = Join-Path $repoFolder "${BaseName}Repository.cs"
+    if (Test-Path $repoImplPath) {
+        Write-Host "?? Repository ya existe: Data/Repositories/${BaseName}Repository.cs" -ForegroundColor Yellow
+    } else {
+        $repoImplContent = @"
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using VRM_Plugin.Module.$ModuleName.Data.DTOs;
+
+namespace VRM_Plugin.Module.$ModuleName.Data.Repositories;
+
+/// <summary>
+/// Implementaci√≥n base del repository de $BaseName (solo ejemplo)
+/// </summary>
+public class ${BaseName}Repository : I${BaseName}Repository
+{
+    private readonly List<${BaseName}Dto> _items = new();
+
+    public Task<List<${BaseName}Dto>> GetSampleAsync()
+    {
+        return Task.FromResult(_items);
+    }
+}
+"@
+        Set-Content -Path $repoImplPath -Value $repoImplContent -Encoding UTF8 -Force
+        Write-Host "? Repository creado: Data/Repositories/${BaseName}Repository.cs" -ForegroundColor Green
+    }
+
+    Write-Host "? Nota: registra I${BaseName}Repository/${BaseName}Repository y el service en ConfigureServices() del m√≥dulo." -ForegroundColor Cyan
+}
+
+# ==================== 3. CREAR COMPONENTE BLAZOR ====================
 Write-Host "`n?? [3] Creando componente Blazor..." -ForegroundColor Yellow
 
-$componentPath = Join-Path $ModuleFullPath "Components\$ComponentName.razor"
+$componentsFolder = Join-Path $ModuleFullPath "Components"
+if (!(Test-Path $componentsFolder)) { New-Item -ItemType Directory -Path $componentsFolder -Force | Out-Null }
 
+$componentPath = Join-Path $componentsFolder "$ComponentName.razor"
 if (Test-Path $componentPath) {
-    Write-Host "??  El componente ya existe: $ComponentName.razor" -ForegroundColor Yellow
+    Write-Host "??  El componente ya existe: Components/$ComponentName.razor" -ForegroundColor Yellow
 } else {
     $routeName = $ComponentName.ToLower()
     $moduleLower = $ModuleName.ToLower()
-    
     $componentContent = @"
-@page "/$moduleLower/$routeName"
+@page ""/$moduleLower/$routeName""
 @attribute [Authorize]
 @rendermode InteractiveServer
+@inject ${ModuleName}Module CurrentModule
 
-<PageTitle>$ComponentName - $ModuleName</PageTitle>
-
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">
-                        <i class="ri-file-list-line me-2"></i>
-                        $ComponentName
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <h5>?? Componente: $ComponentName</h5>
-                        <p class="mb-0">Este componente pertenece al mÛdulo <strong>$ModuleName</strong>.</p>
-                    </div>
-                    
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <h5>?? PrÛximos pasos:</h5>
-                            <ol>
-                                <li>Registrar este componente en la BD</li>
-                                <li>Obtener el <code>IdComponent</code> asignado</li>
-                                <li>Actualizar <code>GetComponents()</code> en <code>${ModuleName}Module.cs</code></li>
-                                <li>Implementar la lÛgica de negocio</li>
-                            </ol>
-                        </div>
-                    </div>
-                    
-                    <!-- TODO: Implementar UI del componente -->
-                    
-                </div>
-            </div>
-        </div>
+<CascadingValue Value=""@CurrentModule"" Name=""CurrentModule"">
+    <div>
+        <!-- Contenido base m√≠nimo; reemplaza seg√∫n la UI requerida -->
     </div>
-</div>
+</CascadingValue>
 
 @code {
-    // TODO: Inyectar servicios necesarios
-    // @inject I${ComponentName}Service ${ComponentName}Service
-    
+    // Servicio inyectable (descomenta si lo registras en ConfigureServices)
+    // @inject I${BaseName}Service ${BaseName}Service
+
     protected override async Task OnInitializedAsync()
     {
-        // TODO: Cargar datos
         await Task.CompletedTask;
     }
 }
 "@
-    
-    Set-Content -Path $componentPath -Value $componentContent -Force
+    Set-Content -Path $componentPath -Value $componentContent -Encoding UTF8 -Force
     Write-Host "? Componente creado: Components/$ComponentName.razor" -ForegroundColor Green
 }
 
 # ==================== 4. ACTUALIZAR _IMPORTS (SI ES NECESARIO) ====================
+Write-Host "`n?? [4] Verificando _Imports.razor..." -ForegroundColor Yellow
+$importsPath = Join-Path $ModuleFullPath "Components\_Imports.razor"
+if (Test-Path $importsPath) {
+    $importsContent = Get-Content -Path $importsPath -Raw
 
-if ($CreateEntity -or $CreateService) {
-    Write-Host "`n?? [4] Verificando _Imports.razor..." -ForegroundColor Yellow
-    
-    $importsPath = Join-Path $ModuleFullPath "Components\_Imports.razor"
-    
-    if (Test-Path $importsPath) {
-        $importsContent = Get-Content -Path $importsPath -Raw
-        
-        $needsUpdate = $false
-        $newImports = @()
-        
-        if ($CreateEntity -and $importsContent -notmatch "VRM_Plugin\.Modules\.$ModuleName\.Domain") {
-            $newImports += "@using VRM_Plugin.Modules.$ModuleName.Domain"
-            $needsUpdate = $true
-        }
-        
-        if ($CreateService -and $importsContent -notmatch "VRM_Plugin\.Modules\.$ModuleName\.Services") {
-            $newImports += "@using VRM_Plugin.Modules.$ModuleName.Services"
-            $needsUpdate = $true
-        }
-        
-        if ($needsUpdate) {
-            $importsContent += "`n" + ($newImports -join "`n")
-            Set-Content -Path $importsPath -Value $importsContent -Force
-            Write-Host "? _Imports.razor actualizado" -ForegroundColor Green
-        } else {
-            Write-Host "? _Imports.razor ya est· actualizado" -ForegroundColor Gray
-        }
+    $needsUpdate = $false
+    $newImports = @()
+
+    if ($CreateEntity -and $importsContent -notmatch "VRM_Plugin\.Module\.$ModuleName\.Domain") {
+        $newImports += "@using VRM_Plugin.Module.$ModuleName.Domain"
+        $needsUpdate = $true
     }
+
+    if ($CreateService -and $importsContent -notmatch "VRM_Plugin\.Module\.$ModuleName\.Services") {
+        $newImports += "@using VRM_Plugin.Module.$ModuleName.Services"
+        $needsUpdate = $true
+    }
+
+    if ($CreateRepository -and $importsContent -notmatch "VRM_Plugin\.Module\.$ModuleName\.Data\.DTOs") {
+        $newImports += "@using VRM_Plugin.Module.$ModuleName.Data.DTOs"
+        $needsUpdate = $true
+    }
+
+    if ($needsUpdate) {
+        $importsContent += "`n" + ($newImports -join "`n")
+        Set-Content -Path $importsPath -Value $importsContent -Encoding UTF8 -Force
+        Write-Host "? _Imports.razor actualizado" -ForegroundColor Green
+    } else {
+        Write-Host "? _Imports.razor ya est√° actualizado" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "?? No existe Components\_Imports.razor en el m√≥dulo (se puede crear manualmente)." -ForegroundColor Yellow
 }
 
 # ==================== 5. INSTRUCCIONES FINALES ====================
-
 Write-Host "`n???????????????????????????????????????????????????????????" -ForegroundColor Green
 Write-Host "  ? COMPONENTE AGREGADO EXITOSAMENTE" -ForegroundColor Green
 Write-Host "???????????????????????????????????????????????????????????" -ForegroundColor Green
 
 Write-Host "`n?? ARCHIVOS CREADOS:" -ForegroundColor Cyan
-
-if ($CreateEntity) {
-    Write-Host "  ? Domain/$ComponentName.cs" -ForegroundColor White
+if ($CreateEntity) { Write-Host "  ? Domain/$BaseName.cs" -ForegroundColor White }
+if ($CreateRepository) {
+    Write-Host "  ? Data/DTOs/${BaseName}Dto.cs" -ForegroundColor White
+    Write-Host "  ? Data/Repositories/I${BaseName}Repository.cs" -ForegroundColor White
+    Write-Host "  ? Data/Repositories/${BaseName}Repository.cs" -ForegroundColor White
 }
-
 if ($CreateService) {
-    Write-Host "  ? Services/I${ComponentName}Service.cs" -ForegroundColor White
-    Write-Host "  ? Services/${ComponentName}Service.cs" -ForegroundColor White
+    Write-Host "  ? Services/I${BaseName}Service.cs" -ForegroundColor White
+    Write-Host "  ? Services/${BaseName}Service.cs" -ForegroundColor White
 }
-
 Write-Host "  ? Components/$ComponentName.razor" -ForegroundColor White
 
-Write-Host "`n??  PASOS SIGUIENTES:" -ForegroundColor Yellow
-Write-Host "  1. Registrar componente en BD y obtener IDs:" -ForegroundColor White
-Write-Host "     ï IdComponent (para el componente UI)" -ForegroundColor Gray
-Write-Host "     ï IdAction (para cada acciÛn que definas)" -ForegroundColor Gray
-
-Write-Host "`n  2. Actualizar ${ModuleName}Module.cs:" -ForegroundColor White
-Write-Host "     ï Agregar componente en GetComponents():" -ForegroundColor Gray
-Write-Host "       new ModuleComponent {" -ForegroundColor DarkGray
-Write-Host "           IdComponent = [ID_DE_BD]," -ForegroundColor DarkGray
-Write-Host "           IdModule = this.IdModule," -ForegroundColor DarkGray
-Write-Host "           Name = `"$ComponentName`"," -ForegroundColor DarkGray
-Write-Host "           Route = `"/$moduleLower/$routeName`"," -ForegroundColor DarkGray
-Write-Host "           ComponentType = typeof(Components.$ComponentName)" -ForegroundColor DarkGray
-Write-Host "       }" -ForegroundColor DarkGray
-
-Write-Host "`n     ï Agregar acciones en GetActions():" -ForegroundColor Gray
-Write-Host "       new ModuleAction {" -ForegroundColor DarkGray
-Write-Host "           IdAction = [ID_DE_BD]," -ForegroundColor DarkGray
-Write-Host "           IdComponent = [ID_COMPONENTE_DE_BD]," -ForegroundColor DarkGray
-Write-Host "           ActionKey = `"$ModuleName.$ComponentName.Ver`"," -ForegroundColor DarkGray
-Write-Host "           IdActionType = 1  // Lectura" -ForegroundColor DarkGray
-Write-Host "       }" -ForegroundColor DarkGray
-
-if ($CreateService) {
-    Write-Host "`n  3. Registrar servicio en ConfigureServices():" -ForegroundColor White
-    Write-Host "     services.AddScoped<I${ComponentName}Service, ${ComponentName}Service>();" -ForegroundColor Gray
+Write-Host "`n??  PASOS SIGUIENTES (manuales):" -ForegroundColor Yellow
+Write-Host "  1. Registrar el componente en BD y obtener IdComponent." -ForegroundColor White
+Write-Host "  2. Actualizar ${ModuleName}Module.cs: agregar entry en GetComponents() y GetActions()." -ForegroundColor White
+Write-Host "  3. Registrar servicios/repos en ConfigureServices() del m√≥dulo:" -ForegroundColor White
+Write-Host "     services.AddScoped<I${BaseName}Service, ${BaseName}Service>();" -ForegroundColor Gray
+if ($CreateRepository) {
+    Write-Host "     services.AddScoped<I${BaseName}Repository, ${BaseName}Repository>();" -ForegroundColor Gray
 }
-
-Write-Host "`n  4. Compilar mÛdulo:" -ForegroundColor White
-Write-Host "     cd `"$ModuleFullPath`"" -ForegroundColor Gray
-Write-Host "     dotnet build" -ForegroundColor Gray
-
-Write-Host "`n  5. Copiar DLL al Host y reiniciar aplicaciÛn" -ForegroundColor White
-
-Write-Host "`n?? Ruta: /$moduleLower/$routeName" -ForegroundColor Cyan
-Write-Host "`n? °Componente listo para desarrollo!" -ForegroundColor Green
+Write-Host "  4. Compilar m√≥dulo: cd `"$ModuleFullPath`" && dotnet build" -ForegroundColor White
 
 Set-Location $RootPath

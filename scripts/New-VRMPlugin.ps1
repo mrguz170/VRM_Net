@@ -271,7 +271,6 @@ public class ${ModuleName}Module : IModule
             return _components;
         }
 
-        // Fallback: valores por defecto si no se cargaron desde BD
         return new List<ModuleComponentDto>();
     }
     
