@@ -1,0 +1,22 @@
+﻿@page "/pedidos/envios"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject PedidosModule CurrentModule
+
+<PageTitle>Gestión de Prospectos</PageTitle>
+
+<CascadingValue Value="@CurrentModule" Name="CurrentModule">
+    <div>
+        <!-- Contenido base mínimo; reemplaza según la UI requerida -->
+    </div>
+</CascadingValue>
+
+@code {
+    // Servicio inyectable (descomenta si lo registras en ConfigureServices)
+    // @inject IEnvioService EnvioService
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.CompletedTask;
+    }
+}

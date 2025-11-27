@@ -39,4 +39,10 @@ public class UserDto
     /// Ejemplo: "1" para Admin, "2" para GerenteFinanzas
     /// </summary>
     public string RoleId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Password del usuario (hasheada)
+    /// 
+    /// </summary>
+    public string Password { get; set; } = string.Empty;
 }

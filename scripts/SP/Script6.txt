@@ -1,0 +1,32 @@
+DELIMITER $$
+/*******************************
+ * Description      : SP para insertar un nuevo rol
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   role_name [VARCHAR] – [Nombre del Rol]
+ *   description [INT] - [Descripcion]
+ *   crater_user [INT] - [Id del usuario que lo cre]
+ *   
+ * Returns          :
+ *  
+ *******************************/
+
+CREATE PROCEDURE sp_set_roles(
+    IN role_name VARCHAR(150),
+    IN description VARCHAR(150),
+    IN crater_user INT
+)
+BEGIN
+INSERT INTO cat_roles (role_name, description,created_user_id) values
+(role_name, description, crater_user);
+END $$
+DELIMITER ;

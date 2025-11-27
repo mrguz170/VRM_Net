@@ -1,0 +1,37 @@
+DELIMITER $$
+/*******************************
+ * Description      : SP para insertar una nueva actionkey				  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   module_id [VARCHAR] – [Id de modulo]
+ *   component_id [VARCHAR] - [Id de componente]
+ *   action_id [INT] - [Id de acción]
+ *   description [VARCHAR] - [Descripcion]
+ *   created_user_id [VARCHAR] - [Id de usuario que crea la acción] 
+
+ *
+ * Returns          :
+ *  
+ *******************************/
+
+CREATE PROCEDURE sp_set_actionkey (
+    IN module_id INT,
+    IN component_id INT,
+    IN action_id INT,
+    IN description VARCHAR(100),
+    IN created_user_id INT
+)
+BEGIN
+INSERT INTO info_actions_key (module_id, component_id, action_id,description,created_user_id) values
+(module_id, component_id, action_id, description,created_user_id);
+END $$
+DELIMITER ;

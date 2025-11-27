@@ -1,0 +1,48 @@
+DELIMITER $$
+
+/*******************************
+ * Description      : Consulta componentes y permisos de roles por cada componente.
+					  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   @module_id [INT] – [Id de modulo]
+
+ *
+ * Returns          :
+ *  Devuelve roles separados por ',' por cada componente para asignar permisos de componente.
+ *******************************/
+
+CREATE PROCEDURE sp_get_component(
+    IN module_id INT
+)
+SELECT
+    c.component_id,
+    c.component_name as name,
+    c.module_id,
+    c.parent_id,
+    c.description,
+    c.route,
+    c.icon,
+    c.show_in_menu,
+    c.menu_order,
+    c.is_active,
+    COALESCE(r.roles, '') AS roles
+  FROM cat_components c
+  LEFT JOIN (
+    SELECT
+      component_id,
+      GROUP_CONCAT(DISTINCT role_id ORDER BY role_id SEPARATOR ',') AS roles
+    FROM info_component_roles
+    GROUP BY component_id
+  ) r ON c.component_id = r.component_id
+  WHERE c.module_id = module_id $$
+DELIMITER ;

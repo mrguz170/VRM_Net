@@ -1,0 +1,32 @@
+DELIMITER $$
+/*******************************
+ * Description      : SP para insertar una nueva acción				  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   action_name [VARCHAR(100)] – [Nombre de acción]
+ *   description [VARCHAR(100)] - [Descripción]
+ *   created_user_id [INT] - [Id de usuario que la crea]
+ *
+ * Returns          :
+ *  
+ *******************************/
+
+CREATE PROCEDURE sp_set_actions(
+    IN action_name VARCHAR(100),
+    IN description VARCHAR(100),
+    IN created_user_id INT
+)
+BEGIN
+INSERT INTO cat_actions (action_name, description, created_user_id) values
+(action_name, description, created_user_id);
+END $$
+DELIMITER ;

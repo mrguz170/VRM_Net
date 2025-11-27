@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using VRM_Plugin.Blazor.Server.Security;
 using VRM_Plugin.Core.Abstractions.Common;
 using VRM_Plugin.Core.Abstractions.Data.DTOs;
 using VRM_Plugin.Core.Abstractions.Services;
+
 
 namespace VRM_Plugin.Core.Abstractions.Data.Repositories;
 
@@ -64,14 +66,14 @@ public class UserRepository : IUserRepository
             // ? VALIDACIÓN DE CONTRASEÑA
             // Opción 1: Si el SP ya validó la contraseña, omitir esta sección
             // Opción 2: Si el SP devuelve el hash en una columna "password", descomentar:
-            /*
+            
             var hashedPassword = user.Password; // Necesitarías agregar propiedad temporal en UserDto
             if (!PasswordHasher.VerifyPassword(password, hashedPassword))
             {
                 _logger.LogWarning("Contraseña inválida para usuario: {Login}", login);
                 return null;
             }
-            */
+            
             
             _logger.LogInformation("Usuario autenticado exitosamente: {Username} con rol: {Role}", 
                 user.Username, 
@@ -87,15 +89,3 @@ public class UserRepository : IUserRepository
     }
 }
 
-/// <summary>
-/// Helper para validar contraseñas hasheadas
-/// </summary>
-public static class PasswordHasher
-{
-    public static bool VerifyPassword(string password, string hashedPassword)
-    {
-        // TODO: Implementar verificación real de password hash (BCrypt, PBKDF2, etc.)
-        // Por ahora, comparación simple (SOLO PARA DESARROLLO)
-        return !string.IsNullOrEmpty(password) && !string.IsNullOrEmpty(hashedPassword);
-    }
-}

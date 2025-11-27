@@ -1,0 +1,32 @@
+DELIMITER $$
+/*******************************
+ * Description      : SP para insertar una nueva action				  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   action_key_id [BIGINT] – [Id de actionkey]
+ *   role_id [INT] - [Id de rol]
+ *   created_user_id [INT] - [Id de usuario que la crea]
+ *
+ * Returns          :
+ *  
+ *******************************/
+
+CREATE PROCEDURE sp_set_action_role (
+    IN action_key_id BIGINT,
+    IN role_id INT,
+    IN created_user_id INT
+)
+BEGIN
+INSERT INTO info_actions_roles (action_key_id, role_id, created_user_id) values
+(action_key_id, role_id, created_user_id);
+END $$
+DELIMITER ;

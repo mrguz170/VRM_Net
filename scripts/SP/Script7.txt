@@ -1,0 +1,42 @@
+DELIMITER $$
+/*******************************
+ * Description      : SP para insertar un nuevo usuario					  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   email_user [VARCHAR] – [Email de usuario]
+ *   username [VARCHAR] - [Username de usuario]
+ *   role_user_id [INT] - [Rol que se le va a asignar]
+ *   name_user [VARCHAR] - [Nombre]
+ *   last_name_user [VARCHAR] - [Apellido paterno] 
+ *   second_last_name_user [VARCHAR] - [Apellido materno] 
+ *   password_user [VARCHAR] - [contraseña hasheada]
+ *   crater_user [INT] - [id de usuario que lo crea]
+ *
+ * Returns          :
+ *  
+ *******************************/
+
+CREATE PROCEDURE sp_set_user(
+    IN email_user VARCHAR(150),
+    IN username VARCHAR(150),
+    IN role_user_id INT,
+    IN name_user VARCHAR(150),
+    IN last_name_user VARCHAR(150),
+    IN second_last_name_user VARCHAR(150),
+    IN password_user VARCHAR (255),
+    IN crater_user INT
+)
+BEGIN
+INSERT INTO cat_users (email, user_name, role_id,name,last_name,second_last_name,password,created_user_id) values
+(email_user, username, role_user_id, name_user,last_name_user, second_last_name_user, password_user, crater_user);
+END $$
+DELIMITER ;

@@ -9,10 +9,9 @@
     <Project Path="src/Host/VRM_Plugin.Blazor.Server/VRM_Plugin.Blazor.Server.csproj" />
   </Folder>
   <Folder Name="/src/Modules/">
+    <Project Path="src/Modules/Comprobacion/VRM_Plugin.Module.Viaticos/VRM_Plugin.Module.Viaticos.csproj" />
     <Project Path="src/Modules/Finanzas/VRM_Plugin.Module.Finanzas/VRM_Plugin.Module.Finanzas.csproj" />
+    <Project Path="src/Modules/Negocio/VRM_Plugin.Module.Pedidos/VRM_Plugin.Module.Pedidos.csproj" />
     <Project Path="src/Modules/Onboarding/VRM_Plugin.Module.Prospectos/VRM_Plugin.Module.Prospectos.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Logica/">
-    <Project Path="src/Modules/Logica/VRM_Plugin.Module.Pedidos/VRM_Plugin.Module.Pedidos.csproj" />
   </Folder>
 </Solution>

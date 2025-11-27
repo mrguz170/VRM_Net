@@ -1,0 +1,30 @@
+DELIMITER $$
+
+/*******************************
+ * Description      : Consulta información de cada módulo
+					  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   @module_id [INT] – [Id de modulo]
+
+ *
+ * Returns          :
+ *  Devuelve información de cada módulo para la carga de estos.
+ *******************************/
+
+CREATE PROCEDURE sp_get_module_info(
+    IN module_id INT
+)
+SELECT module_name,display_name,description, version
+ FROM cat_modules a
+  WHERE a.module_id = module_id $$
+DELIMITER ;

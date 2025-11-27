@@ -1,0 +1,52 @@
+DELIMITER $$
+
+/*******************************
+ * Description      : Consulta información de usuario por email o username
+					  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   @module_id [INT] – [Id de modulo]
+
+ *
+ * Returns          :
+ *  Devuelve información de usuario que se desea logear
+ *******************************/
+
+CREATE PROCEDURE sp_get_user(
+    IN login VARCHAR(30) 
+)
+BEGIN
+    IF  login LIKE '%@%' THEN
+		SELECT 
+        user_id as userId,
+		user_name as UserName,
+		CONCAT(name,' ',last_name,' ',second_last_name) as NombreCompleto, 
+		email , 
+		b.role_name as role,
+		a.role_id as RoleId , 
+		password
+			FROM cat_users a inner join cat_roles b on a.role_id = b.role_id
+			WHERE a.Email = login; 
+    ELSE
+		SELECT 
+        user_id,
+        user_name,
+		CONCAT(name,' ',last_name,' ',second_last_name) as NombreCompleto, 
+		email ,
+		b.role_name as role,
+		a.role_id as RoleId  , 
+		password
+			FROM cat_users a inner join cat_roles b on a.role_id = b.role_id
+			WHERE a.user_name = login;
+    END IF;
+END $$
+DELIMITER ;

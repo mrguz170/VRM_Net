@@ -1,0 +1,46 @@
+DELIMITER $$
+
+/*******************************
+ * Description      : Consulta Modulos,Componentes y acciones, y los permisos por roles de cada acción.
+					  Cada uno con su respectiva relación.
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   @module_id [INT] – [Id de modulo]
+
+ *
+ * Returns          :
+ *  Devuelve las actionskey para asignar permisos de acciones.
+ *******************************/
+
+CREATE PROCEDURE sp_get_actions(
+    IN module_id INT
+)
+BEGIN
+    SELECT 
+        a.action_key_id AS ActionKeyId,
+        CONCAT(c.module_name, '.', d.component_name, '.', e.action_name) AS ActionKey,
+        GROUP_CONCAT(b.role_id ORDER BY b.role_id SEPARATOR ',') AS Roles,
+        b.is_active AS IsActive
+    FROM Info_actions_key a
+    INNER JOIN info_actions_roles b ON a.action_key_id = b.action_key_id
+    INNER JOIN cat_modules c        ON a.module_id = c.module_id
+    INNER JOIN cat_components d     ON a.component_id = d.component_id
+    INNER JOIN cat_actions e        ON a.action_id = e.action_id
+    WHERE a.module_id = module_id AND b.is_active = 1
+    GROUP BY 
+        a.action_key_id,
+        c.module_name,
+        d.component_name,
+        e.action_name,
+        b.is_active;
+END $$
+DELIMITER ;

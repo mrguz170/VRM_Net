@@ -1,0 +1,44 @@
+DELIMITER $$
+/*******************************
+ * Description      : SP para insertar un nuevo componente					  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   @component_name [VARCHAR] – [Id de componente]
+ *   module_id [INT] - [Id de modulo]
+ *   parent_id [INT] - [Id de modulo padre , si es padre se va null]
+ *	 description [VARCHAR] - [Descripcion de modulo]
+ *	 route [VARCHAR] - [Ruta de donde se encuentra el componente para su navegación]
+ *   icon [VARCHAR] - [icono ej. ri-exchange-dollar-line]
+ *   show_in_menu [show_in_menu] - [Bandera de si se muestra en el menú de cada módulo]
+ *   menu_order [menu_order] - [Posición en el menú de cada modulo]
+ *   created_user_id [INT] - [Id del usuario que crea el componente]
+ 
+ * Returns          :
+ *  
+ *******************************/
+
+CREATE PROCEDURE sp_set_components(
+    IN component_name VARCHAR(100),
+    IN module_id INT,
+    IN parent_id INT,
+    IN description VARCHAR (500),
+    IN route VARCHAR (300),
+    IN icon VARCHAR (100),
+    IN show_in_menu bool,
+    IN menu_order INT,
+    in created_user_id INT
+)
+BEGIN
+INSERT INTO cat_components (component_name, module_id,parent_id,description,route,icon,show_in_menu,menu_order,created_user_id) values
+(component_name, module_id, parent_id,description,route,component_type,icon,show_in_menu,menu_order,created_user_id);
+END $$
+DELIMITER ;

@@ -1,0 +1,36 @@
+DELIMITER $$
+/*******************************
+ * Description      : SP para insertar un nuevo módulo			  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   module_name [VARCHAR(100)] – [Nombre del módulo que tiene que se igual al proyecto]
+ *   display_name [VARCHAR(100)] - [Nombre del módulo que se puede mostrar en el portal]
+ *   description [VARCHAR(300)] - [Descripción]
+ *   version     [VARCHAR(100)] - [Versión]
+ *   created_user_id [INT]  - [Usuario que lo crea]
+ *
+ * Returns          :
+ *  
+ *******************************/
+
+CREATE PROCEDURE sp_set_module(
+    IN module_name VARCHAR(100),
+    IN display_name VARCHAR(100),
+    IN description VARCHAR(300),
+    IN version VARCHAR(100),
+    IN created_user_id INT
+)
+BEGIN
+INSERT INTO cat_modules (module_name, display_name,description,version, created_user_id) values
+(module_name, display_name,description,version, created_user_id);
+END $$
+DELIMITER ;

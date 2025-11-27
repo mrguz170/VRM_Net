@@ -1,0 +1,9 @@
+call sp_set_actionkey(1,2,5,'Ver detalles',1);
+call sp_set_actions('VerProspectos','Ver lista de prospectos',1);
+call sp_set_action_role(101645908969521152,2,1);
+
+call sp_set_module('Viaticos','Gestion de Viaticos','Módulo para gestionar viaticos','1.0.0',1);
+call sp_set_components('Viaticos',4,null,'Modulo principal de Viaticos','','ri-gas-station-line',1,1,1);
+call sp_set_components('Anticipos',4,6,'Componente para solicitar anticipo','/viaticos/anticipos','ri-currency-line',1,1,1);
+call sp_set_component_roles(6,1,1);
+call sp_set_component_roles(7,1,1);

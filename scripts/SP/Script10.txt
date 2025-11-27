@@ -1,0 +1,32 @@
+DELIMITER $$
+/*******************************
+ * Description      : SP para insertar la asignación de permisos de un rol a un componente				  
+ *
+ * Created By       : IFM - [Name or Initials]
+ * Created On       : 2025-11-25 [YYYY-MM-DD]
+ *
+ * Last Modified By : 
+ * Last Modified On : 
+ * Modification     : 
+ *
+ * Version          : 1.0
+ *
+ * Parameters       :
+ *   component_id [INT] – [Id de componente]
+ *   role_id [INT] - [Id de rol]
+ *   created_user_id [INT] - [Id de usuario que la crea]
+ *
+ * Returns          :
+ *  
+ *******************************/
+
+CREATE PROCEDURE sp_set_component_roles(
+    IN component_id INT,
+    IN role_id INT,
+    IN created_user_id INT
+)
+BEGIN
+INSERT INTO info_component_roles (component_id, role_id,created_user_id) VALUES
+(component_id,role_id,created_user_id);
+END $$
+DELIMITER ;
