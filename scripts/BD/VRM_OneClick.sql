@@ -43,7 +43,7 @@ CREATE TABLE `cat_actions` (
 
 LOCK TABLES `cat_actions` WRITE;
 /*!40000 ALTER TABLE `cat_actions` DISABLE KEYS */;
-INSERT INTO `cat_actions` VALUES (1,'Detalles','Ver detalles',0,'2025-11-11 20:50:59',NULL,1,NULL),(2,'Editar','Accion para editar campos',0,'2025-11-11 20:50:59',NULL,1,NULL),(3,'TimbrarSAT','Accion para timbrar al SAT',0,'2025-11-11 20:50:59',NULL,1,NULL),(4,'Eliminar','',0,'2025-11-11 20:50:59',NULL,1,NULL),(5,'ExportarSensibles','',0,'2025-11-11 20:50:59',NULL,1,NULL),(6,'VerSensibles','',0,'2025-11-11 20:50:59',NULL,1,NULL),(7,'VerGenerales','',0,'2025-11-11 20:50:59',NULL,1,NULL),(8,'Nueva','Nueva Factura',0,'2025-11-11 21:12:58',NULL,1,NULL),(9,'CancelarSat','Accion Cancela SAT',0,'2025-11-19 00:07:59',NULL,1,NULL),(10,'VerProspectos','Ver lista de prospectos',0,'2025-11-25 20:30:54',NULL,1,NULL);
+INSERT INTO `cat_actions` VALUES (1,'Editar','Accion para editar campos',0,'2025-11-11 20:50:59',NULL,1,NULL),(2,'TimbrarSAT','Accion para timbrar al SAT',0,'2025-11-11 20:50:59',NULL,1,NULL),(3,'Eliminar','',0,'2025-11-11 20:50:59',NULL,1,NULL),(4,'Nueva','Nueva Factura',0,'2025-11-11 21:12:58',NULL,1,NULL);
 /*!40000 ALTER TABLE `cat_actions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -79,7 +79,7 @@ CREATE TABLE `cat_components` (
 
 LOCK TABLES `cat_components` WRITE;
 /*!40000 ALTER TABLE `cat_components` DISABLE KEYS */;
-INSERT INTO `cat_components` VALUES (1,'Finanzas',1,NULL,'Módulo principal de finanzas','','ri-money-dollar-circle-line',1,20,1,'2025-11-11 20:24:42',NULL,1,NULL),(2,'Facturas',1,1,'Gestión de facturas','/finanzas/facturas','ri-file-list-3-line',1,1,1,'2025-11-11 20:24:42',NULL,1,NULL),(3,'Cobros y Pagos',1,1,'Gestión de cobros y pagos','/finanzas/cobros-pagos','ri-exchange-dollar-line',1,2,1,'2025-11-11 20:24:42',NULL,1,NULL),(4,'Pedidos',3,NULL,'Componente base pedidos','','ri-upload-fill',1,1,1,'2025-11-26 15:11:11',NULL,1,NULL),(5,'Envios',3,4,'Componente para enviar pedidos','/pedidos/envios','ri-upload-fill',1,1,1,'2025-11-26 15:12:22',NULL,1,NULL),(6,'Viaticos',4,NULL,'Modulo principal de Viaticos','','ri-gas-station-line',1,1,1,'2025-11-26 16:52:20',NULL,1,NULL),(7,'Anticipos',4,6,'Componente para solicitar anticipo','/viaticos/anticipos','ri-currency-line',1,1,1,'2025-11-26 16:54:15',NULL,1,NULL);
+INSERT INTO `cat_components` VALUES (1,'Finanzas',1,NULL,'Módulo principal de finanzas','','ri-money-dollar-circle-line',1,20,1,'2025-11-11 20:24:42',NULL,1,NULL),(2,'Facturas',1,1,'Gestión de facturas','/finanzas/facturas','ri-file-list-3-line',1,1,1,'2025-11-11 20:24:42',NULL,1,NULL);
 /*!40000 ALTER TABLE `cat_components` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -111,7 +111,7 @@ CREATE TABLE `cat_modules` (
 
 LOCK TABLES `cat_modules` WRITE;
 /*!40000 ALTER TABLE `cat_modules` DISABLE KEYS */;
-INSERT INTO `cat_modules` VALUES (1,'Finanzas','Gestión de Finanzas','Módulo para gestionar operaciones financieras. Incluye facturas, pagos, conciliaciones y cuentas por pagar.','1.0.0',0,'2025-11-11 20:23:51','2025-11-11 20:23:51',1,1),(2,'Prospectos','Gestión de Finanzas','Módulo para gestionar solicitudes de proveedores. Permite recibir, revisar y aprobar empresas que desean ser proveedores.','1.0.0',0,'2025-11-11 20:23:51','2025-11-11 20:23:51',1,1),(3,'Pedidos','Gestion de Pedidos','Módulo para gestionar envío y recibo de pedidos','1.0.0',0,'2025-11-26 13:59:15',NULL,1,NULL),(4,'Viaticos','Gestion de Viaticos','Módulo para gestionar viaticos','1.0.0',0,'2025-11-26 16:33:04',NULL,1,NULL);
+INSERT INTO `cat_modules` VALUES (1,'Finanzas','Gestión de Finanzas','Módulo para gestionar operaciones financieras. Incluye facturas, pagos, conciliaciones y cuentas por pagar.','1.0.0',0,'2025-11-11 20:23:51','2025-11-11 20:23:51',1,1);
 /*!40000 ALTER TABLE `cat_modules` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -141,7 +141,7 @@ CREATE TABLE `cat_roles` (
 
 LOCK TABLES `cat_roles` WRITE;
 /*!40000 ALTER TABLE `cat_roles` DISABLE KEYS */;
-INSERT INTO `cat_roles` VALUES (1,'Admin','Acceso completo del sistema',0,'2025-11-11 20:59:13',NULL,1,NULL),(2,'Contador','Gerente de contaduria',0,'2025-11-11 20:59:13',NULL,1,NULL),(3,'GerenteFinanzas','Coordinador de Finanzas',0,'2025-11-11 20:59:13',NULL,1,NULL);
+INSERT INTO `cat_roles` VALUES (1,'Admin','Acceso completo del sistema',0,'2025-11-11 20:59:13',NULL,1,NULL);
 /*!40000 ALTER TABLE `cat_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -177,7 +177,7 @@ CREATE TABLE `cat_users` (
 
 LOCK TABLES `cat_users` WRITE;
 /*!40000 ALTER TABLE `cat_users` DISABLE KEYS */;
-INSERT INTO `cat_users` VALUES ('4899b263-bf7b-11f0-b882-25512ae0e3cf','admin@vrm.com','BetoM',1,'Alberto','Martinez','Ozornio','rlsK5kLWWPPRZwVWNhlAr3CiqxpXuHXFFNKzZbhA+VDS3pk5X5nND2RM0lau46DV',0,'2025-11-11 21:54:26',NULL,1,NULL),('4899ca4f-bf7b-11f0-b882-25512ae0e3cf','gerente.finanzas@vrm.com','GustavoB',2,'Gustavo','Bañuelos','Ochoa','rlsK5kLWWPPRZwVWNhlAr3CiqxpXuHXFFNKzZbhA+VDS3pk5X5nND2RM0lau46DV',0,'2025-11-11 21:54:26',NULL,1,NULL),('4899cc95-bf7b-11f0-b882-25512ae0e3cf','contador@vrm.com','IrvingF',3,'Irving','Flores','Marañon','rlsK5kLWWPPRZwVWNhlAr3CiqxpXuHXFFNKzZbhA+VDS3pk5X5nND2RM0lau46DV',0,'2025-11-11 21:54:26',NULL,1,NULL);
+INSERT INTO `cat_users` VALUES ('4899b263-bf7b-11f0-b882-25512ae0e3cf','jesusadmin@vrm.com','JesusAdmin',1,'Jesus','Admin','Admin','rlsK5kLWWPPRZwVWNhlAr3CiqxpXuHXFFNKzZbhA+VDS3pk5X5nND2RM0lau46DV',0,'2025-11-11 21:54:26',NULL,1,NULL);
 /*!40000 ALTER TABLE `cat_users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -216,7 +216,7 @@ CREATE TABLE `info_actions_key` (
 
 LOCK TABLES `info_actions_key` WRITE;
 /*!40000 ALTER TABLE `info_actions_key` DISABLE KEYS */;
-INSERT INTO `info_actions_key` VALUES (101643171884171265,1,2,2,0,'Edicion Campos',1,'2025-11-19 00:12:11',NULL,1,NULL),(101643171884171266,1,2,3,0,'Timbra ante el SAT',1,'2025-11-19 00:12:11',NULL,1,NULL),(101643171884171267,1,2,4,0,'Elimina Factura',1,'2025-11-19 00:12:11',NULL,1,NULL),(101645908969521152,1,2,5,0,'Ver detalles',0,'2025-11-25 20:26:46',NULL,1,NULL),(101633185632223234,1,2,8,0,'Crear nueva factura',1,'2025-11-11 21:29:55',NULL,1,NULL),(101643171884171264,1,2,9,0,'Cancela factura SAT',1,'2025-11-19 00:09:20',NULL,1,NULL);
+INSERT INTO `info_actions_key` VALUES (101643171884171265,1,2,1,0,'Edicion Campos',1,'2025-11-19 00:12:11',NULL,1,NULL),(101643171884171266,1,2,2,0,'Timbra ante el SAT',1,'2025-11-19 00:12:11',NULL,1,NULL),(101643171884171267,1,2,3,0,'Elimina Factura',1,'2025-11-19 00:12:11',NULL,1,NULL),(101633185632223234,1,2,4,0,'Crear nueva factura',1,'2025-11-11 21:29:55',NULL,1,NULL);
 /*!40000 ALTER TABLE `info_actions_key` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -248,7 +248,7 @@ CREATE TABLE `info_actions_roles` (
 
 LOCK TABLES `info_actions_roles` WRITE;
 /*!40000 ALTER TABLE `info_actions_roles` DISABLE KEYS */;
-INSERT INTO `info_actions_roles` VALUES (101633185632223234,1,1,'2025-11-11 21:32:11',NULL,1,NULL),(101633185632223234,2,1,'2025-11-18 23:47:20',NULL,1,NULL),(101643171884171264,1,0,'2025-11-19 00:13:08',NULL,1,NULL),(101643171884171265,2,1,'2025-11-19 00:13:08',NULL,1,NULL),(101643171884171266,1,1,'2025-11-19 00:13:08',NULL,1,NULL),(101643171884171267,1,1,'2025-11-19 00:13:08',NULL,1,NULL),(101645908969521152,2,0,'2025-11-25 20:40:09',NULL,1,NULL);
+INSERT INTO `info_actions_roles` VALUES (101643171884171265,1,1,'2025-11-11 21:32:11',NULL,1,NULL),(101643171884171266,1,1,'2025-11-18 23:47:20',NULL,1,NULL),(101643171884171267,1,1,'2025-11-19 00:13:08',NULL,1,NULL),(101633185632223234,1,1,'2025-11-19 00:13:08',NULL,1,NULL);
 /*!40000 ALTER TABLE `info_actions_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -280,7 +280,7 @@ CREATE TABLE `info_component_roles` (
 
 LOCK TABLES `info_component_roles` WRITE;
 /*!40000 ALTER TABLE `info_component_roles` DISABLE KEYS */;
-INSERT INTO `info_component_roles` VALUES (1,1,0,'2025-11-13 01:05:39',NULL,1,NULL),(1,2,0,'2025-11-13 01:05:39',NULL,1,NULL),(1,3,0,'2025-11-13 01:05:39',NULL,1,NULL),(2,1,0,'2025-11-13 01:05:39',NULL,1,NULL),(2,2,0,'2025-11-13 01:05:39',NULL,1,NULL),(3,1,0,'2025-11-13 01:05:39',NULL,1,NULL),(3,2,0,'2025-11-13 01:05:39',NULL,1,NULL),(3,3,0,'2025-11-13 01:05:39',NULL,1,NULL),(4,1,0,'2025-11-26 15:18:39',NULL,1,NULL),(5,1,0,'2025-11-26 15:18:39',NULL,1,NULL),(6,1,0,'2025-11-26 16:56:58',NULL,1,NULL),(7,1,0,'2025-11-26 16:56:58',NULL,1,NULL);
+INSERT INTO `info_component_roles` VALUES (1,1,0,'2025-11-13 01:05:39',NULL,1,NULL),(2,1,0,'2025-11-13 01:05:39',NULL,1,NULL);
 /*!40000 ALTER TABLE `info_component_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
