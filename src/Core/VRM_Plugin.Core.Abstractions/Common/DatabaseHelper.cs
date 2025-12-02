@@ -12,7 +12,6 @@ namespace VRM_Plugin.Core.Abstractions.Common;
 /// - El Host la usa directamente en sus repositorios
 /// - Los módulos la usan en sus repositorios
 /// - No está acoplada a la arquitectura específica del plugin system
-/// - Es portable y podría extraerse a un NuGet package
 /// </summary>
 public class DatabaseHelper
 {

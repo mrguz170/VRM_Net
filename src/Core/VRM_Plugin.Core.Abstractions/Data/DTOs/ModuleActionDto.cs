@@ -3,9 +3,8 @@ namespace VRM_Plugin.Core.Abstractions.Data.DTOs;
 /// <summary>
 /// Entidad que representa una acción granular (operación/business logic).
 /// Mapea directamente a tabla AccionesGranulares en BD.
-/// Cada acción tiene una relación explícita con su componente mediante IdComponent.
-/// 
-/// ? Ubicación: Data/DTOs/ (homologado con módulos)
+/// Cada acción tiene una relación explícita con su componente mediante IdComponent. 
+/// ? Ubicación: Data/DTOs/ 
 /// </summary>
 public class ModuleActionDto
 {
@@ -18,14 +17,12 @@ public class ModuleActionDto
 
     /// <summary>
     /// ID del componente al que pertenece esta acción (FK)
-    /// NULL = Acción global del módulo
     /// </summary>
     public int? ComponentId { get; set; }
 
     // ===== METADATA DE LA ACCIÓN =====
 
     /// <summary>
-    /// Código de la acción (legacy para compatibilidad)
     /// Formato: "{ModuleName}.{ComponentName}.{ActionName}"
     /// Ej: "Finanzas.Facturas.TimbrarSAT"
     /// </summary>
@@ -69,7 +66,7 @@ public class ModuleActionDto
     // ===== ESTADO (SOFT DELETE) =====
 
     /// <summary>
-    /// Indica si la acción está activa (soft delete pattern)
+    /// Indica si la acción está activa
     /// </summary>
     public bool IsActive { get; set; } = true;
 }

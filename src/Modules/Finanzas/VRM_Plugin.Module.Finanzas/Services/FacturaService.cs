@@ -6,9 +6,9 @@ namespace VRM_Plugin.Modules.Finanzas.Services;
 
 /// <summary>
 /// Servicio de lógica de negocio para Facturas
-/// ? Usa IFacturaRepository para acceso a datos
-/// ? Convierte entre DTOs (BD) y Domain (negocio)
-/// ? Aplica validaciones y lógica de negocio
+/// Usa IFacturaRepository para acceso a datos
+/// Convierte entre DTOs (BD) y Domain (negocio)
+/// Aplica validaciones y lógica de negocio
 /// </summary>
 public class FacturaService : IFacturaService
 {
@@ -50,13 +50,13 @@ public class FacturaService : IFacturaService
     /// </summary>
     public async Task<Factura> CreateFacturaAsync(Factura factura)
     {
-        // ? Validar (lógica de negocio)
+        // Validar (lógica de negocio)
         ValidarFactura(factura);
         
-        // ? Calcular totales (lógica de negocio)
+        // Calcular totales (lógica de negocio)
         factura.Total = factura.Subtotal + factura.Impuestos;
         
-        // ? Convertir Domain ? DTO
+        // Convertir Domain ? DTO
         var dto = new CreateFacturaDto
         {
             Folio = factura.Numero,
@@ -71,7 +71,7 @@ public class FacturaService : IFacturaService
             CreadoPor = factura.CreadoPor
         };
         
-        // ? Guardar en BD
+        // Guardar en BD
         var idGenerado = await _repository.CreateAsync(dto);
         factura.Id = idGenerado;
         

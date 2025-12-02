@@ -2,19 +2,18 @@ namespace VRM_Plugin.Core.Abstractions.Data.DTOs;
 
 /// <summary>
 /// DTO para transferir información de usuario entre capas
-/// Usado para autenticación y gestión de usuarios
-/// 
-/// ? Ubicación: Data/DTOs/ (homologado con módulos)
+/// Usado para autenticación y gestión de usuarios 
+/// ? Ubicación: Data/DTOs/ 
 /// </summary>
 public class UserDto
 {
     /// <summary>
-    /// ID único del usuario (mapea a user_id en BD)
+    /// ID único del usuario 
     /// </summary>
     public string UserId { get; set; } = string.Empty;
     
     /// <summary>
-    /// Nombre de usuario (login)
+    /// Nombre de usuario 
     /// </summary>
     public string Username { get; set; } = string.Empty;
     
@@ -42,7 +41,6 @@ public class UserDto
 
     /// <summary>
     /// Password del usuario (hasheada)
-    /// 
     /// </summary>
     public string Password { get; set; } = string.Empty;
 }

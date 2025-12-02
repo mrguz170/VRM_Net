@@ -13,8 +13,7 @@ namespace VRM_Plugin.Blazor.Server.Authentication;
 
 /// <summary>
 /// Proveedor de autenticación para VRM_Plugin.
-/// ? REFACTORIZADO: Usa IUserRepository y UserDto unificado
-/// ? Usa PersistentComponentState para mantener autenticación entre SSR e Interactive Server.
+/// Usa PersistentComponentState para mantener autenticación entre SSR e Interactive Server.
 /// </summary>
 public class VRMAuthenticationStateProvider : AuthenticationStateProvider, IDisposable
 {
@@ -109,7 +108,6 @@ public class VRMAuthenticationStateProvider : AuthenticationStateProvider, IDisp
         {
             var user = _authenticationState.User;
             
-            // ? Usar UserDto unificado
             var userDto = new UserDto
             {
                 UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "",
@@ -117,7 +115,6 @@ public class VRMAuthenticationStateProvider : AuthenticationStateProvider, IDisp
                 Email = user.FindFirst(ClaimTypes.Email)?.Value ?? "",
                 NombreCompleto = user.FindFirst("NombreCompleto")?.Value ?? "",
                 RoleId = user.FindFirst("RoleId")?.Value ?? "",
-                // ? Guardar el rol único (primer rol encontrado)
                 Role = user.FindFirst(ClaimTypes.Role)?.Value ?? ""
             };
          
@@ -135,7 +132,7 @@ public class VRMAuthenticationStateProvider : AuthenticationStateProvider, IDisp
     }
 
     /// <summary>
-    /// ? Autentica un usuario usando UserDto
+    /// Autentica un usuario usando UserDto
     /// </summary>
     public async Task<bool> LoginAsync(string username, string password)
     {
@@ -166,7 +163,7 @@ public class VRMAuthenticationStateProvider : AuthenticationStateProvider, IDisp
                 new Claim("RoleId", usuario.RoleId)
             };
 
-            // ? Agregar el rol único del usuario
+            // Agregar el rol único del usuario
             if (!string.IsNullOrWhiteSpace(usuario.Role))
             {
                 claims.Add(new Claim(ClaimTypes.Role, usuario.Role));

@@ -5,7 +5,7 @@ namespace VRM_Plugin.Modules.Finanzas.Data.Repositories;
 
 /// <summary>
 /// Implementación del repositorio de Pagos
-/// ? Usa DatabaseHelper de Common/ (homologado)
+/// ? Usa DatabaseHelper de Common/
 /// </summary>
 public class PagoRepository : IPagoRepository
 {

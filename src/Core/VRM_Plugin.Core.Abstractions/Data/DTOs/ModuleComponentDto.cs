@@ -3,21 +3,20 @@ namespace VRM_Plugin.Core.Abstractions.Data.DTOs;
 /// <summary>
 /// Entidad que representa un componente Blazor (navegación/menú).
 /// Mapea directamente a tabla ModuloComponentes en BD.
-/// Arquitectura jerárquica usando IdParent (NULL = raíz).
-/// 
-/// ? Ubicación: Data/DTOs/ (homologado con módulos)
+/// Arquitectura jerárquica usando IdParent (NULL = raíz). 
+/// ? Ubicación: Data/DTOs/ 
 /// </summary>
 public class ModuleComponentDto
 {
     // ===== IDs PARA BD =====
 
     /// <summary>
-    /// ID del componente en BD (auto-generado por IDENTITY)
+    /// ID del componente en BD 
     /// </summary>
     public int ComponentId { get; set; }
 
     /// <summary>
-    /// ID del módulo al que pertenece este componente (FK)
+    /// ID del módulo al que pertenece este componente 
     /// </summary>
     public int ModuleId { get; set; }
 
@@ -33,7 +32,7 @@ public class ModuleComponentDto
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Descripción del componente (opcional)
+    /// Descripción del componente 
     /// </summary>
     public string Description { get; set; } = string.Empty;
 
@@ -58,7 +57,7 @@ public class ModuleComponentDto
     public int MenuOrder { get; set; } = 0;
 
     /// <summary>
-    /// Clase CSS del icono (Remix Icons, Bootstrap Icons, etc.)
+    /// Clase CSS del icono (SLICED ICONS)
     /// </summary>
     public string Icon { get; set; } = string.Empty;
 
@@ -72,7 +71,7 @@ public class ModuleComponentDto
     public string? RolesString { get; set; }
     
     /// <summary>
-    /// ? Alias para compatibilidad con parseador genérico
+    /// Alias para compatibilidad con parseador genérico
     /// Si el SP devuelve "roles", se mapeará aquí automáticamente
     /// </summary>
     public string? Roles 
@@ -95,7 +94,7 @@ public class ModuleComponentDto
     // ===== ESTADO (SOFT DELETE) =====
 
     /// <summary>
-    /// Indica si el componente está activo (soft delete pattern)
+    /// Indica si el componente está activo 
     /// </summary>
     public bool IsActive { get; set; } = true;
 }

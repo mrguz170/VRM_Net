@@ -3,23 +3,21 @@ namespace VRM_Plugin.Core.Abstractions.Data.DTOs;
 /// <summary>
 /// Entidad que representa un módulo (DLL) del sistema.
 /// Mapea directamente a tabla Modulos en BD.
-/// Esta es la entidad persistente que los módulos (IModule) referencian.
-/// 
-/// ? Ubicación: Data/DTOs/ (homologado con módulos)
+/// ? Ubicación: Data/DTOs/ 
 /// </summary>
 public class ModuleDto
 {
     // ===== IDs =====
     
     /// <summary>
-    /// ID del módulo en BD (PK, auto-generado por IDENTITY)
+    /// ID del módulo en BD 
     /// </summary>
     public int ModuleId { get; set; }
     
     // ===== IDENTIFICACIÓN =====
     
     /// <summary>
-    /// Nombre técnico/código del módulo (UNIQUE en BD)
+    /// Nombre técnico/código del módulo 
     /// Ej: "Finanzas", "Prospectos", "Inventario"
     /// </summary>
     public string ModuleName { get; set; } = string.Empty;

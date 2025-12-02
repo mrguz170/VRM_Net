@@ -16,12 +16,11 @@ Piénsalo como un manual de instrucciones universal
     │  - DisplayName        │
     │  - Description        │
     │  - Version            │
-    │  - Author             │
-    │  - Category           │
-    │  - Dependencies       │
-    │  - RequiredPermissions│
+    │  - GetComponents
+       - GetActions│
+    │  - OnModuleLoadedAsync│
     │  - ConfigureServices  │
-    │  - IsEnabledForClient │
+    │                       │
     └───────────────────────┘
          ↑         ↑         ↑
          │         │         │
@@ -31,5 +30,5 @@ Piénsalo como un manual de instrucciones universal
     │Plugin  │ │Plugin │ │Plugin  │
     └────────┘ └───────┘ └────────┘
 
-    Analogía: Es como el puerto USB de tu computadora. No importa qué dispositivo conectes (mouse, teclado, disco duro), 
-    mientras cumplan el estándar USB, funcionarán.
+    Analogía: Es como el puerto USB de tu computadora. 
+    No importa qué dispositivo conectes (mouse, teclado, disco duro), mientras cumplan el estándar USB, funcionarán.

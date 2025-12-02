@@ -5,8 +5,8 @@ namespace VRM_Plugin.Modules.Finanzas.Data.Repositories;
 
 /// <summary>
 /// Implementación del repositorio de Facturas
-/// ? Usa DatabaseHelper de Common/ (homologado)
-/// ? DatabaseHelper mapea snake_case (BD) ? PascalCase (DTO)
+/// Usa DatabaseHelper de Common/ 
+/// DatabaseHelper mapea snake_case (BD) ? PascalCase (DTO)
 /// </summary>
 public class FacturaRepository : IFacturaRepository
 {
@@ -18,7 +18,7 @@ public class FacturaRepository : IFacturaRepository
     }
     
     /// <summary>
-    /// ? USO GENÉRICO: DatabaseHelper mapea automáticamente
+    /// DatabaseHelper mapea automáticamente
     /// - id_factura ? IdFactura
     /// - fecha_emision ? FechaEmision
     /// - estado_factura ? EstadoFactura

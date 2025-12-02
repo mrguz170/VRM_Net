@@ -11,6 +11,4 @@ Entidades compartidas:
 
 ¿Por qué estas entidades son "compartidas"?
 Porque TODOS los módulos necesitan saber:
-•	✅ ¿Está este módulo habilitado para el cliente X?
-•	✅ ¿Qué configuración fiscal tiene el cliente?
 •	✅ ¿Qué permisos tiene este usuario?

@@ -102,7 +102,6 @@ public class FinanzasModule : IModule
     
     /// <summary>
     /// Registra servicios de NEGOCIO y repositorios del módulo
-
     /// </summary>
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
@@ -112,7 +111,7 @@ public class FinanzasModule : IModule
         
         //  Registrar servicios de negocio del módulo
         services.AddScoped<IFacturaService, FacturaService>();
-        services.AddScoped<IPagoService, PagoService>();
+        
         
         //  Registrar el módulo como IModule para inyección en layouts/componentes
         services.AddSingleton<IModule>(this);

@@ -4,7 +4,6 @@ namespace VRM_Plugin.Core.Abstractions.Services;
 
 /// <summary>
 /// Servicio para verificar permisos granulares de acciones dentro de módulos.
-/// ? Actualizado para trabajar con IDs numéricos y jerarquía de componentes.
 /// Proporciona autorización a nivel de acción y componente.
 /// </summary>
 public interface IModuleAuthorizationService

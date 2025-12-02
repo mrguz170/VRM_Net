@@ -31,7 +31,6 @@ param(
 $RootPath = Get-Location
 $ModulesPath = Join-Path $RootPath "src\Modules\$FolderOrganization"
 
-# ? SIN "Demo" ni "Modules" en nombre de carpeta
 $ModuleProjectName = "VRM_Plugin.Module.$ModuleName"
 $ModuleFullPath = Join-Path $ModulesPath $ModuleProjectName
 $AssemblyName = "VRM_Plugin.Module.$ModuleName"

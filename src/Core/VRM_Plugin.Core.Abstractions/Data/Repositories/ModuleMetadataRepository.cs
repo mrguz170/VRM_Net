@@ -137,8 +137,7 @@ public class ModuleMetadataRepository : IModuleMetadataService
             return new List<ModuleActionDto>();
         }
     }
-        
-    
+           
     // ==================== MÉTODOS HELPER PRIVADOS ====================
     
     /// <summary>

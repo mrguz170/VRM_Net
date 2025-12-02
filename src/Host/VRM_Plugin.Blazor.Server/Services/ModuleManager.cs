@@ -127,7 +127,7 @@ public class ModuleManager : IModuleManager
     }
     
     /// <summary>
-    /// ? NUEVO: Carga metadata desde BD e inyecta al módulo
+    /// Carga metadata desde BD e inyecta al módulo
     /// </summary>
     private async Task LoadModuleMetadataFromDatabase(IModule module)
     {

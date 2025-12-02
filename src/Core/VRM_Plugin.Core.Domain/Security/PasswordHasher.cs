@@ -4,8 +4,7 @@ namespace VRM_Plugin.Blazor.Server.Security;
 
 /// <summary>
 /// Utilidad para hashing seguro de contraseñas usando PBKDF2 (Password-Based Key Derivation Function 2)
-/// ?? NOTA: Solo para uso interno del Host (autenticación del sistema)
-/// Los módulos NO deben usar esta clase directamente
+/// NOTA: Solo para uso interno autenticación del sistema
 /// </summary>
 public static class PasswordHasher
 {
@@ -79,7 +78,6 @@ public static class PasswordHasher
         }
         catch (Exception)
         {
-            // Cualquier otro error de validación
             return false;
         }
     }

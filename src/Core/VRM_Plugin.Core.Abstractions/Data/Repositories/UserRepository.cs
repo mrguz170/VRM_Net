@@ -10,9 +10,8 @@ namespace VRM_Plugin.Core.Abstractions.Data.Repositories;
 
 /// <summary>
 /// Repositorio de usuarios (infraestructura del SISTEMA)
-/// 
-/// ? Ubicación: Data/Repositories/ (homologado con módulos)
-/// ? Usa DatabaseHelper de Common/
+/// Ubicación: Data/Repositories/ 
+/// Usa DatabaseHelper de Common/
 /// </summary>
 public class UserRepository : IUserRepository
 {
@@ -29,19 +28,19 @@ public class UserRepository : IUserRepository
         _db = new DatabaseHelper(connectionString);
         _logger = logger;
     }
-    
+
     /// <summary>
-    /// Obtiene un usuario por login y valida contraseña
+    /// Obtiene un usuario por login y valida contraseñ
     /// Llama al SP: sp_get_user
     /// 
     /// El SP debe devolver columnas:
-    /// - user_id ? UserDto.UserId
-    /// - user_name o username ? UserDto.Username
+    /// - userid ? UserDto.UserId
+    /// - username o username ? UserDto.Username
     /// - email ? UserDto.Email
     /// - NombreCompleto ? UserDto.NombreCompleto
     /// - role ? UserDto.Role (UN SOLO ROL como string, ej: "Admin")
-    /// - permission ? UserDto.Permission (ID del rol/permiso)
-    /// - password (opcional) ? Para validación
+    /// - RoleId ? UserDto.RoleId (ID del rol/permiso)
+    /// - password ? Para validación
     /// </summary>
     public UserDto? GetUserByLogin(string login, string password)
     {
@@ -49,7 +48,7 @@ public class UserRepository : IUserRepository
         {
             _logger.LogDebug("Obteniendo usuario por login: {Login}", login);
             
-            // ? Usar parseador genérico
+            // Usar parseador genérico
             var users = _db.ExecuteStoredProcedure<UserDto>("sp_get_user", new Dictionary<string, object>
             {
                 { "login", login }
@@ -63,18 +62,14 @@ public class UserRepository : IUserRepository
             
             var user = users.First();
             
-            // ? VALIDACIÓN DE CONTRASEÑA
-            // Opción 1: Si el SP ya validó la contraseña, omitir esta sección
-            // Opción 2: Si el SP devuelve el hash en una columna "password", descomentar:
-            
-            var hashedPassword = user.Password; // Necesitarías agregar propiedad temporal en UserDto
+            // VALIDACIÓN DE CONTRASEÑA           
+            var hashedPassword = user.Password; 
             if (!PasswordHasher.VerifyPassword(password, hashedPassword))
             {
                 _logger.LogWarning("Contraseña inválida para usuario: {Login}", login);
                 return null;
             }
-            
-            
+                        
             _logger.LogInformation("Usuario autenticado exitosamente: {Username} con rol: {Role}", 
                 user.Username, 
                 user.Role);
