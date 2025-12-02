@@ -11,4 +11,7 @@ public interface IUserRepository
     /// Obtiene un usuario por su login/email y valida la contraseña
     /// </summary>
     UserDto? GetUserByLogin(string login, string password);
+
+
+    Task<List<UserDto>>? GetAllUserAsync();
 }

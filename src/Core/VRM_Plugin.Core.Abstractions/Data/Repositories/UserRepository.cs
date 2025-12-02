@@ -82,5 +82,12 @@ public class UserRepository : IUserRepository
             return null;
         }
     }
+
+    public async Task<List<UserDto>> GetAllUserAsync()
+    {
+        return await Task.Run(() =>
+            _db.ExecuteStoredProcedure<UserDto>(
+                "sp_user_getall"));
+    }
 }
 

@@ -9,6 +9,7 @@
     <Project Path="src/Host/VRM_Plugin.Blazor.Server/VRM_Plugin.Blazor.Server.csproj" />
   </Folder>
   <Folder Name="/src/Modules/">
+    <Project Path="src/Modules/Administrador/VRM_Plugin.Module.PanelAdmin/VRM_Plugin.Module.PanelAdmin.csproj" />
     <Project Path="src/Modules/Finanzas/VRM_Plugin.Module.Finanzas/VRM_Plugin.Module.Finanzas.csproj" />
   </Folder>
 </Solution>
