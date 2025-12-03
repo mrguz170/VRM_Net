@@ -1,0 +1,20 @@
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cat_users` (
+  `user_id` varchar(100) NOT NULL DEFAULT (uuid()),
+  `email` varchar(150) NOT NULL,
+  `user_name` varchar(50) NOT NULL,
+  `role_id` int NOT NULL,
+  `name` varchar(150) DEFAULT NULL,
+  `last_name` varchar(150) DEFAULT NULL,
+  `second_last_name` varchar(150) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0',
+  `created_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_date` datetime DEFAULT NULL,
+  `created_user_id` varchar(100) NOT NULL,
+  `updated_user_id`  varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`role_id`,`email`,`user_name`),
+  CONSTRAINT `cat_users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `cat_roles` (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;

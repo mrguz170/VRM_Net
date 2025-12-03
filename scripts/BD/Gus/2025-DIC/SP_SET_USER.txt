@@ -1,0 +1,42 @@
+
+DELIMITER $$
+CREATE PROCEDURE sp_set_user(
+    IN email_user VARCHAR(150),
+    IN username VARCHAR(150),
+    IN role_user_id INT,
+    IN name_user VARCHAR(150),
+    IN last_name_user VARCHAR(150),
+    IN second_last_name_user VARCHAR(150),
+    IN password_user VARCHAR(255),
+    IN is_active_user TINYINT,
+    IN creator_user VARCHAR(100)
+)
+BEGIN
+    INSERT INTO cat_users (
+        user_id,
+        email,
+        user_name,
+        role_id,
+        name,
+        last_name,
+        second_last_name,
+        password,
+        is_active,
+        created_user_id,
+        updated_user_id
+    )
+    VALUES (
+        UUID(),
+        email_user,
+        username,
+        role_user_id,
+        name_user,
+        last_name_user,
+        second_last_name_user,
+        password_user,
+        is_active_user,
+        creator_user,
+        ''
+    );
+END $$
+DELIMITER ;
