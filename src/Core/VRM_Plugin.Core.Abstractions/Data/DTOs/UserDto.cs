@@ -43,4 +43,9 @@ public class UserDto
     /// Password del usuario (hasheada)
     /// </summary>
     public string Password { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Estado del usuario
+    /// </summary>
+    public string IsActive { get; set; } = string.Empty;
 }

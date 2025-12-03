@@ -2,6 +2,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VRM_Plugin.Core.Abstractions;
 using VRM_Plugin.Core.Abstractions.Data.DTOs;
+using VRM_Plugin.Module.PanelAdmin.Data.Repositories;
+using VRM_Plugin.Module.PanelAdmin.Services;
 
 namespace VRM_Plugin.Module.PanelAdmin;
 
@@ -96,11 +98,12 @@ public class PanelAdminModule : IModule
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         //  Registrar repositorios del módulo (capa de datos)
-        //services.AddScoped<IRepositoryInterface, RepositoryInterfaceImplemented>();
+        services.AddScoped<IRolRepository, RolRepository>();
                 
         //  Registrar servicios de negocio del módulo
-        //services.AddScoped<IServiceInterface,ServiceInterfaceImplemented>();
-        
+        services.AddScoped< IRolService, RolService >();
+        services.AddScoped<IUsuarioService, UsuarioService>();
+
         //  Registrar el módulo como IModule para inyección en layouts/componentes
         services.AddSingleton<IModule>(this);
         services.AddSingleton(this); 

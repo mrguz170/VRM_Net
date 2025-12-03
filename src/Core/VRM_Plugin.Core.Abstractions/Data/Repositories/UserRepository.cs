@@ -87,7 +87,7 @@ public class UserRepository : IUserRepository
     {
         return await Task.Run(() =>
             _db.ExecuteStoredProcedure<UserDto>(
-                "sp_user_getall"));
+                "sp_get_all_user"));
     }
 }
 
