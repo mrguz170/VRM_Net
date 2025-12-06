@@ -81,4 +81,26 @@ public static class PasswordHasher
             return false;
         }
     }
+
+    /// <summary>
+    /// Genera una contraseña temporal para nuevos usuarios
+    /// Formato: VRM + 4 dígitos aleatorios + año actual
+    /// Ejemplo: VRM@2025
+    /// </summary>
+    /// <returns>Contraseña temporal en texto plano</returns>
+    public static string GenerateDefaultPassword()
+    {
+        return $"vrm123!";
+    }
+
+    /// <summary>
+    /// Genera contraseña temporal y devuelve junto con su hash
+    /// </summary>
+    /// <returns>Tupla con (contraseña en texto plano, hash)</returns>
+    public static (string PlainPassword, string HashedPassword) GenerateAndHashDefaultPassword()
+    {
+        var plainPassword = GenerateDefaultPassword();
+        var hashedPassword = HashPassword(plainPassword);
+        return (plainPassword, hashedPassword);
+    }
 }

@@ -2,6 +2,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VRM_Plugin.Core.Abstractions;
 using VRM_Plugin.Core.Abstractions.Data.DTOs;
+using VRM_Plugin.Core.Abstractions.Data.Repositories;
+using VRM_Plugin.Core.Abstractions.Services;
 using VRM_Plugin.Module.PanelAdmin.Data.Repositories;
 using VRM_Plugin.Module.PanelAdmin.Services;
 
@@ -16,18 +18,19 @@ public class PanelAdminModule : IModule
     private List<ModuleActionDto> _actions = new();
     
     // Metadata del módulo (se inyectan desde BD, valores vacíos por defecto)
-    private string _moduleName = string.Empty;
+    private int _moduleId = 0;
+    private string _moduleName = "PanelAdmin";
     private string _displayName = string.Empty;
     private string _description = string.Empty;
     private string _version = string.Empty;
-        
-// ==================== PROPIEDADES PÚBLICAS ====================
-    
+
+    // ==================== PROPIEDADES PÚBLICAS ====================
+
     /// <summary>
     /// ID numérico del módulo
     /// </summary>
-    public int ModuleId { get; set; } = 5;
-    
+    //public int ModuleId { get; set; } = 5;
+    public int ModuleId { get; set; }
     public string ModuleName => _moduleName;
     public string DisplayName => _displayName;
     public string Description => _description;
@@ -82,8 +85,9 @@ public class PanelAdminModule : IModule
     /// <summary>
     /// El Host llama este método para inyectar metadata desde BD
     /// </summary>    
-    public void SetMetadata(string moduleName, string displayName, string description, string version)
+    public void SetMetadata(int moduleId, string moduleName, string displayName, string description, string version)
     {
+        _moduleId = moduleId != 0 ? moduleId : _moduleId;
         _moduleName = moduleName ?? _moduleName;
         _displayName = displayName ?? _displayName;
         _description = description ?? _description;
@@ -99,7 +103,8 @@ public class PanelAdminModule : IModule
     {
         //  Registrar repositorios del módulo (capa de datos)
         services.AddScoped<IRolRepository, RolRepository>();
-                
+        //services.AddScoped<IUserRepository, UserRepository>();
+
         //  Registrar servicios de negocio del módulo
         services.AddScoped< IRolService, RolService >();
         services.AddScoped<IUsuarioService, UsuarioService>();

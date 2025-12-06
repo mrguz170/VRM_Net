@@ -2,32 +2,85 @@
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject PanelAdminModule CurrentModule
-@using VRM_Plugin.Core.Shared.Components.Shared
+@inject IUsuarioService UsuarioService
 
-<PageHeader Title="VRM" pTitle="Usuarios"></PageHeader>
 
 <CascadingValue Value="@CurrentModule" Name="CurrentModule">
+
+    <PageHeader Title="@CurrentModule.DisplayName" pTitle="Control de usuarios"></PageHeader>
 
     <div class="flex flex-col gap-4 min-h-[calc(100vh-212px)]">
 
         <div class="grid grid-cols-1 gap-4">
-        
-        </div>
-        <div class="grid grid-cols-1 gap-4">
+
             <div class="col-span-12 gap-6 p-5 bg-white border rounded 2xl:col-span-9 dark:bg-darklight dark:border-darkborder border-black/10">
-                <div class="flex items-center gap-3 mb-4">
-                    <MudText Typo="Typo.h2" Class="text-base font-semibold capitalize text-slate-800 dark:text-slate-100">Lista de Usuarios</MudText>
-                    @* <a href="#" class="px-3 py-1.5 rounded-md text-xs border border-black/20 dark:border-darkborder text-muted"><i class="align-bottom ltr:mr-1 rtl:ml-1 ri-filter-line"></i> Filters</a> *@
+                
+               @*  <div class="flex items-center justify gap-3 mb-4">
+                    <div class="flex">
+                        <MudButton type="button" Class="btn flex items-center gap-2 bg-purple h-10 border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]">
+                            <span class="mud-icon-root mud-icon-size-medium ri-user-add-line" aria-hidden="true" role="img"></span>
+                            Crear
+                        </MudButton>
+                    </div>
+                    
+                     <div class="flex">
+                        <MudButton type="button" Class="btn flex items-center gap-1.5 bg-success border-success text-white hover:bg-success/[0.85] hover:border-success/[0.85]">
+                                <span class="mud-icon-root mud-icon-size-medium ri-user-add-line" aria-hidden="true" role="img"></span>
+                            Nuevo
+                        </MudButton>
+                    </div>  
+                     <div class="flex">
+                        <MudButton type="button" Class="btn flex items-center gap-1.5 bg-info border-info text-white hover:bg-info/[0.85] hover:border-info/[0.85]">
+                            <span class="mud-icon-root mud-icon-size-medium ri-user-add-line" aria-hidden="true" role="img"></span>
+                            Nuevo
+                        </MudButton>
+                    </div>
+                </div> *@
+
+
+                <div class="flex justify-between gap-3 mb-4">
+                    <MudButton OnClick="NewUser" type="button" Class="btn flex items-center gap-1.5 bg-info border-info text-white hover:bg-info/[0.85] hover:border-info/[0.85]">
+                        <span class="mud-icon-root mud-icon-size-medium ri-user-add-line text-lg" aria-hidden="true" role="img"></span>
+                        @* <MudIcon class="mud-icon-root mud-icon-size-large ri-user-add-line" Size="Size.Medium" aria-hidden=" true" role="img" /> *@
+                        @* <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Small" /> *@
+                        
+                    </MudButton>
+
+                    @* <MudButton OnClick="NewUser" type="button" Class="btn flex items-center gap-1.5 bg-info border-info text-white hover:bg-info/[0.85] hover:border-info/[0.85]">
+                        <span class="ri-user-add-line mud-icon-size-medium "></span>
+                        Nuevo Usuario
+                    </MudButton> *@
+
+                    @* <MudButton OnClick="NewUser" Color="Color.Info" Variant="Variant.Filled">
+                        <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Small" />
+                        Nuevo Usuario
+                    </MudButton> *@
+
+                    <div class="space-y-2">
+                    </div>
+
+                    <div class="flex">
+                        <input style="width:35vh;" class=" ltr:rounded-r-none rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 h-10 form-input" placeholder="Buscar..." type="text" />
+                        @* <input class="w-[30vh] sm:w-[35vh] md:w-[40vh] ltr:rounded-r-none rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 h-10 form-input" placeholder="Buscar..." type="text" /> *@
+                        @* <input class="w-48 sm:w-56 md:w-64 ltr:rounded-r-none rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 h-10 form-input" placeholder="Buscar..." type="text" /> *@
+                        
+                        <MudButton type="button" Class="btn flex items-center gap-2 bg-purple h-10 border-purple ltr:rounded-l-none rtl:rounded-r-none ltr:rounded-r rtl:rounded-l text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]">
+                            <span class="mud-icon-root mud-icon-size-medium ri-search-2-line" aria-hidden="true" role="img"></span>
+                            Buscar
+                        </MudButton>
+                    </div>
                 </div>
+
                 <div class="overflow-auto">
                     <MudTable Class="min-w-[640px] text-left w-full" Items="@products" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info">
                         <HeaderContent>
                             <MudTh>Usuario</MudTh>
                             <MudTh>Nombre Completo</MudTh>
                             <MudTh>Email</MudTh>
-                            <MudTh>Role</MudTh>
+                            <MudTh>Permiso</MudTh>
                             <MudTh>Estado</MudTh>
                             <MudTh>Acción</MudTh>
+                            <MudTh>Ultima Modificacion</MudTh>
                         </HeaderContent>
                         <RowTemplate>
                             <MudTd DataLabel="Usuario">
@@ -35,19 +88,49 @@
                             </MudTd>
                             <MudTd DataLabel="Nombre Completo">@context.NombreCompleto</MudTd>
                             <MudTd DataLabel="Email">@context.Email</MudTd>
-                            <MudTd DataLabel="Role">@context.Role</MudTd>
-                            <MudTd DataLabel="Estado">@context.Status</MudTd>
+                            
+                            <MudTd DataLabel="Role">
+                                <div class="inline-flex items-center text-xs justify-center px-1.5 py-0.5 text-info">
+                                    @* <span class="h-1.5 w-1.5 rounded-full bg-current ltr:mr-1.5 rtl:ml-1.5"></span> *@
+                                    <span>@context.Role</span>
+                                </div>                               
+                            </MudTd>
+
+                            <MudTd DataLabel="Estado">
+                                @if (context.Status == "Activo")
+                                {
+                                    <div class="bg-success text-white inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5">
+                                    @* <div class="bg-success/20 text-success inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5"> *@
+                                        @context.Status
+                                    </div>
+                                }
+                                else
+                                {
+@*                                     <div class="bg-muted text-white dark:bg-darkmuted inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5">
+ *@                                    <div class="bg-danger/20 text-danger dark:bg-darkmuted inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5">
+                                        @context.Status
+                                    </div>
+                                }
+                            </MudTd>
+
                             <MudTd DataLabel="Acción">
-                                <div class="flex items-center gap-3">
-                                    @* <a href="#!" class="transition duration-200 ease-linear text-muted hover:text-success"><i class="ri-eye-line"></i></a> *@
+                                <div class="flex justify-center gap-3">
                                     <a href="#!" class="transition duration-200 ease-linear text-muted hover:text-purple"><i class="ri-edit-line"></i></a>
-                                    <a href="#!" class="transition duration-200 ease-linear text-muted hover:text-danger"><i class="ri-delete-bin-line"></i></a>
+                                    @* <a href="#!" class="transition duration-200 ease-linear text-muted hover:text-danger"><i class="ri-delete-bin-line"></i></a> *@
                                 </div>
                             </MudTd>
+
+                            <MudTd DataLabel="Role">
+                                @* <div class="inline-flex items-center text-xs justify-center px-1.5 py-0.5 text-info">
+                                </div> *@
+                                    <span>
+                                        @context.FechaModificacion
+                                    </span>
+                            </MudTd>
                         </RowTemplate>
-                        
                     </MudTable>
                 </div>
+
                 <div class="flex items-center gap-3 mt-4">
                     <MudText Class="text-muted grow">Showing <b>05</b> of <b>07</b> Results</MudText>
                     <ul class="inline-flex items-center gap-1 shrink-0">
@@ -61,26 +144,45 @@
                     </ul>
                 </div>
             </div>
-            
+        </div>
     </div>
-</div>
 
 </CascadingValue>
 
 @code {
 
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await Task.CompletedTask;
+    // }
+
+    // private List<Usuario> products = new List<Usuario>
+    // {
+    //     new Usuario { Id = 1, Username = "jgarcia", NombreCompleto = "Juan García López", Email = "jgarcia@example.com", Descripcion = "Administrador del sistema", Active = 1, Role = "Admin", Status = "Activo" },
+    //     new Usuario { Id = 3, Username = "pmartinez", NombreCompleto = "Pedro Martínez Sánchez", Email = "pmartinez@example.com", Descripcion = "Supervisor de ventas", Active = 1, Role = "Supervisor", Status = "Activo" },
+    //     new Usuario { Id = 4, Username = "alopez", NombreCompleto = "Ana López Fernández", Email = "alopez@example.com", Descripcion = "Operador de soporte", Active = 0, Role = "Support", Status = "Inactivo" },
+    //     new Usuario { Id = 4, Username = "alopez", NombreCompleto = "Ana López Fernández", Email = "alopez@example.com", Descripcion = "Operador de soporte", Active = 0, Role = "Support", Status = "Inactivo" },
+    //     new Usuario { Id = 4, Username = "alopez", NombreCompleto = "Ana López Fernández", Email = "alopez@example.com", Descripcion = "Operador de soporte", Active = 0, Role = "Support", Status = "Inactivo" },
+
+    //      new Usuario { Id = 1, Username = "jgarcia", NombreCompleto = "Juan García López", Email = "jgarcia@example.com", Descripcion = "Administrador del sistema", Active = 1, Role = "Admin", Status = "Activo" },
+    //     new Usuario { Id = 2, Username = "mrodriguez", NombreCompleto = "María Rodríguez Pérez", Email = "mrodriguez@example.com", Descripcion = "Usuario estándar", Active = 1, Role = "User", Status = "Activo" },
+    //     new Usuario { Id = 3, Username = "pmartinez", NombreCompleto = "Pedro Martínez Sánchez", Email = "pmartinez@example.com", Descripcion = "Supervisor de ventas", Active = 1, Role = "Supervisor", Status = "Activo" },
+    //     new Usuario { Id = 4, Username = "alopez", NombreCompleto = "Ana López Fernández", Email = "alopez@example.com", Descripcion = "Operador de soporte", Active = 0, Role = "Support", Status = "Inactivo" },
+    //     new Usuario { Id = 5, Username = "cgonzalez", NombreCompleto = "Carlos González Ruiz", Email = "cgonzalez@example.com", Descripcion = "Usuario de pruebas", Active = 1, Role = "User", Status = "Activo" },
+    //     new Usuario { Id = 5, Username = "cgonzalez", NombreCompleto = "Carlos González Ruiz", Email = "cgonzalez@example.com", Descripcion = "Usuario de pruebas", Active = 1, Role = "User", Status = "Activo" },
+    //     new Usuario { Id = 6, Username = "lhernandez", NombreCompleto = "Laura Hernández Moreno", Email = "lhernandez@example.com", Descripcion = "Administradora de contenido", Active = 1, Role = "Editor", Status = "Inactivo" }
+    // };
+    private List<Usuario> products = new List<Usuario>();
+
     protected override async Task OnInitializedAsync()
     {
-        await Task.CompletedTask;
+        var usersDto = await UsuarioService.GetAllUserAsync();        
+        products = usersDto;
     }
 
-    private List<Usuario> products = new List<Usuario>
-    {
-        new Usuario { Id = 1, Username = "jgarcia", NombreCompleto = "Juan García López", Email = "jgarcia@example.com", Descripcion = "Administrador del sistema", Active = 1, Role = "Admin", Status = "Activo" },
-        new Usuario { Id = 2, Username = "mrodriguez", NombreCompleto = "María Rodríguez Pérez", Email = "mrodriguez@example.com", Descripcion = "Usuario estándar", Active = 1, Role = "User", Status = "Activo" },
-        new Usuario { Id = 3, Username = "pmartinez", NombreCompleto = "Pedro Martínez Sánchez", Email = "pmartinez@example.com", Descripcion = "Supervisor de ventas", Active = 1, Role = "Supervisor", Status = "Activo" },
-        new Usuario { Id = 4, Username = "alopez", NombreCompleto = "Ana López Fernández", Email = "alopez@example.com", Descripcion = "Operador de soporte", Active = 0, Role = "Support", Status = "Inactivo" },
-        new Usuario { Id = 5, Username = "cgonzalez", NombreCompleto = "Carlos González Ruiz", Email = "cgonzalez@example.com", Descripcion = "Usuario de pruebas", Active = 1, Role = "User", Status = "Activo" },
-        new Usuario { Id = 6, Username = "lhernandez", NombreCompleto = "Laura Hernández Moreno", Email = "lhernandez@example.com", Descripcion = "Administradora de contenido", Active = 1, Role = "Editor", Status = "Inactivo" }
-    };
+    private async Task NewUser()
+    {        
+        Navigation.NavigateTo("/paneladmin/nuevousuario");
+    }
+
 }

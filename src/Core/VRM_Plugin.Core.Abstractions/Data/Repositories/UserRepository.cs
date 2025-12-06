@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+Ôªøusing Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using VRM_Plugin.Blazor.Server.Security;
 using VRM_Plugin.Core.Abstractions.Common;
@@ -10,7 +10,7 @@ namespace VRM_Plugin.Core.Abstractions.Data.Repositories;
 
 /// <summary>
 /// Repositorio de usuarios (infraestructura del SISTEMA)
-/// UbicaciÛn: Data/Repositories/ 
+/// Ubicaci√≥n: Data/Repositories/ 
 /// Usa DatabaseHelper de Common/
 /// </summary>
 public class UserRepository : IUserRepository
@@ -30,7 +30,7 @@ public class UserRepository : IUserRepository
     }
 
     /// <summary>
-    /// Obtiene un usuario por login y valida contraseÒ
+    /// Obtiene un usuario por login y valida contrase√±
     /// Llama al SP: sp_get_user
     /// 
     /// El SP debe devolver columnas:
@@ -40,7 +40,7 @@ public class UserRepository : IUserRepository
     /// - NombreCompleto ? UserDto.NombreCompleto
     /// - role ? UserDto.Role (UN SOLO ROL como string, ej: "Admin")
     /// - RoleId ? UserDto.RoleId (ID del rol/permiso)
-    /// - password ? Para validaciÛn
+    /// - password ? Para validaci√≥n
     /// </summary>
     public UserDto? GetUserByLogin(string login, string password)
     {
@@ -48,7 +48,7 @@ public class UserRepository : IUserRepository
         {
             _logger.LogDebug("Obteniendo usuario por login: {Login}", login);
             
-            // Usar parseador genÈrico
+            // Usar parseador gen√©rico
             var users = _db.ExecuteStoredProcedure<UserDto>("sp_get_user", new Dictionary<string, object>
             {
                 { "login", login }
@@ -62,11 +62,11 @@ public class UserRepository : IUserRepository
             
             var user = users.First();
             
-            // VALIDACI”N DE CONTRASE—A           
+            // VALIDACI√ìN DE CONTRASE√ëA           
             var hashedPassword = user.Password; 
             if (!PasswordHasher.VerifyPassword(password, hashedPassword))
             {
-                _logger.LogWarning("ContraseÒa inv·lida para usuario: {Login}", login);
+                _logger.LogWarning("Contrase√±a inv√°lida para usuario: {Login}", login);
                 return null;
             }
                         
@@ -88,6 +88,39 @@ public class UserRepository : IUserRepository
         return await Task.Run(() =>
             _db.ExecuteStoredProcedure<UserDto>(
                 "sp_get_all_user"));
+    }
+
+    public async Task<string> CreateUserAsync(UserDto dto)
+    {
+        return await Task.Run(() =>
+        {
+            var parameters = new Dictionary<string, object>
+        {
+            { "email_user", dto.Email },
+            { "username", dto.Username },
+            { "role_user_id", dto.RoleId },
+            { "name_user", dto.Nombre },
+            { "last_name_user", dto.ApellidoPaterno },
+            { "second_last_name_user", dto.ApellidoMaterno },
+            { "password_user", dto.Password },
+            { "is_active_user", dto.IsActive },
+            { "creator_user", dto.created_user_id }
+        };
+
+            var dataTable = _db.ExecuteStoredProcedure("sp_set_user", parameters);
+
+            if (dataTable.Rows.Count == 0)
+            {
+                _logger.LogWarning("SP sp_set_user no devolvi√≥ resultados");
+                return string.Empty;
+            }
+
+            var newUserId = dataTable.Rows[0]["NewUserId"]?.ToString() ?? string.Empty;
+
+            _logger.LogInformation("Usuario creado con ID: {UserId}", newUserId);
+
+            return newUserId;
+        });
     }
 }
 

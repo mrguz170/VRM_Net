@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using VRM_Plugin.Core.Abstractions.Data.DTOs;
-using VRM_Plugin.Module.PanelAdmin.Data.DTOs;
 using VRM_Plugin.Module.PanelAdmin.Domain;
 
 namespace VRM_Plugin.Module.PanelAdmin.Services;
@@ -12,9 +11,10 @@ namespace VRM_Plugin.Module.PanelAdmin.Services;
 /// </summary>
 public interface IUsuarioService
 {
-    Task<List<UserDto>> GetAllAsync();
-    Task<UserDto?> GetByIdAsync(int id);
-    Task<UserDto> CreateAsync(UserDto dto);
-    Task<UserDto> UpdateAsync(UserDto dto);
-    Task<bool> DeleteAsync(int id);
+    Task<List<Usuario>> GetAllUserAsync();
+    Task<Usuario?> GetUserByIdAsync(int id);
+    Task<Usuario> CreateUserAsync(Usuario usuario); 
+    Task<Usuario> UpdateUserAsync(Usuario usuario);
+    Task<bool> DeleteUserAsync(int id);
+
 }

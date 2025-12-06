@@ -1,3 +1,5 @@
+using System;
+
 namespace VRM_Plugin.Core.Abstractions.Data.DTOs;
 
 /// <summary>
@@ -26,7 +28,20 @@ public class UserDto
     /// Nombre completo del usuario
     /// </summary>
     public string NombreCompleto { get; set; } = string.Empty;
-    
+
+    /// <summary>
+    /// Nombre del usuario
+    /// </summary>
+    public string Nombre { get; set; } = string.Empty;
+    /// <summary>
+    /// Apellido Paterno del usuario
+    /// </summary>
+    public string ApellidoPaterno { get; set; } = string.Empty;
+    /// <summary>
+    /// Apellido Materno del usuario
+    /// </summary>
+    public string ApellidoMaterno { get; set; } = string.Empty;
+
     /// <summary>
     /// Rol del usuario (UN SOLO ROL por usuario)
     /// Ejemplo: "Admin", "GerenteFinanzas", "Contador"
@@ -47,5 +62,16 @@ public class UserDto
     /// <summary>
     /// Estado del usuario
     /// </summary>
-    public string IsActive { get; set; } = string.Empty;
+    //public string IsActive { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+
+    /// <summary>
+    /// Ultima fecha de actualización 
+    /// </summary>
+    public DateTime UpdatedDate { get; set; }
+
+    /// <summary>
+    /// Ultima fecha de actualización 
+    /// </summary>
+    public string created_user_id { get; set; } = string.Empty;
 }

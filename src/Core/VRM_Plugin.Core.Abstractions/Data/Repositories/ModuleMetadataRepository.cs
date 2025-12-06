@@ -137,9 +137,46 @@ public class ModuleMetadataRepository : IModuleMetadataService
             return new List<ModuleActionDto>();
         }
     }
-           
+
+    /// <summary>
+    /// Obtiene información del módulo desde BD usando su nombre técnico
+    /// Llama al SP: sp_get_module_info_by_name
+    /// </summary>
+    public ModuleDto? GetModuleMetadataByName(string moduleName)
+    {
+        try
+        {
+            _logger.LogDebug("Obteniendo metadata del módulo '{ModuleName}' desde BD", moduleName);
+
+            var metadata = _db.ExecuteStoredProcedureSingle<ModuleDto>("sp_get_module_info_by_name",
+                new Dictionary<string, object>
+                {
+                { "module_name", moduleName }
+                });
+
+            if (metadata == null)
+            {
+                _logger.LogWarning("No se encontró metadata para el módulo '{ModuleName}'", moduleName);
+                return null;
+            }
+
+            _logger.LogInformation(
+                "Metadata obtenida para módulo '{ModuleName}': ID={ModuleId}, {DisplayName} v{Version}",
+                moduleName,
+                metadata.ModuleId,
+                metadata.DisplayName,
+                metadata.Version);
+
+            return metadata;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener metadata del módulo '{ModuleName}'", moduleName);
+            return null;
+        }
+    }
     // ==================== MÉTODOS HELPER PRIVADOS ====================
-    
+
     /// <summary>
     /// Parsea un string de roles "1,2,3" a List&lt;int&gt;
     /// </summary>

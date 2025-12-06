@@ -1,4 +1,3 @@
-
 DELIMITER $$
 CREATE PROCEDURE sp_set_user(
     IN email_user VARCHAR(150),
@@ -12,6 +11,12 @@ CREATE PROCEDURE sp_set_user(
     IN creator_user VARCHAR(100)
 )
 BEGIN
+    DECLARE v_user_id CHAR(36);
+
+    -- Generar el UUID y guardarlo en variable
+    SET v_user_id = UUID();
+
+    -- Insertar usando la variable
     INSERT INTO cat_users (
         user_id,
         email,
@@ -22,11 +27,10 @@ BEGIN
         second_last_name,
         password,
         is_active,
-        created_user_id,
-        updated_user_id
+        created_user_id
     )
     VALUES (
-        UUID(),
+        v_user_id,
         email_user,
         username,
         role_user_id,
@@ -35,8 +39,10 @@ BEGIN
         second_last_name_user,
         password_user,
         is_active_user,
-        creator_user,
-        ''
+        creator_user
     );
-END $$
+
+    -- Devolver el UUID generado
+    SELECT v_user_id AS NewUserId;
+END; $$
 DELIMITER ;

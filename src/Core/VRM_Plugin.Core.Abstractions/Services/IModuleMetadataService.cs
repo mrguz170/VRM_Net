@@ -21,5 +21,11 @@ public interface IModuleMetadataService
     /// Obtiene las acciones de un módulo
     /// </summary>
     List<ModuleActionDto> GetActionsByModuleId(int moduleId);
-    
-    }
+
+    /// <summary>
+    /// Obtiene la información completa de un módulo por su nombre técnico
+    /// </summary>
+    ModuleDto? GetModuleMetadataByName(string moduleName);
+        
+
+}

@@ -79,8 +79,6 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         }
     }
 
-
-    
     /// <summary>
     /// Verifica si el usuario puede acceder a un componente específico
     /// </summary>
@@ -165,6 +163,8 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
         }
     }
 
+    
+
     // ==================== MÉTODOS PRIVADOS ====================
 
     /// <summary>
@@ -178,12 +178,11 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
             .Select(c => c.Value)
             .ToList();
 
-            return permissionClaims
-                .Select(p => int.TryParse(p, out var id) ? id : 0)
-                .Where(id => id > 0)
-                .ToList();
+        return permissionClaims
+            .Select(p => int.TryParse(p, out var id) ? id : 0)
+            .Where(id => id > 0)
+            .ToList();
     }
-
 
     /// <summary>
     /// Verifica permisos de componente con herencia desde el padre

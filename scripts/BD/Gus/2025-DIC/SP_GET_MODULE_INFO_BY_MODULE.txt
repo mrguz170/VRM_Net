@@ -1,0 +1,20 @@
+use vrm
+drop PROCEDURE sp_get_module_info_by_name
+DELIMITER $$
+CREATE PROCEDURE sp_get_module_info_by_name(
+    IN module_name VARCHAR(100)
+)
+BEGIN
+    SELECT 
+        module_id,
+        module_name,
+        display_name,
+        description,
+        version
+    FROM cat_modules a
+    WHERE LOWER(TRIM(a.module_name)) COLLATE utf8mb4_unicode_ci 
+          = LOWER(TRIM(module_name)) COLLATE utf8mb4_unicode_ci;
+END;
+
+ $$
+DELIMITER ;

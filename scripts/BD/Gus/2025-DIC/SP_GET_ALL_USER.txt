@@ -1,18 +1,21 @@
 use vrm
-
+drop PROCEDURE sp_get_all_user
 DELIMITER $$
-CREATE PROCEDURE sp_get_all_user(
-)
+
+CREATE PROCEDURE sp_get_all_user()
 BEGIN
     SELECT 
-		user_id as userId,
-		user_name as UserName,
-		CONCAT(name,' ',last_name,' ',second_last_name) as NombreCompleto, 
-		email as Email, 
-		b.role_name as role,
-		a.role_id as RoleId ,
-		a.is_active as IsActive
-	FROM cat_users a inner join cat_roles b on a.role_id = b.role_id;
-	
-END $$
+        user_id AS userId,
+        user_name AS UserName,
+        CONCAT(name,' ',last_name,' ',second_last_name) AS NombreCompleto, 
+        email AS Email, 
+        b.role_name AS role,
+        a.role_id AS RoleId,
+        a.is_active AS IsActive,
+        IFNULL(a.updated_date, a.created_date) AS UpdatedDate
+    FROM cat_users a 
+    INNER JOIN cat_roles b ON a.role_id = b.role_id
+    ORDER BY user_name;
+END$$
+
 DELIMITER ;

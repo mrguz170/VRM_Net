@@ -22,10 +22,10 @@
 
         <!-- Título -->
         <h1 class="mb-2 text-2xl font-semibold text-center dark:text-white">
-            Sign In to VRM
+            Iniciar sesión a VRM
         </h1>
         <p class="text-center text-muted mb-7 dark:text-darkmuted">
-            Enter your credentials to access the system
+            Ingresa tus credenciales para acceder al sistema
         </p>
 
         @if (!string.IsNullOrEmpty(errorMessage))
@@ -43,7 +43,7 @@
                 <!-- Email -->
                 <div>
                     <InputText @bind-Value="loginModel.Email" 
-                               placeholder="Enter your email" 
+                               placeholder="Ingresa tú email o nombre de usuario" 
                                class="form-input w-full px-4 py-3 border border-black/10 dark:border-darkborder rounded-lg focus:ring-2 focus:ring-purple focus:border-transparent dark:bg-dark dark:text-white" />
                     <ValidationMessage For="@(() => loginModel.Email)" class="text-red-500 text-sm mt-1" />
                 </div>
@@ -52,13 +52,13 @@
                 <div>
                     <InputText @bind-Value="loginModel.Password" 
                                type="password"
-                               placeholder="Enter your password" 
+                               placeholder="Ingresa tú contraseña" 
                                class="form-input w-full px-4 py-3 border border-black/10 dark:border-darkborder rounded-lg focus:ring-2 focus:ring-purple focus:border-transparent dark:bg-dark dark:text-white" />
                     <ValidationMessage For="@(() => loginModel.Password)" class="text-red-500 text-sm mt-1" />
                 </div>
 
                 <div class="ltr:text-right rtl:text-left">
-                    <a href="/forgot-password" class="text-black dark:text-white hover:underline">Forgot Password?</a>
+                    <a href="/forgot-password" class="text-black dark:text-white hover:underline">Olvidaste contraseña?</a>
                 </div>
 
                 <!-- Submit Button -->
@@ -113,14 +113,14 @@
             }
             else
             {
-                errorMessage = "Invalid email or password. Please try again.";
+                errorMessage = "Email o contraseña invalido. Por favor vuelve a intentalo.";
                 isLoading = false;
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"🔴 [Login] Error: {ex.GetType().Name} - {ex.Message}");
-            errorMessage = $"An error occurred during login. Please try again.";
+            errorMessage = $"A ocurrido un error al iniciar sesión. Por favor vuelve a intentalo.";
             isLoading = false;
         }
     }
@@ -128,10 +128,10 @@
     public class LoginModel
     {
         [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [EmailAddress(ErrorMessage = "Formato invalido de Email")]
         public string? Email { get; set; }
 
-        [Required(ErrorMessage = "Password is required")]
+        [Required(ErrorMessage = "Contraseña es obligatoria")]
         public string? Password { get; set; }
     }
 }

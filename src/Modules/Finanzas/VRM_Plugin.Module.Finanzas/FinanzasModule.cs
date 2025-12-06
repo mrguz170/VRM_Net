@@ -20,20 +20,20 @@ public class FinanzasModule : IModule
     // Datos inyectados por el Host (desde BD)
     private List<ModuleComponentDto> _components = new();
     private List<ModuleActionDto> _actions = new();
-    
+
     // Metadata del módulo (se inyectan desde BD, valores vacíos por defecto)
-    private string _moduleName = string.Empty;
+    private int _moduleId = 0;
+    private string _moduleName = "Finanzas";
     private string _displayName = string.Empty;
     private string _description = string.Empty;
     private string _version = string.Empty;
-    
+
     // ==================== PROPIEDADES PÚBLICAS ====================
-    
+
     /// <summary>
     /// ID numérico del módulo
     /// </summary>
-    public int ModuleId { get; set; } = 1;
-    
+    public int ModuleId { get; set; }
     public string ModuleName => _moduleName;
     public string DisplayName => _displayName;
     public string Description => _description;
@@ -85,21 +85,22 @@ public class FinanzasModule : IModule
     {
         _actions = actions ?? new List<ModuleActionDto>();
     }
-    
+
     /// <summary>
     /// El Host llama este método para inyectar metadata desde BD
     /// </summary>    
-    public void SetMetadata(string moduleName, string displayName, string description, string version)
+    public void SetMetadata(int moduleId, string moduleName, string displayName, string description, string version)
     {
+        _moduleId = moduleId != 0 ? moduleId : _moduleId;
         _moduleName = moduleName ?? _moduleName;
         _displayName = displayName ?? _displayName;
         _description = description ?? _description;
         _version = version ?? _version;
     }
 
-    
+
     // ==================== CONFIGURACIÓN DE SERVICIOS ====================
-    
+
     /// <summary>
     /// Registra servicios de NEGOCIO y repositorios del módulo
     /// </summary>

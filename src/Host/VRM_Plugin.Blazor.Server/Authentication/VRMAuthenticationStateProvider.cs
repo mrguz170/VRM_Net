@@ -5,16 +5,21 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Net;
 using System.Security.Claims;
-using VRM_Plugin.Core.Abstractions.Services;
 using VRM_Plugin.Core.Abstractions.Data.DTOs;
+using VRM_Plugin.Core.Abstractions.Services;
 
 namespace VRM_Plugin.Blazor.Server.Authentication;
 
 /// <summary>
-/// Proveedor de autenticación para VRM_Plugin.
-/// Usa PersistentComponentState para mantener autenticación entre SSR e Interactive Server.
-/// </summary>
+/// Proveedor de AUTENTICACIÓN para VRM_Plugin.
+/// Gestión de identidad del usuario
+///	Login/Logout
+///	Persistencia de estado de autenticación
+///	Creación y validación de Claims
+///	Manejo de cookies de sesión
+/// /// </summary>
 public class VRMAuthenticationStateProvider : AuthenticationStateProvider, IDisposable
 {
     private readonly ILogger<VRMAuthenticationStateProvider> _logger;
@@ -255,5 +260,18 @@ public class VRMAuthenticationStateProvider : AuthenticationStateProvider, IDisp
     public void Dispose()
     {
         _subscription.Dispose();
+    }
+
+    /// <summary>
+    /// Obtiene el UserId del usuario autenticado (versión asíncrona)
+    /// </summary>
+    public async Task<string?> GetUserIdAsync()
+    {
+        var authState = await GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated ?? false)
+        {
+            return authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        }
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+Ôªøusing Microsoft.Extensions.Logging;
 using System.Reflection;
 using VRM_Plugin.Core.Abstractions;
 using VRM_Plugin.Core.Abstractions.Services;
@@ -7,8 +7,8 @@ using VRM_Plugin.Core.Abstractions.Data.DTOs;
 namespace VRM_Plugin.Blazor.Server.Services;
 
 /// <summary>
-/// Gestor de mÛdulos del sistema de plugins.
-/// Descubre, carga y administra mÛdulos din·micamente desde ensamblados.
+/// Gestor de m√≥dulos del sistema de plugins.
+/// Descubre, carga y administra m√≥dulos din√°micamente desde ensamblados.
 /// </summary>
 public class ModuleManager : IModuleManager
 {
@@ -26,20 +26,20 @@ public class ModuleManager : IModuleManager
     }
 
     /// <summary>
-    /// Descubre y carga mÛdulos desde una ruta especÌfica
-    /// Busca DLLs con patrÛn: VRM_Plugin.*.dll
+    /// Descubre y carga m√≥dulos desde una ruta espec√≠fica
+    /// Busca DLLs con patr√≥n: VRM_Plugin.*.dll
     /// </summary>
     public async Task<int> DiscoverAndLoadModulesAsync(string modulesPath)
     {
         var startTime = DateTime.UtcNow;
         _logger.LogInformation(
-            "[ModuleManager] Iniciando descubrimiento de mÛdulos en: {ModulesPath}",
+            "[ModuleManager] Iniciando descubrimiento de m√≥dulos en: {ModulesPath}",
             modulesPath);
 
         if (!Directory.Exists(modulesPath))
         {
             _logger.LogWarning(
-                "[ModuleManager] Carpeta de mÛdulos no encontrada: {ModulesPath}. Creando carpeta...",
+                "[ModuleManager] Carpeta de m√≥dulos no encontrada: {ModulesPath}. Creando carpeta...",
                 modulesPath);
             Directory.CreateDirectory(modulesPath);
             return 0;
@@ -87,7 +87,7 @@ public class ModuleManager : IModuleManager
                         }
                         
                         _logger.LogInformation(
-                            "[ModuleManager] MÛdulo descubierto: {ModuleName} (ID: {ModuleId}, VersiÛn: {Version})",
+                            "[ModuleManager] M√≥dulo descubierto: {ModuleName} (ID: {ModuleId}, Versi√≥n: {Version})",
                             module.ModuleName,
                             module.ModuleId,
                             module.Version);
@@ -103,7 +103,7 @@ public class ModuleManager : IModuleManager
                     catch (Exception ex)
                     {
                         _logger.LogError(ex,
-                            "[ModuleManager] Error al instanciar mÛdulo: {ModuleType}",
+                            "[ModuleManager] Error al instanciar m√≥dulo: {ModuleType}",
                             moduleType.FullName);
                     }
                 }
@@ -119,97 +119,186 @@ public class ModuleManager : IModuleManager
         var elapsedMs = (DateTime.UtcNow - startTime).TotalMilliseconds;
         
         _logger.LogInformation(
-            "[ModuleManager] ? Descubrimiento completado: {ModuleCount} mÛdulos cargados en {ElapsedMs}ms",
+            "[ModuleManager] ? Descubrimiento completado: {ModuleCount} m√≥dulos cargados en {ElapsedMs}ms",
             _loadedModules.Count,
             elapsedMs);
 
         return _loadedModules.Count;
     }
     
+    ///// <summary>
+    ///// Carga metadata desde BD e inyecta al m√≥dulo
+    ///// </summary>
+    //private async Task LoadModuleMetadataFromDatabase(IModule module)
+    //{
+    //    if (_metadataService == null)
+    //    {
+    //        _logger.LogWarning(
+    //            "[ModuleManager] IModuleMetadataService no est√° configurado. Usando valores por defecto para {ModuleName}",
+    //            module.ModuleName);
+    //        return;
+    //    }
+        
+    //    try
+    //    {
+    //        _logger.LogDebug(
+    //            "[ModuleManager] Cargando metadata desde BD para m√≥dulo {ModuleName} (ID: {ModuleId})",
+    //            module.ModuleName,
+    //            module.ModuleId);
+            
+    //        // 1. Obtener metadata b√°sica (ahora es ModuleMetadataDto)
+    //        var metadata = _metadataService.GetModuleMetadata(module.ModuleId);
+            
+    //        // 2. Obtener componentes
+    //        var components = _metadataService.GetComponentsByModuleId(module.ModuleId);
+            
+    //        // 3. Obtener acciones
+    //        var actions = _metadataService.GetActionsByModuleId(module.ModuleId);
+                       
+    //        // 4. Inyectar al m√≥dulo usando reflexi√≥n
+    //        var moduleType = module.GetType();
+            
+    //        // Inyectar metadata
+    //        var setMetadataMethod = moduleType.GetMethod("SetMetadata");
+    //        if (setMetadataMethod != null)
+    //        {
+    //            setMetadataMethod.Invoke(module, new object[] { metadata.ModuleName , metadata.DisplayName, metadata.Description, metadata.Version });
+                
+    //            _logger.LogDebug(
+    //                "[ModuleManager] Metadata inyectada para {ModuleName}: {DisplayName} v{Version}",
+    //                module.ModuleName,
+    //                metadata.DisplayName,
+    //                metadata.Version);
+    //        }
+            
+    //        // Inyectar componentes
+    //        var setComponentsMethod = moduleType.GetMethod("SetComponents");
+    //        if (setComponentsMethod != null)
+    //        {
+    //            setComponentsMethod.Invoke(module, new object[] { components });
+    //            _logger.LogDebug(
+    //                "[ModuleManager] {Count} componentes inyectados para {ModuleName}",
+    //                components.Count,
+    //                module.ModuleName);
+    //        }
+            
+    //        // Inyectar acciones
+    //        var setActionsMethod = moduleType.GetMethod("SetActions");
+    //        if (setActionsMethod != null)
+    //        {
+    //            setActionsMethod.Invoke(module, new object[] { actions });
+    //            _logger.LogDebug(
+    //                "[ModuleManager] {Count} acciones inyectadas para {ModuleName}",
+    //                actions.Count,
+    //                module.ModuleName);
+    //        }
+                     
+            
+    //        _logger.LogInformation(
+    //            "[ModuleManager] ? Metadata completa cargada desde BD para {ModuleName}",
+    //            module.ModuleName);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogWarning(
+    //            ex,
+    //            "[ModuleManager] Error al cargar metadata desde BD para {ModuleName}. Usando valores por defecto.",
+    //            module.ModuleName);
+    //    }
+        
+    //    await Task.CompletedTask;
+    //}
+
     /// <summary>
-    /// Carga metadata desde BD e inyecta al mÛdulo
+    /// Carga metadata desde BD e inyecta al m√≥dulo usando ModuleName como clave
     /// </summary>
     private async Task LoadModuleMetadataFromDatabase(IModule module)
     {
         if (_metadataService == null)
         {
             _logger.LogWarning(
-                "[ModuleManager] IModuleMetadataService no est· configurado. Usando valores por defecto para {ModuleName}",
+                "[ModuleManager] IModuleMetadataService no est√° configurado. Usando valores por defecto para {ModuleName}",
                 module.ModuleName);
             return;
         }
-        
+
         try
         {
             _logger.LogDebug(
-                "[ModuleManager] Cargando metadata desde BD para mÛdulo {ModuleName} (ID: {ModuleId})",
-                module.ModuleName,
-                module.ModuleId);
-            
-            // 1. Obtener metadata b·sica (ahora es ModuleMetadataDto)
-            var metadata = _metadataService.GetModuleMetadata(module.ModuleId);
-            
-            // 2. Obtener componentes
-            var components = _metadataService.GetComponentsByModuleId(module.ModuleId);
-            
-            // 3. Obtener acciones
-            var actions = _metadataService.GetActionsByModuleId(module.ModuleId);
-                       
-            // 4. Inyectar al mÛdulo usando reflexiÛn
+                "[ModuleManager] Buscando metadata en BD para m√≥dulo '{ModuleName}'",
+                module.ModuleName);
+
+            // 1. Obtener metadata por nombre (retorna ModuleDto con ModuleId)
+            var metadata = _metadataService.GetModuleMetadataByName(module.ModuleName);
+
+            if (metadata == null)
+            {
+                _logger.LogError(
+                    "[ModuleManager] ‚ùå M√≥dulo '{ModuleName}' no existe en BD. Debe registrarse primero.",
+                    module.ModuleName);
+                return;
+            }
+
+            // 2. Inyectar ModuleId desde BD al m√≥dulo
+            //module.ModuleId = metadata.ModuleId;
+
+            //_logger.LogInformation(
+            //    "[ModuleManager] ‚úÖ ModuleId={ModuleId} asignado a m√≥dulo '{ModuleName}'",
+            //    metadata.ModuleId,
+            //    module.ModuleName);
+
+            // 3. Obtener componentes usando el ModuleId de BD
+            var components = _metadataService.GetComponentsByModuleId(metadata.ModuleId);
+
+            // 4. Obtener acciones usando el ModuleId de BD
+            var actions = _metadataService.GetActionsByModuleId(metadata.ModuleId);
+
+            // 5. Inyectar metadata al m√≥dulo usando reflexi√≥n
             var moduleType = module.GetType();
-            
-            // Inyectar metadata
+
             var setMetadataMethod = moduleType.GetMethod("SetMetadata");
             if (setMetadataMethod != null)
             {
-                setMetadataMethod.Invoke(module, new object[] { metadata.ModuleName , metadata.DisplayName, metadata.Description, metadata.Version });
-                
-                _logger.LogDebug(
-                    "[ModuleManager] Metadata inyectada para {ModuleName}: {DisplayName} v{Version}",
-                    module.ModuleName,
-                    metadata.DisplayName,
-                    metadata.Version);
+                setMetadataMethod.Invoke(module, new object[] {
+                metadata.ModuleId,
+                metadata.ModuleName,
+                metadata.DisplayName,
+                metadata.Description,
+                metadata.Version
+            });
             }
-            
-            // Inyectar componentes
+
             var setComponentsMethod = moduleType.GetMethod("SetComponents");
             if (setComponentsMethod != null)
             {
                 setComponentsMethod.Invoke(module, new object[] { components });
-                _logger.LogDebug(
-                    "[ModuleManager] {Count} componentes inyectados para {ModuleName}",
-                    components.Count,
-                    module.ModuleName);
             }
-            
-            // Inyectar acciones
+
             var setActionsMethod = moduleType.GetMethod("SetActions");
             if (setActionsMethod != null)
             {
                 setActionsMethod.Invoke(module, new object[] { actions });
-                _logger.LogDebug(
-                    "[ModuleManager] {Count} acciones inyectadas para {ModuleName}",
-                    actions.Count,
-                    module.ModuleName);
             }
-                     
-            
+
             _logger.LogInformation(
-                "[ModuleManager] ? Metadata completa cargada desde BD para {ModuleName}",
-                module.ModuleName);
+                "[ModuleManager] üéâ Metadata completa cargada desde BD para '{ModuleName}' (ID={ModuleId}): {ComponentCount} componentes, {ActionCount} acciones",
+                module.ModuleName,
+                metadata.ModuleId,
+                components.Count,
+                actions.Count);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(
+            _logger.LogError(
                 ex,
-                "[ModuleManager] Error al cargar metadata desde BD para {ModuleName}. Usando valores por defecto.",
+                "[ModuleManager] Error al cargar metadata desde BD para '{ModuleName}'",
                 module.ModuleName);
         }
-        
+
         await Task.CompletedTask;
     }
 
-    // ==================== IMPLEMENTACI”N DE IModuleManager ====================
+    // ==================== IMPLEMENTACI√ìN DE IModuleManager ====================
 
     public IReadOnlyList<IModule> GetAllModules()
     {
