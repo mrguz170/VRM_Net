@@ -22,20 +22,20 @@ public class RolService : IRolService
 
     public async Task<List<RolDto>> GetAllAsync()
     {
-        if (_repo != null) return await _repo.GetSampleAsync();
+        if (_repo != null) return await _repo.Getall();
         return await Task.FromResult(new List<RolDto>());
     }
 
     public async Task<RolDto?> GetByIdAsync(int id)
     {
         var list = await GetAllAsync();
-        return list.FirstOrDefault(x => x.Id == id);
+        return list.FirstOrDefault(x => x.role_id == id);
     }
 
-    public async Task<RolDto> CreateAsync(RolDto dto)
+    public Task CreateAsync(RolDto dto)
     {
-        
-        return await Task.FromResult(dto);
+        var res = _repo.CreateNewRole(dto);
+        return res ;
     }
 
     public async Task<RolDto> UpdateAsync(RolDto dto)
