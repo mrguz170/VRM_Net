@@ -11,9 +11,9 @@ namespace VRM_Plugin.Module.PanelAdmin.Services;
 /// </summary>
 public interface IRolService
 {
-    Task<List<RolDto>> GetAllAsync();
-    Task<RolDto?> GetByIdAsync(int id);
-    public Task CreateAsync(RolDto dto);
+    Task<List<Rol>> GetAllAsync();
+    Task<Rol?> GetByIdAsync(int id);
+    Task<bool> CreateAsync(RolDto dto);
     Task<RolDto> UpdateAsync(RolDto dto);
     Task<bool> DeleteAsync(int id);
 }

@@ -1,0 +1,299 @@
+﻿@page "/paneladmin/crearrol"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject PanelAdminModule CurrentModule
+@inject IRolService RolService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@using VRM_Plugin.Core.Shared.Components.Shared
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Web
+
+<PageHeader Title="VRM" pTitle="Crear Rol"></PageHeader>
+
+<CascadingValue Value="@CurrentModule" Name="CurrentModule">
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+        <!-- Mensaje de error -->
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="space-y-2 md:col-span-2">
+                <MudAlert Severity="Severity.Error" Class="mb-4">@_errorMessage</MudAlert>
+            </div>
+        }
+
+        <!-- Nombre Rol -->
+        <div class="card space-y-4">
+            <MudText>Nombre Rol <span class="color:red; font-size:14px;">*</span></MudText>
+            <input id="rolname" 
+                   type="text" 
+                   class="form-input w-full" 
+                   placeholder="Ingrese el nombre del rol"
+                   @bind="_nombreRol"
+                   @bind:event="oninput" />
+            @if (!string.IsNullOrEmpty(_errorNombre))
+            {
+                <MudText Class="text-danger">@_errorNombre</MudText>
+            }
+
+
+        <!-- Descripción -->
+
+            <MudText>Descripción <span class="color:red; font-size:14px;">*</span></MudText>
+            <input id="desc" 
+                   type="text" 
+                   class="form-input w-full" 
+                   placeholder="Ingrese la descripción del rol"
+                   @bind="_descripcion"
+                   @bind:event="oninput" />
+            @if (!string.IsNullOrEmpty(_errorDescripcion))
+            {
+                <MudText Class="text-danger" >@_errorDescripcion</MudText>
+            }
+
+
+        <!-- Botones -->
+
+            <MudButton type="button" 
+                       Class="btn bg-purple border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]" 
+                       @onclick="Guardar">
+                Guardar
+            </MudButton>           
+            <MudButton type="button" 
+                       Class="btn bg-light border-light text-black hover:bg-light/[0.85] hover:border-light/[0.85]" 
+                       @onclick="Cancelar">
+                Cancelar
+            </MudButton>          
+        </div>
+
+    </div>
+
+    <!-- Modal de éxito -->
+    @if (_successMessage)
+    {
+        <div class="fixed inset-0 bg-black/80 z-[99999] overflow-y-auto dark:bg-dark/90" @onclick="Salir">
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="relative w-full max-w-lg p-0 overflow-hidden bg-white border rounded-lg shadow-3xl border-black/10 dark:bg-darklight dark:border-darkborder" @onclick:stopPropagation>
+                    
+                    <!-- Modal header -->
+                    <div class="flex items-center justify-between px-5 py-3 bg-white border-b border-black/10 dark:bg-darklight dark:border-darkborder">
+                        <MudText Typo="Typo.h5" Class="text-lg font-semibold text-slate-800 dark:text-slate-100">¡Éxito!</MudText>
+                        <MudButton Class="text-muted hover:text-black dark:hover:text-white" @onclick="Salir">
+                            <svg class="w-5 h-5" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z" fill="currentcolor" />
+                                <path d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z" fill="currentcolor" />
+                            </svg>
+                        </MudButton>
+                    </div>
+
+                    <!-- Modal content -->
+                    <div class="p-5 space-y-4">
+                        <div class="text-center py-4">
+                            <svg class="w-16 h-16 mx-auto mb-4"
+                                 fill="none" stroke="#22c55e" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+
+                            <MudText Typo="Typo.h6" Class="font-semibold mb-2">Rol creado exitosamente</MudText>
+                            <MudText Class="text-muted text-sm">El rol "<strong>@_rolDto.role_name</strong>" ha sido creado exitosamente en el sistema.</MudText>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-4 pt-4">
+                            <MudButton Class="transition-all duration-300 border rounded-md btn text-purple border-purple hover:bg-purple hover:text-white" @onclick="Salir">
+                                Aceptar
+                            </MudButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</CascadingValue>
+
+@code {
+    private MudForm _form;
+    private RolDto _rolDto = new();
+    private bool _formIsValid = false;
+    private string? _errorMessage;
+    private string? _errorNombre;
+    private string? _errorDescripcion;
+    private bool _successMessage = false;
+    // Propiedades para bind de inputs
+    private string _nombreRol = string.Empty;
+    private string _descripcion = string.Empty;
+    // Información del usuario autenticado
+    private string? _usuarioId;
+    private string? _usuarioNombre;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Inicializar con valores por defecto
+        _rolDto.is_active = true;
+        _rolDto.created_date = DateTime.Now;
+        // Obtener información del usuario autenticado
+        await ObtenerUsuarioActual();
+    }
+
+    /// <summary>
+    /// Valida los campos del formulario
+    /// </summary>
+    private bool ValidarFormulario()
+    {
+        _errorMessage = null;
+        _errorNombre = null;
+        _errorDescripcion = null;
+        bool esValido = true;
+
+        // Validar Nombre
+        if (string.IsNullOrWhiteSpace(_nombreRol))
+        {
+            _errorNombre = "El nombre del rol es obligatorio";
+            esValido = false;
+        }
+        else if (_nombreRol.Length < 3)
+        {
+            _errorNombre = "El nombre debe tener al menos 3 caracteres";
+            esValido = false;
+        }
+        else if (_nombreRol.Length > 100)
+        {
+            _errorNombre = "El nombre no puede exceder 100 caracteres";
+            esValido = false;
+        }
+
+        // Validar Descripción
+        if (string.IsNullOrWhiteSpace(_descripcion))
+        {
+            _errorDescripcion = "La descripción es obligatoria";
+            esValido = false;
+        }
+        else if (_descripcion.Length < 5)
+        {
+            _errorDescripcion = "La descripción debe tener al menos 5 caracteres";
+            esValido = false;
+        }
+        else if (_descripcion.Length > 255)
+        {
+            _errorDescripcion = "La descripción no puede exceder 255 caracteres";
+            esValido = false;
+        }
+
+        return esValido;
+    }
+
+    private async Task ObtenerUsuarioActual()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated ?? false)
+            {
+                // Obtener el NameIdentifier (UserId)
+                _usuarioId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;               
+
+                // También puedes obtener otros datos si los necesitas
+                var rol = user.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+
+            }
+            else
+            {
+                _errorMessage = "No hay usuario autenticado";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error al obtener información del usuario: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Guarda el nuevo rol
+    /// </summary>
+    private async Task Guardar()
+    {
+        // Validar formulario
+        if (!ValidarFormulario())
+        {
+            Snackbar.Add("Por favor, complete los campos requeridos correctamente", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            _errorMessage = null;
+
+            // Asignar valores al DTO
+            _rolDto.role_name = _nombreRol.Trim();
+            _rolDto.description = _descripcion.Trim();
+            _rolDto.create_user_id = _usuarioId ?? "SYSTEM";
+
+            // Llamar al servicio para crear el rol
+            var resultado = await RolService.CreateAsync(_rolDto);
+
+            if (resultado)
+            {
+                _successMessage = true;
+            }
+            else
+            {
+                _errorMessage = "Error al guardar el rol. Por favor, intente nuevamente.";
+                Snackbar.Add("Error al crear el rol", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error inesperado: {ex.Message}";
+            Snackbar.Add("Error inesperado al crear el rol", Severity.Error);
+        }
+    }
+
+    /// <summary>
+    /// Cierra el modal y redirige a la lista de roles
+    /// </summary>
+    private async Task Salir()  
+    {
+        await Task.Delay(500);
+        NavigationManager.NavigateTo("/paneladmin/roles");
+    }
+
+    /// <summary>
+    /// Cancela la creación y regresa a la lista de roles
+    /// </summary>
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo("/paneladmin/roles");
+    }
+}
+
+<style>
+    .form-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+
+    .form-input {
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+</style>
