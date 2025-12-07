@@ -63,7 +63,8 @@ public class UsuarioService : IUsuarioService
     {
         var dto = MapDomainToDto(usuario);
 
-        dto.created_user_id = await _authProvider.GetUserIdAsync(); 
+        dto.created_user_id = await _authProvider.GetUserIdAsync();
+        dto.Password = PasswordHasher.GenerateAndHashDefaultPassword(dto.Nombre, dto.ApellidoPaterno).HashedPassword;
 
         var userId = await _repo.CreateUserAsync(dto);
         usuario.Id = userId;

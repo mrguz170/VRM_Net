@@ -53,7 +53,7 @@ public class RolRepository : IRolRepository
         List<RolDto> roles = new List<RolDto>();
         try
         {
-            roles = _db.ExecuteStoredProcedure<RolDto>("sp_getall_roles", new Dictionary<string, object>
+            roles = _db.ExecuteStoredProcedure<RolDto>("sp_get_all_roles", new Dictionary<string, object>
             {
             });
             return Task.FromResult(roles);

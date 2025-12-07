@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace VRM_Plugin.Blazor.Server.Security;
 
@@ -84,22 +86,65 @@ public static class PasswordHasher
 
     /// <summary>
     /// Genera una contraseña temporal para nuevos usuarios
-    /// Formato: VRM + 4 dígitos aleatorios + año actual
-    /// Ejemplo: VRM@2025
+    /// Formato: Primeras 2 letras del nombre + Primeras 2 letras del apellido + Fecha actual (DDMMYYYY)
+    /// Ejemplo: Para "Gustavo Bañuelos Ochoa" genera: GUBA06122025
     /// </summary>
+    /// <param name="nombre">Nombre del usuario</param>
+    /// <param name="apellido">Apellido del usuario</param>
     /// <returns>Contraseña temporal en texto plano</returns>
-    public static string GenerateDefaultPassword()
+    public static string GenerateDefaultPassword(string nombre, string apellido)
     {
-        return $"vrm123!";
+        // Normalizar y limpiar el nombre (primeras 2 letras)
+        string nombreParte = NormalizarTexto(nombre)
+            .ToUpper()
+            .Substring(0, Math.Min(2, NormalizarTexto(nombre).Length))
+            .PadRight(2, 'X');
+
+        // Normalizar y limpiar el apellido (primeras 2 letras)
+        string apellidoParte = NormalizarTexto(apellido)
+            .ToUpper()
+            .Substring(0, Math.Min(2, NormalizarTexto(apellido).Length))
+            .PadRight(2, 'X');
+
+        // Fecha actual en formato DDMMYYYY
+        string fechaParte = DateTime.Now.ToString("ddMMyyyy");
+
+        return $"{nombreParte}{apellidoParte}{fechaParte}";
+    }
+
+    /// <summary>
+    /// Normaliza texto removiendo acentos y caracteres especiales
+    /// </summary>
+    private static string NormalizarTexto(string texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+            return "XX";
+
+        // Remover espacios y caracteres no alfabéticos
+        texto = new string(texto.Where(c => char.IsLetter(c)).ToArray());
+
+        // Remover acentos
+        string normalizado = texto.Normalize(NormalizationForm.FormD);
+        StringBuilder sb = new StringBuilder();
+
+        foreach (char c in normalizado)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+            {
+                sb.Append(c);
+            }
+        }
+
+        return sb.ToString().Normalize(NormalizationForm.FormC);
     }
 
     /// <summary>
     /// Genera contraseña temporal y devuelve junto con su hash
     /// </summary>
     /// <returns>Tupla con (contraseña en texto plano, hash)</returns>
-    public static (string PlainPassword, string HashedPassword) GenerateAndHashDefaultPassword()
+    public static (string PlainPassword, string HashedPassword) GenerateAndHashDefaultPassword(string nombre, string apellidoP)
     {
-        var plainPassword = GenerateDefaultPassword();
+        var plainPassword = GenerateDefaultPassword(nombre, apellidoP);
         var hashedPassword = HashPassword(plainPassword);
         return (plainPassword, hashedPassword);
     }
