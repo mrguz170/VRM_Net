@@ -14,7 +14,7 @@ public interface IRolRepository
     /// </summary>
     Task<List<RolDto>> GetSampleAsync();
 
-    public Task CreateNewRole(RolDto rolDto);
+    Task<bool> CreateNewRole(RolDto rolDto);
 
     Task<List<RolDto>> Getall();
 }

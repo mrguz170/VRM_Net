@@ -30,7 +30,7 @@ public class RolRepository : IRolRepository
         return Task.FromResult(_items);
     }
 
-    public Task CreateNewRole(RolDto rolDto)
+    public Task<bool> CreateNewRole(RolDto rolDto)
     {
         try
         {
@@ -55,6 +55,44 @@ public class RolRepository : IRolRepository
         {
             roles = _db.ExecuteStoredProcedure<RolDto>("sp_get_all_roles", new Dictionary<string, object>
             {
+            });
+            return Task.FromResult(roles);
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(roles);
+        }
+
+    }
+
+    public Task UpdateRole(RolDto rolDto)
+    {
+        try
+        {
+            var users = _db.ExecuteNonQuery("sp_update_role", new Dictionary<string, object>
+            {
+                { "role_name", rolDto.role_name },
+                { "description", rolDto.description },
+                { "is_active", rolDto.is_active },
+                { "update_user", rolDto.create_user_id }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating new role: {ex.Message}");
+            return Task.FromResult(false);
+        }
+        return Task.FromResult(true);
+    }
+
+    public Task<List<RolDto>> DeleteRol(RolDto rolDto)
+    {
+        List<RolDto> roles = new List<RolDto>();
+        try
+        {
+            roles = _db.ExecuteStoredProcedure<RolDto>("sp_delete_role", new Dictionary<string, object>
+            {
+                { "id_role", rolDto.role_id }
             });
             return Task.FromResult(roles);
         }

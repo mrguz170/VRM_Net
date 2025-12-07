@@ -3,89 +3,113 @@
 @rendermode InteractiveServer
 @inject PanelAdminModule CurrentModule
 @inject IRolService RolService
+@using VRM_Plugin.Core.Shared.Components.Shared
+@inject NavigationManager NavigationManager
+
+<PageHeader Title="VRM" pTitle="Roles"></PageHeader>
 
 <CascadingValue Value="@CurrentModule" Name="CurrentModule">
-    <div class="container mt-5">
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <h2>Gestión de Roles</h2>
-            </div>
-        </div>  
 
-        @if (isLoading)
-        {
-            <div class="alert alert-info">
-                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Cargando roles...
-            </div>
-        }
-        else if (roles != null && roles.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Estado</th>
-                            <th>Fecha de Creación</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var rol in roles)
-                        {
-                            <tr>
-                                <td>@rol.role_id</td>
-                                <td>
-                                    <strong>@rol.role_name</strong>
-                                </td>
-                                <td>@rol.description</td>
-                                <td>
-                                    @if (rol.is_active)
+    <div class="flex flex-col gap-4 min-h-[calc(100vh-212px)]">
+
+        <div class="grid grid-cols-1 gap-4">
+        
+        </div>
+        <div class="grid grid-cols-1 gap-4">
+            <div class="col-span-12 gap-6 p-5 bg-white border rounded 2xl:col-span-9 dark:bg-darklight dark:border-darkborder border-black/10">
+                <div class="flex items-center gap-3 mb-4">
+                    <MudText Typo="Typo.h2" Class="text-base font-semibold capitalize text-slate-800 dark:text-slate-100">Lista de Roles</MudText>
+                </div>
+
+                <div class="flex justify-start mb-4">
+
+                    <button 
+                            class="flex items-center gap-2 rounded-md
+                   bg-success border-success text-white
+                   hover:bg-success/80 hover:border-success/80
+                   px-4 py-2" @onclick="() => Crear()">
+
+                        <p class="w-8 h-8 flex items-center justify-center bg-white/20 rounded-sm">
+                            <svg viewBox="0 0 24 24" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                        </p>
+
+                        <span class="text-left"></span>
+                    </button>
+
+                </div>
+
+                @if (isLoading)
+                {
+                    <div class="flex items-center justify-center py-8">
+                        <MudProgressCircular Color="Color.Info" Indeterminate="true"></MudProgressCircular>
+                    </div>
+                }
+                else if (errorMessage != null)
+                {
+                    <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+                }
+                else if (roles != null && roles.Any())
+                {
+                    <div class="overflow-auto">
+                        <MudTable Class="min-w-[640px] text-left w-full" Items="@roles" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info">
+                            <HeaderContent>
+                                <Component />
+                                <MudTh>ID</MudTh>
+                                <MudTh>Nombre</MudTh>
+                                <MudTh>Descripción</MudTh>
+                                <MudTh>Estado</MudTh>
+                                <MudTh>Última modificación</MudTh>
+                                <MudTh>Acción</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="ID">@context.Id</MudTd>
+                                <MudTd DataLabel="Nombre">
+                                    <a href="#!" class="capitalize font-semibold">@context.Nombre</a>
+                                </MudTd>
+                                <MudTd DataLabel="Descripción">@context.Descripcion</MudTd>
+                                <MudTd DataLabel="Estado">
+                                    @if (context.Activo)
                                     {
-                                        <span class="badge bg-success">Activo</span>
+                                        <MudChip T="string" Color="Color.Success" >Activo</MudChip>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-danger">Inactivo</span>
+                                        <MudChip T="string" Color="Color.Error" >Inactivo</MudChip>
                                     }
-                                </td>
-                                <td>@rol.created_date.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary" @onclick="() => EditarRol(rol)">
-                                        Editar
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" @onclick="() => EliminarRol(rol)">
-                                        Eliminar
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                                </MudTd>
+                                <MudTd DataLabel="Fecha de Creación">@context.Fecha</MudTd>
+                                <MudTd DataLabel="Acción">
+                                    <div class="flex items-center gap-3">
+                                        <button class="transition duration-200 ease-linear text-muted hover:text-purple" @onclick="() => EditarRol(context)" title="Editar">
+                                            <i class="ri-edit-line"></i>
+                                        </button>
+                                        <button class="transition duration-200 ease-linear text-muted hover:text-danger" @onclick="() => EliminarRol(context)" title="Eliminar">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </div>
+                    <div class="flex items-center gap-3 mt-4">
+                        <MudText Class="text-muted grow">Mostrando <b>@roles.Count</b> resultados</MudText>
+                    </div>
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Warning">No hay roles disponibles en el sistema.</MudAlert>
+                }
             </div>
-        }
-        else if (!isLoading && (roles == null || !roles.Any()))
-        {
-            <div class="alert alert-warning">
-                No hay roles disponibles en el sistema.
-            </div>
-        }
-
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @errorMessage
-                <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
-            </div>
-        }
+            
+        </div>
     </div>
+
 </CascadingValue>
 
 @code {
-    private List<RolDto>? roles;
+    private List<Rol>? roles;
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -95,10 +119,8 @@
         {
             isLoading = true;
 
-            
             // Cargar todos los roles
             roles = await RolService.GetAllAsync();
-            
 
         }
         catch (Exception ex)
@@ -111,13 +133,18 @@
         }
     }
 
-    private void EditarRol(RolDto rol)
+    private void EditarRol(Rol rol)
     {
         // TODO: Implementar lógica de edición
     }
 
-    private async Task EliminarRol(RolDto rol)
+    private async Task EliminarRol(Rol rol)
     {
         // TODO: Implementar lógica de eliminación
+    }
+
+    private void Crear()
+    {
+        NavigationManager.NavigateTo("/paneladmin/crearrol");
     }
 }

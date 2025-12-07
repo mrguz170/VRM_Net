@@ -20,22 +20,40 @@ public class RolService : IRolService
         _repo = repo;
     }
 
-    public async Task<List<RolDto>> GetAllAsync()
+    public async Task<List<Rol?>> GetAllAsync()
     {
-        if (_repo != null) return await _repo.Getall();
-        return await Task.FromResult(new List<RolDto>());
+        var res = await _repo.Getall();
+        List<Rol?> roles = new List<Rol?>();
+
+        foreach (var item in res)
+        {
+            roles.Add(new Rol
+            {
+                Id = item.role_id,
+                Nombre = item.role_name,
+                Descripcion = item.description,
+                Activo = item.is_active,
+                Fecha = item.updated_date != default(DateTime) ? item.updated_date : item.created_date,
+                UserCreated = item.user_name
+            });
+        }
+
+        if (roles.Count>0) 
+            return roles;
+
+        return await Task.FromResult(roles);
     }
 
-    public async Task<RolDto?> GetByIdAsync(int id)
+    public async Task<Rol?> GetByIdAsync(int id)
     {
         var list = await GetAllAsync();
-        return list.FirstOrDefault(x => x.role_id == id);
+        return list.FirstOrDefault(x => x.Id == id);
     }
 
-    public Task CreateAsync(RolDto dto)
+    public Task<bool> CreateAsync(RolDto dto)
     {
-        var res = _repo.CreateNewRole(dto);
-        return res ;
+        var item = _repo.CreateNewRole(dto);
+        return item;
     }
 
     public async Task<RolDto> UpdateAsync(RolDto dto)
