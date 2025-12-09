@@ -34,8 +34,6 @@
                                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                             </svg>
                         </p>
-
-                        <span class="text-left"></span>
                     </button>
 
                 </div>
@@ -66,17 +64,21 @@
                             <RowTemplate>
                                 <MudTd DataLabel="ID">@context.Id</MudTd>
                                 <MudTd DataLabel="Nombre">
-                                    <a href="#!" class="capitalize font-semibold">@context.Nombre</a>
+                                    <a class="capitalize font-semibold">@context.Nombre</a>
                                 </MudTd>
                                 <MudTd DataLabel="Descripción">@context.Descripcion</MudTd>
                                 <MudTd DataLabel="Estado">
                                     @if (context.Activo)
                                     {
-                                        <MudChip T="string" Color="Color.Success" >Activo</MudChip>
+                                        <div class="bg-success text-white inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5">
+                                            Activo
+                                        </div>
                                     }
                                     else
                                     {
-                                        <MudChip T="string" Color="Color.Error" >Inactivo</MudChip>
+                                        <div class="bg-danger/20 text-danger dark:bg-darkmuted inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5">
+                                            Inactivo
+                                        </div>
                                     }
                                 </MudTd>
                                 <MudTd DataLabel="Fecha de Creación">@context.Fecha</MudTd>
@@ -84,9 +86,6 @@
                                     <div class="flex items-center gap-3">
                                         <button class="transition duration-200 ease-linear text-muted hover:text-purple" @onclick="() => EditarRol(context)" title="Editar">
                                             <i class="ri-edit-line"></i>
-                                        </button>
-                                        <button class="transition duration-200 ease-linear text-muted hover:text-danger" @onclick="() => EliminarRol(context)" title="Eliminar">
-                                            <i class="ri-delete-bin-line"></i>
                                         </button>
                                     </div>
                                 </MudTd>
@@ -112,6 +111,7 @@
     private List<Rol>? roles;
     private bool isLoading = true;
     private string? errorMessage;
+    private int rol_selected;
 
     protected override async Task OnInitializedAsync()
     {
@@ -136,11 +136,6 @@
     private void EditarRol(Rol rol)
     {
         // TODO: Implementar lógica de edición
-    }
-
-    private async Task EliminarRol(Rol rol)
-    {
-        // TODO: Implementar lógica de eliminación
     }
 
     private void Crear()

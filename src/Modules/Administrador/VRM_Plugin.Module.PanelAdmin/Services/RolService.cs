@@ -62,9 +62,4 @@ public class RolService : IRolService
         return await Task.FromResult(dto);
     }
 
-    public async Task<bool> DeleteAsync(int id)
-    {
-        
-        return await Task.FromResult(false);
-    }
 }

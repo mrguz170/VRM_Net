@@ -17,4 +17,5 @@ public interface IRolRepository
     Task<bool> CreateNewRole(RolDto rolDto);
 
     Task<List<RolDto>> Getall();
+    //Task<bool> UpdateRole(RolDto rolDto);
 }

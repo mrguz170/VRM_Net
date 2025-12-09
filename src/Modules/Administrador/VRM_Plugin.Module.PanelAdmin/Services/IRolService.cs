@@ -15,5 +15,4 @@ public interface IRolService
     Task<Rol?> GetByIdAsync(int id);
     Task<bool> CreateAsync(RolDto dto);
     Task<RolDto> UpdateAsync(RolDto dto);
-    Task<bool> DeleteAsync(int id);
 }
