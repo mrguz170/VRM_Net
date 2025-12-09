@@ -1,5 +1,7 @@
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
+@inject AuthenticationStateProvider AuthStateProvider
+
 <!-- Start Topbar -->
 <div class="bg-white dark:bg-darklight dark:border-darkborder flex gap-4 lg:z-10 items-center justify-between px-4 h-[60px] border-b border-black/10 detached-topbar relative">
     <div class="flex items-center flex-1 gap-2 sm:gap-4">
@@ -224,7 +226,8 @@
                     }" x-on:keydown.escape.prevent.stop="close($refs.button)" x-on:focusin.window="!$refs.panel.contains($event.target) && close()" x-id="['dropdown-button']" class="relative profile h-[60px] flex items-center justify-center">
             <button x-ref="button" x-on:click="toggle()" :aria-expanded="open" :aria-controls="$id('dropdown-button')" type="button" class="flex items-center gap-1.5 xl:gap-0 dark:text-white/80">
                 <img class="rounded-full h-7 w-7 ltr:xl:mr-2 rtl:xl:ml-2" src="./assets/images/user.png" alt="Header Avatar" />
-                <span class="hidden fw-medium xl:block dark:text-white/80">Stevens L.</span>
+                @* <span class="hidden fw-medium xl:block dark:text-white/80">Stevens L.</span> *@
+                <span class="hidden fw-medium xl:block dark:text-white/80">@nombreUsuario</span>
                 <svg :class="{ 'transform rotate-180': open }" class="text-gray-400 transition-transform duration-300 size-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
@@ -273,16 +276,41 @@
     private bool isProfileOpen = false;
     private string Mode { get; set; } = "light";
     private string Direction { get; set; } = "ltr";
+    private string nombreUsuario = "Usuario";
 
     [Inject]
     private NavigationManager NavigationManager { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await CargarNombreUsuario();
+
         // Add event listener for clicks outside dropdowns
         JsRuntime.InvokeVoidAsync("addClickListener", DotNetObjectReference.Create(this));
         // Subscribe to location changed event
         NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private async Task CargarNombreUsuario()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user?.Identity?.IsAuthenticated ?? false)
+            {
+                // Prioridad: NombreCompleto > Username > Name
+                nombreUsuario = user.FindFirst("Name")?.Value
+                    ?? user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+                    ?? "Usuario";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar nombre de usuario: {ex.Message}");
+            nombreUsuario = "Usuario";
+        }
     }
 
     private async Task ToggleDirection()

@@ -14,9 +14,11 @@ public class Usuario
     public string Email { get; set; } = string.Empty;
     
     public string Role { get; set; } = string.Empty;
+    public string RoleId { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     
     public DateTime FechaModificacion { get; set; }
     public string created_user_id { get; set; } = string.Empty;
     
+    public bool RegenerarPassword { get; set; } = false;
 }

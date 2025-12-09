@@ -1,14 +1,15 @@
-ï»¿@page "/paneladmin/nuevousuario"
+@page "/paneladmin/usuario/{UsuarioId?}"
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject IUsuarioService UsuarioService
+@inject IRolService RolService
 @inject PanelAdminModule CurrentModule
 @inject NavigationManager Navigation
 @using System.ComponentModel.DataAnnotations
 
 <CascadingValue Value="@CurrentModule" Name="CurrentModule">
 
-    <PageHeader Title="@CurrentModule.DisplayName" pTitle="Crear nuevo usuario"></PageHeader>
+    <PageHeader Title="@CurrentModule.DisplayName" pTitle="@tituloAccion"></PageHeader>
 
 
     <div class="grid grid-cols-12 gap-4">
@@ -17,7 +18,7 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-1">
                     <div class="gap-6 pt-4 px-5 bg-white border rounded dark:bg-darklight dark:border-darkborder border-black/10">
                         <div class="overflow-auto mt-4 px-4 pb-4">
-                            <EditForm Model="@nuevoUsuario" OnValidSubmit="@CrearUsuario">
+                            <EditForm Model="@nuevoUsuario" OnValidSubmit="@GuardarUsuario">
                                 <DataAnnotationsValidator />
 
                                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -69,22 +70,56 @@
                                         <ValidationMessage For="@(() => nuevoUsuario.RolId)" class="text-danger text-sm" />
                                     </div>
 
-                                    @* <div class="card">
-                                        <div class="space-y-4">
-                                            <div class="flex items-center justify-between gap-4">
-                                                <MudText Class="text-lg font-semibold">Estatus</MudText>
-                                                <div class="inline-block togglebutton">
-                                                    <label for="toggleEstatus" class="flex items-center cursor-pointer">
-                                                        <div class="relative">
-                                                            <InputCheckbox @bind-Value="nuevoUsuario.Activo" id="toggleEstatus" class="sr-only" />
-                                                            <div class="block band bg-black/10 w-[54px] h-[29px] rounded-full dark:bg-dark"></div>
-                                                            <div class="dot absolute left-[3px] top-[2px] bg-white w-6 h-6 rounded-full transition"></div>
-                                                        </div>
-                                                    </label>
+                                    @if (esEdicion)
+                                    {
+                                        <div class="card">
+                                            <div class="space-y-4">
+                                                <div class="flex items-center justify-between gap-4">
+                                                    <MudText Class="text-lg font-semibold">Estatus</MudText>
+                                                    <div class="inline-block togglebutton">
+                                                        <label for="toggleEstatus" class="flex items-center cursor-pointer">
+                                                            <div class="relative">
+                                                                <InputCheckbox @bind-Value="nuevoUsuario.Activo" id="toggleEstatus" class="sr-only" />
+                                                                <div class="block band bg-black/10 w-[54px] h-[29px] rounded-full dark:bg-dark"></div>
+                                                                <div class="dot absolute left-[3px] top-[2px] bg-white w-6 h-6 rounded-full transition"></div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div> *@
+
+                                        <div class="card">
+                                            <div class="space-y-4">
+                                                <div class="flex items-center justify-between gap-4">
+                                                    <MudText Class="text-lg font-semibold">Restablecer contraseña</MudText>
+                                                    <div class="inline-block togglebutton">
+                                                        <label for="toggleResetPassword" class="flex items-center cursor-pointer">
+                                                            <div class="relative">
+                                                                <InputCheckbox @bind-Value="nuevoUsuario.RestablecerPassword" id="toggleResetPassword" class="sr-only" />
+                                                                <div class="block band bg-black/10 w-[54px] h-[29px] rounded-full dark:bg-dark"></div>
+                                                                <div class="dot absolute left-[3px] top-[2px] bg-white w-6 h-6 rounded-full transition"></div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                @if (nuevoUsuario.RestablecerPassword)
+                                                {
+                                                    <div class="p-3 bg-warning/10 border border-warning/20 rounded">
+                                                        <MudText Class="text-sm text-warning">
+                                                            <i class="ri-alert-line"></i>
+                                                            Se generará una nueva contraseña temporal al actualizar el usuario.
+                                                        </MudText>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="space-y-4">
+                                        </div>
+                                    }
 
                                     <div class="space-y-4">
                                     </div>
@@ -113,7 +148,7 @@
                                                     </div>
                                                     <div class="p-5 space-y-4">
                                                         <div class="text-black dark:text-muted">
-                                                            <MudText Class="text-muted">Si continÃºas, se perderÃ¡n los ajustes realizados</MudText>
+                                                            <MudText Class="text-muted">Si continúas, se perderán los ajustes realizados</MudText>
                                                         </div>
                                                         <div class="flex items-center justify-end gap-4">
                                                             <MudButton Class="transition-all duration-300 border rounded-md btn text-danger border-danger hover:bg-danger hover:text-white" OnClick="CloseModal">Cancelar</MudButton>
@@ -125,14 +160,14 @@
                                         </div>
                                     }
 
-                                    @* Modal de Ã©xito *@
+                                    @* Modal de éxito *@
                                     @if (mostrarModalExito)
                                     {
                                         <div class="fixed inset-0 bg-black/80 z-[99999] overflow-y-auto dark:bg-dark/90">
                                             <div class="flex items-center justify-center min-h-screen px-4">
                                                 <div class="relative w-full max-w-lg p-0 my-8 overflow-hidden bg-white border rounded-lg border-black/10 dark:bg-darklight dark:border-darkborder">
                                                     <div class="flex items-center justify-between px-5 py-3 bg-success/10 border-b border-success/20">
-                                                        <MudText Typo="Typo.h5" Class="text-lg font-semibold text-success">Usuario creado con Ã©xito</MudText>
+                                                        <MudText Typo="Typo.h5" Class="text-lg font-semibold text-success">@mensajeExito</MudText>
                                                         <div class="flex items-center justify-center w-10 h-10 rounded-full bg-success text-white">
                                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -145,10 +180,10 @@
                                                                 <MudText Class="text-muted font-semibold">Nombre de usuario:</MudText>
                                                                 <MudText Class="text-lg font-bold text-purple">@usuarioCreado?.Username</MudText>
                                                             </div>
-                                                            <div class="flex items-center gap-3">
+                                                            @* <div class="flex items-center gap-3">
                                                                 <MudText Class="text-muted font-semibold">ID de usuario:</MudText>
                                                                 <MudText Class="text-lg font-bold text-info">@usuarioCreado?.Id</MudText>
-                                                            </div>
+                                                            </div> *@
                                                         </div>
                                                         <div class="flex items-center justify-end gap-4 pt-4 border-t border-black/10 dark:border-darkborder">
                                                             <MudButton Class="transition-all duration-300 border rounded-md btn bg-success text-white border-success hover:bg-success/[0.85]" OnClick="CerrarModalExito">Aceptar</MudButton>
@@ -159,7 +194,7 @@
                                         </div>
                                     }
 
-                                    <button type="submit" Class="btn bg-purple border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]">Crear</button>
+                                    <button type="submit" Class="btn bg-purple border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]">@textoBotonSubmit</button>
                                 </div>
                             </EditForm>
                         </div>
@@ -172,18 +207,26 @@
 </CascadingValue>
 
 @code {
+    [Parameter]
+    public string? UsuarioId { get; set; }
+
     private NuevoUsuarioModel nuevoUsuario = new();
     private List<RolModel> roles = new();
     private bool open = false;
     private bool mostrarModalExito = false;
     private Usuario? usuarioCreado = null;
 
+    private bool esEdicion => !string.IsNullOrWhiteSpace(UsuarioId);
+    private string tituloAccion => esEdicion ? "Actualizar usuario" : "Crear nuevo usuario";
+    private string textoBotonSubmit => esEdicion ? "Actualizar" : "Crear";
+    private string mensajeExito => esEdicion ? "Usuario actualizado con éxito" : "Usuario creado con éxito";
+
     private void ToggleModal()
     {
         // Verificar si hay al menos un campo con contenido
         if (TieneAlgunCampoConDatos())
         {
-            // Si hay datos, mostrar el modal de confirmaciÃ³n
+            // Si hay datos, mostrar el modal de confirmación
             open = !open;
         }
         else
@@ -221,15 +264,68 @@
         // roles = await UsuarioService.ObtenerRolesAsync();
 
         // Datos de ejemplo (reemplazar con llamada real al servicio)
-        roles = new List<RolModel>
+        // roles = new List<RolModel>
+        // {
+        //     new RolModel { Id = "1", Nombre = "Administrador" },
+        //     new RolModel { Id = "2", Nombre = "Usuario" },
+        //     new RolModel { Id = "3", Nombre = "Invitado" }
+        // };
+
+        var rolesFromDb = await RolService.GetAllAsync();
+        roles = rolesFromDb
+            .Where(r => r.Activo) // Filtrar solo roles activos
+            .Select(r => new RolModel
+            {
+                Id = r.Id.ToString(),
+                Nombre = r.Nombre
+            })
+            .ToList();
+
+        // Si estamos en modo edición, cargar los datos del usuario
+        if (esEdicion)
         {
-            new RolModel { Id = "1", Nombre = "Administrador" },
-            new RolModel { Id = "2", Nombre = "Usuario" },
-            new RolModel { Id = "3", Nombre = "Invitado" }
-        };
+            await CargarDatosUsuario();
+        }
     }
 
-    private async Task CrearUsuario()
+    private async Task CargarDatosUsuario()
+    {
+        // Validar que el UsuarioId no esté vacío
+        if (string.IsNullOrWhiteSpace(UsuarioId))
+        {
+            // ID vacío, redirigir
+            Navigation.NavigateTo("/paneladmin/usuarios");
+            return;
+        }
+
+        // Intentar cargar el usuario directamente con el ID (UUID/string)
+        var usuario = await UsuarioService.GetUserByIdAsync(UsuarioId);
+
+        if (usuario != null)
+        {
+            // Separar el email del dominio @vrm.com
+            var emailParts = usuario.Email.Split('@');
+            var emailSinDominio = emailParts.Length > 0 ? emailParts[0] : usuario.Email;
+
+            nuevoUsuario = new NuevoUsuarioModel
+            {
+                Nombre = usuario.Nombre,
+                ApellidoPaterno = usuario.ApellidoPaterno,
+                ApellidoMaterno = usuario.ApellidoMaterno,
+                Username = usuario.Username,
+                Email = emailSinDominio,
+                RolId = usuario.RoleId,
+                Activo = usuario.Status == "Activo"
+            };
+        }
+        else
+        {
+            // Usuario no encontrado, redirigir
+            Navigation.NavigateTo("/paneladmin/usuarios");
+        }
+    }
+
+    private async Task GuardarUsuario()
     {
         var usuario = new Usuario
         {
@@ -238,11 +334,30 @@
             ApellidoMaterno = nuevoUsuario.ApellidoMaterno,
             Username = nuevoUsuario.Username,
             Email = $"{nuevoUsuario.Email}@vrm.com",
-            Role = nuevoUsuario.RolId,
+            RoleId = nuevoUsuario.RolId,
             Status = nuevoUsuario.Activo ? "Activo" : "Inactivo"
         };
 
-        usuarioCreado = await UsuarioService.CreateUserAsync(usuario);
+        if (esEdicion)
+        {
+            // Modo edición: actualizar usuario existente
+            usuario.Id = UsuarioId!;
+            
+            // Pasar información de restablecimiento de contraseña
+            if (nuevoUsuario.RestablecerPassword)
+            {
+                // Se indicará al servicio que debe regenerar la contraseña
+                usuario.RegenerarPassword = true;
+            }
+            
+            usuarioCreado = await UsuarioService.UpdateUserAsync(usuario);
+        }
+        else
+        {
+            // Modo creación: crear nuevo usuario
+            usuarioCreado = await UsuarioService.CreateUserAsync(usuario);
+        }
+
         mostrarModalExito = true;
     }
 
@@ -254,13 +369,21 @@
     private void OnNombreChanged(string value)
     {
         nuevoUsuario.Nombre = value;
-        ActualizarCamposAutomaticos();
+        // Solo actualizar campos automáticamente en modo creación
+        if (!esEdicion)
+        {
+            ActualizarCamposAutomaticos();
+        }
     }
 
     private void OnApellidoChanged(string value)
     {
         nuevoUsuario.ApellidoPaterno = value;
-        ActualizarCamposAutomaticos();
+        // Solo actualizar campos automáticamente en modo creación
+        if (!esEdicion)
+        {
+            ActualizarCamposAutomaticos();
+        }
     }
 
     private void ActualizarCamposAutomaticos()
@@ -296,18 +419,20 @@
 
         [Required(ErrorMessage = "El username es obligatorio")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "El username debe tener entre 3 y 50 caracteres")]
-        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "El username solo puede contener letras, nÃºmeros y guiones bajos")]
+        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "El username solo puede contener letras, números y guiones bajos")]
         public string Username { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El email es obligatorio")]
         [StringLength(50, ErrorMessage = "El email no puede exceder 50 caracteres")]
-        [RegularExpression(@"^[a-zA-Z0-9._-]+$", ErrorMessage = "El email contiene caracteres no vÃ¡lidos")]
+        [RegularExpression(@"^[a-zA-Z0-9._-]+$", ErrorMessage = "El email contiene caracteres no válidos")]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Debe seleccionar un rol")]
         public string RolId { get; set; } = string.Empty;
 
         public bool Activo { get; set; } = true;
+        
+        public bool RestablecerPassword { get; set; } = false;
     }
 
     public class RolModel

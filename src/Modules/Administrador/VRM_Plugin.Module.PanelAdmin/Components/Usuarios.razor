@@ -1,8 +1,10 @@
 ﻿@page "/paneladmin/usuarios"
+@inject IJSRuntime JsRuntime
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject PanelAdminModule CurrentModule
 @inject IUsuarioService UsuarioService
+@inject NavigationManager Navigation
 
 
 <CascadingValue Value="@CurrentModule" Name="CurrentModule">
@@ -14,65 +16,28 @@
         <div class="grid grid-cols-1 gap-4">
 
             <div class="col-span-12 gap-6 p-5 bg-white border rounded 2xl:col-span-9 dark:bg-darklight dark:border-darkborder border-black/10">
-                
-               @*  <div class="flex items-center justify gap-3 mb-4">
-                    <div class="flex">
-                        <MudButton type="button" Class="btn flex items-center gap-2 bg-purple h-10 border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]">
-                            <span class="mud-icon-root mud-icon-size-medium ri-user-add-line" aria-hidden="true" role="img"></span>
-                            Crear
-                        </MudButton>
-                    </div>
-                    
-                     <div class="flex">
-                        <MudButton type="button" Class="btn flex items-center gap-1.5 bg-success border-success text-white hover:bg-success/[0.85] hover:border-success/[0.85]">
-                                <span class="mud-icon-root mud-icon-size-medium ri-user-add-line" aria-hidden="true" role="img"></span>
-                            Nuevo
-                        </MudButton>
-                    </div>  
-                     <div class="flex">
-                        <MudButton type="button" Class="btn flex items-center gap-1.5 bg-info border-info text-white hover:bg-info/[0.85] hover:border-info/[0.85]">
-                            <span class="mud-icon-root mud-icon-size-medium ri-user-add-line" aria-hidden="true" role="img"></span>
-                            Nuevo
-                        </MudButton>
-                    </div>
-                </div> *@
-
 
                 <div class="flex justify-between gap-3 mb-4">
-                    <MudButton OnClick="NewUser" type="button" Class="btn flex items-center gap-1.5 bg-info border-info text-white hover:bg-info/[0.85] hover:border-info/[0.85]">
+                    <MudButton OnClick="NewUser" type="button" Class="btn flex items-center gap-1.5 bg-success border-success text-white hover:bg-success/[0.85] hover:border-success/[0.85]">
                         <span class="mud-icon-root mud-icon-size-medium ri-user-add-line text-lg" aria-hidden="true" role="img"></span>
-                        @* <MudIcon class="mud-icon-root mud-icon-size-large ri-user-add-line" Size="Size.Medium" aria-hidden=" true" role="img" /> *@
-                        @* <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Small" /> *@
-                        
                     </MudButton>
-
-                    @* <MudButton OnClick="NewUser" type="button" Class="btn flex items-center gap-1.5 bg-info border-info text-white hover:bg-info/[0.85] hover:border-info/[0.85]">
-                        <span class="ri-user-add-line mud-icon-size-medium "></span>
-                        Nuevo Usuario
-                    </MudButton> *@
-
-                    @* <MudButton OnClick="NewUser" Color="Color.Info" Variant="Variant.Filled">
-                        <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Small" />
-                        Nuevo Usuario
-                    </MudButton> *@
+                    @* <MudButton type="button" data-tippy-content="Tooltip on right" data-tippy-arrow="true" data-tippy-placement="right" Class="transition-all duration-300 border rounded-md tippy-tooltip btn text-purple border-purple hover:bg-purple hover:text-white">Tooltip on right</MudButton> *@
 
                     <div class="space-y-2">
                     </div>
 
                     <div class="flex">
-                        <input style="width:35vh;" class=" ltr:rounded-r-none rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 h-10 form-input" placeholder="Buscar..." type="text" />
-                        @* <input class="w-[30vh] sm:w-[35vh] md:w-[40vh] ltr:rounded-r-none rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 h-10 form-input" placeholder="Buscar..." type="text" /> *@
-                        @* <input class="w-48 sm:w-56 md:w-64 ltr:rounded-r-none rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 h-10 form-input" placeholder="Buscar..." type="text" /> *@
-                        
-                        <MudButton type="button" Class="btn flex items-center gap-2 bg-purple h-10 border-purple ltr:rounded-l-none rtl:rounded-r-none ltr:rounded-r rtl:rounded-l text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]">
+                        <input @bind="terminoBusqueda" @bind:event="oninput" @onkeypress="HandleKeyPress" style="width:35vh;" class=" ltr:rounded-r-none rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 h-10 form-input" placeholder="Buscar..." type="text" />
+
+                        <MudButton OnClick="BuscarUsuarios" type="button" Class="btn flex items-center gap-2 bg-purple h-10 border-purple ltr:rounded-l-none rtl:rounded-r-none ltr:rounded-r rtl:rounded-l text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]">
                             <span class="mud-icon-root mud-icon-size-medium ri-search-2-line" aria-hidden="true" role="img"></span>
-                            Buscar
+                            @* Buscar *@
                         </MudButton>
                     </div>
                 </div>
 
                 <div class="overflow-auto">
-                    <MudTable Class="min-w-[640px] text-left w-full" Items="@products" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info">
+                    <MudTable Class="min-w-[640px] text-left w-full" Items="@usuariosPaginados" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info">
                         <HeaderContent>
                             <MudTh>Usuario</MudTh>
                             <MudTh>Nombre Completo</MudTh>
@@ -88,26 +53,23 @@
                             </MudTd>
                             <MudTd DataLabel="Nombre Completo">@context.NombreCompleto</MudTd>
                             <MudTd DataLabel="Email">@context.Email</MudTd>
-                            
+
                             <MudTd DataLabel="Role">
                                 <div class="inline-flex items-center text-xs justify-center px-1.5 py-0.5 text-info">
-                                    @* <span class="h-1.5 w-1.5 rounded-full bg-current ltr:mr-1.5 rtl:ml-1.5"></span> *@
                                     <span>@context.Role</span>
-                                </div>                               
+                                </div>
                             </MudTd>
 
                             <MudTd DataLabel="Estado">
                                 @if (context.Status == "Activo")
                                 {
                                     <div class="bg-success text-white inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5">
-                                    @* <div class="bg-success/20 text-success inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5"> *@
                                         @context.Status
                                     </div>
                                 }
                                 else
                                 {
-@*                                     <div class="bg-muted text-white dark:bg-darkmuted inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5">
- *@                                    <div class="bg-danger/20 text-danger dark:bg-darkmuted inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5">
+                                    <div class="bg-danger/20 text-danger dark:bg-darkmuted inline-flex items-center rounded-full text-xs justify-center px-1.5 py-0.5">
                                         @context.Status
                                     </div>
                                 }
@@ -115,32 +77,83 @@
 
                             <MudTd DataLabel="Acción">
                                 <div class="flex justify-center gap-3">
-                                    <a href="#!" class="transition duration-200 ease-linear text-muted hover:text-purple"><i class="ri-edit-line"></i></a>
-                                    @* <a href="#!" class="transition duration-200 ease-linear text-muted hover:text-danger"><i class="ri-delete-bin-line"></i></a> *@
+                                    <a @onclick="() => EditUser(context.Id)" @onclick:preventDefault class="cursor-pointer transition duration-200 ease-linear text-muted hover:text-purple"><i class="ri-edit-line"></i></a>
                                 </div>
                             </MudTd>
 
                             <MudTd DataLabel="Role">
-                                @* <div class="inline-flex items-center text-xs justify-center px-1.5 py-0.5 text-info">
-                                </div> *@
-                                    <span>
-                                        @context.FechaModificacion
-                                    </span>
+                                <span>
+                                    @context.FechaModificacion
+                                </span>
                             </MudTd>
                         </RowTemplate>
                     </MudTable>
                 </div>
 
+                @if (!usuariosFiltrados.Any())
+                {
+                    <div class="flex flex-col items-center justify-center py-8 text-muted">
+                        <span class="ri-search-line text-4xl mb-2"></span>
+                        <MudText Class="text-lg">No se encontraron resultados para "@terminoBusqueda"</MudText>
+                    </div>
+                }
+
                 <div class="flex items-center gap-3 mt-4">
-                    <MudText Class="text-muted grow">Showing <b>05</b> of <b>07</b> Results</MudText>
+                    <MudText Class="text-muted grow">Mostrando <b>@usuariosPaginados.Count</b> de <b>@usuariosFiltrados.Count</b> Resultados</MudText>
                     <ul class="inline-flex items-center gap-1 shrink-0">
-                        <li><button type="button" class="flex justify-center px-2.5 py-1 rounded transition text-muted hover:text-purple border border-black/10 hover:border-purple dark:border-darkborder dark:text-darkmuted dark:hover:text-purple dark:hover:border-purple">First</button></li>
-                        <li><button type="button" class="flex justify-center px-2.5 py-1 rounded transition text-muted hover:text-purple border border-black/10 hover:border-purple dark:border-darkborder dark:text-darkmuted dark:hover:text-purple dark:hover:border-purple">Prev</button></li>
-                        <li><button type="button" class="flex justify-center px-2.5 py-1 rounded transition text-purple border border-purple">1</button></li>
-                        <li><button type="button" class="flex justify-center px-2.5 py-1 rounded transition text-muted hover:text-purple border border-black/10 hover:border-purple dark:border-darkborder dark:text-darkmuted dark:hover:text-purple dark:hover:border-purple">2</button></li>
-                        <li><button type="button" class="flex justify-center px-2.5 py-1 rounded transition text-muted hover:text-purple border border-black/10 hover:border-purple dark:border-darkborder dark:text-darkmuted dark:hover:text-purple dark:hover:border-purple">3</button></li>
-                        <li><button type="button" class="flex justify-center px-2.5 py-1 rounded transition text-muted hover:text-purple border border-black/10 hover:border-purple dark:border-darkborder dark:text-darkmuted dark:hover:text-purple dark:hover:border-purple">Next</button></li>
-                        <li><button type="button" class="flex justify-center px-2.5 py-1 rounded transition text-muted hover:text-purple border border-black/10 hover:border-purple dark:border-darkborder dark:text-darkmuted dark:hover:text-purple dark:hover:border-purple">Last</button></li>
+                        <li>
+                            <button type="button" 
+                                    @onclick="IrAPrimeraPagina" 
+                                    disabled="@(paginaActual == 1)"
+                                    class="flex justify-center px-2 py-2 transition border rounded @(paginaActual == 1 ? "text-purple/50 cursor-not-allowed border-purple/5 bg-purple/5" : "text-purple hover:text-white hover:bg-purple border-purple/5 hover:border-purple bg-purple/10")">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 mx-auto rtl:rotate-180">
+                                    <path d="M4.83594 12.0001L11.043 18.2072L12.4573 16.793L7.66436 12.0001L12.4573 7.20718L11.043 5.79297L4.83594 12.0001ZM10.4858 12.0001L16.6929 18.2072L18.1072 16.793L13.3143 12.0001L18.1072 7.20718L16.6929 5.79297L10.4858 12.0001Z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" 
+                                    @onclick="IrAPaginaAnterior" 
+                                    disabled="@(paginaActual == 1)"
+                                    class="flex justify-center px-2 py-2 transition border rounded @(paginaActual == 1 ? "text-purple/50 cursor-not-allowed border-purple/5 bg-purple/5" : "text-purple hover:text-white hover:bg-purple border-purple/5 hover:border-purple bg-purple/10")">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 mx-auto rtl:rotate-180">
+                                    <path d="M10.8284 12.0007L15.7782 16.9504L14.364 18.3646L8 12.0007L14.364 5.63672L15.7782 7.05093L10.8284 12.0007Z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </li>
+                        
+                        @foreach (var numeroPagina in ObtenerPaginasVisibles())
+                        {
+                            var pagina = numeroPagina;
+                            <li>
+                                <button type="button" 
+                                        @onclick="() => IrAPagina(pagina)" 
+                                        class="flex justify-center px-3.5 py-2 rounded transition @(paginaActual == pagina ? "text-white bg-purple border border-purple" : "text-purple hover:text-white hover:bg-purple border border-purple/5 hover:border-purple bg-purple/10")">
+                                    @pagina
+                                </button>
+                            </li>
+                        }
+                        
+                        <li>
+                            <button type="button" 
+                                    @onclick="IrAPaginaSiguiente" 
+                                    disabled="@(paginaActual == totalPaginas)"
+                                    class="flex justify-center px-2 py-2 transition border rounded @(paginaActual == totalPaginas ? "text-purple/50 cursor-not-allowed border-purple/5 bg-purple/5" : "text-purple hover:text-white hover:bg-purple border-purple/5 hover:border-purple bg-purple/10")">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 mx-auto rtl:rotate-180">
+                                    <path d="M13.1714 12.0007L8.22168 7.05093L9.63589 5.63672L15.9999 12.0007L9.63589 18.3646L8.22168 16.9504L13.1714 12.0007Z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" 
+                                    @onclick="IrAUltimaPagina" 
+                                    disabled="@(paginaActual == totalPaginas)"
+                                    class="flex justify-center px-2 py-2 transition border rounded @(paginaActual == totalPaginas ? "text-purple/50 cursor-not-allowed border-purple/5 bg-purple/5" : "text-purple hover:text-white hover:bg-purple border-purple/5 hover:border-purple bg-purple/10")">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 mx-auto rtl:rotate-180">
+                                    <path d="M19.1643 12.0001L12.9572 5.79297L11.543 7.20718L16.3359 12.0001L11.543 16.793L12.9572 18.2072L19.1643 12.0001ZM13.5144 12.0001L7.30728 5.79297L5.89307 7.20718L10.686 12.0001L5.89307 16.793L7.30728 18.2072L13.5144 12.0001Z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -150,39 +163,162 @@
 </CascadingValue>
 
 @code {
+    private List<Usuario> usuarios = new List<Usuario>();
+    private List<Usuario> usuariosFiltrados = new List<Usuario>();
+    private List<Usuario> usuariosPaginados = new List<Usuario>();
+    
+    private string _terminoBusqueda = string.Empty;
 
-    // protected override async Task OnInitializedAsync()
+    // private IJSObjectReference? _module;
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
     // {
-    //     await Task.CompletedTask;
+    //     if (firstRender)
+    //     {
+    //         // Load Dashboard JavaScript module
+    //         _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "wwwroot/assets/js/tooltips.init.js");
+
+    //         // Call JavaScript function to initialize dashboard
+    //         //await JsRuntime.InvokeVoidAsync("initChart");
+    //     }
     // }
 
-    // private List<Usuario> products = new List<Usuario>
-    // {
-    //     new Usuario { Id = 1, Username = "jgarcia", NombreCompleto = "Juan García López", Email = "jgarcia@example.com", Descripcion = "Administrador del sistema", Active = 1, Role = "Admin", Status = "Activo" },
-    //     new Usuario { Id = 3, Username = "pmartinez", NombreCompleto = "Pedro Martínez Sánchez", Email = "pmartinez@example.com", Descripcion = "Supervisor de ventas", Active = 1, Role = "Supervisor", Status = "Activo" },
-    //     new Usuario { Id = 4, Username = "alopez", NombreCompleto = "Ana López Fernández", Email = "alopez@example.com", Descripcion = "Operador de soporte", Active = 0, Role = "Support", Status = "Inactivo" },
-    //     new Usuario { Id = 4, Username = "alopez", NombreCompleto = "Ana López Fernández", Email = "alopez@example.com", Descripcion = "Operador de soporte", Active = 0, Role = "Support", Status = "Inactivo" },
-    //     new Usuario { Id = 4, Username = "alopez", NombreCompleto = "Ana López Fernández", Email = "alopez@example.com", Descripcion = "Operador de soporte", Active = 0, Role = "Support", Status = "Inactivo" },
+    private string terminoBusqueda
+    {
+        get => _terminoBusqueda;
+        set
+        {
+            if (_terminoBusqueda != value)
+            {
+                _terminoBusqueda = value;
+                BuscarUsuarios();
+            }
+        }
+    }
 
-    //      new Usuario { Id = 1, Username = "jgarcia", NombreCompleto = "Juan García López", Email = "jgarcia@example.com", Descripcion = "Administrador del sistema", Active = 1, Role = "Admin", Status = "Activo" },
-    //     new Usuario { Id = 2, Username = "mrodriguez", NombreCompleto = "María Rodríguez Pérez", Email = "mrodriguez@example.com", Descripcion = "Usuario estándar", Active = 1, Role = "User", Status = "Activo" },
-    //     new Usuario { Id = 3, Username = "pmartinez", NombreCompleto = "Pedro Martínez Sánchez", Email = "pmartinez@example.com", Descripcion = "Supervisor de ventas", Active = 1, Role = "Supervisor", Status = "Activo" },
-    //     new Usuario { Id = 4, Username = "alopez", NombreCompleto = "Ana López Fernández", Email = "alopez@example.com", Descripcion = "Operador de soporte", Active = 0, Role = "Support", Status = "Inactivo" },
-    //     new Usuario { Id = 5, Username = "cgonzalez", NombreCompleto = "Carlos González Ruiz", Email = "cgonzalez@example.com", Descripcion = "Usuario de pruebas", Active = 1, Role = "User", Status = "Activo" },
-    //     new Usuario { Id = 5, Username = "cgonzalez", NombreCompleto = "Carlos González Ruiz", Email = "cgonzalez@example.com", Descripcion = "Usuario de pruebas", Active = 1, Role = "User", Status = "Activo" },
-    //     new Usuario { Id = 6, Username = "lhernandez", NombreCompleto = "Laura Hernández Moreno", Email = "lhernandez@example.com", Descripcion = "Administradora de contenido", Active = 1, Role = "Editor", Status = "Inactivo" }
-    // };
-    private List<Usuario> products = new List<Usuario>();
+    private int paginaActual = 1;
+    private const int elementosPorPagina = 12;
+    private int totalPaginas => (int)Math.Ceiling((double)usuariosFiltrados.Count / elementosPorPagina);
 
     protected override async Task OnInitializedAsync()
     {
-        var usersDto = await UsuarioService.GetAllUserAsync();        
-        products = usersDto;
+        var usersDto = await UsuarioService.GetAllUserAsync();
+        usuarios = usersDto;
+        usuariosFiltrados = usuarios;
+        ActualizarPaginacion();
     }
 
-    private async Task NewUser()
-    {        
-        Navigation.NavigateTo("/paneladmin/nuevousuario");
+    private void BuscarUsuarios()
+    {
+        if (string.IsNullOrWhiteSpace(terminoBusqueda))
+        {
+            usuariosFiltrados = usuarios;
+        }
+        else
+        {
+            var busqueda = terminoBusqueda.Trim().ToLower();
+            
+            usuariosFiltrados = usuarios.Where(u =>
+                (!string.IsNullOrEmpty(u.Username) && u.Username.ToLower().Contains(busqueda)) ||
+                (!string.IsNullOrEmpty(u.NombreCompleto) && u.NombreCompleto.ToLower().Contains(busqueda)) ||
+                (!string.IsNullOrEmpty(u.Email) && u.Email.ToLower().Contains(busqueda))
+            ).ToList();
+        }
+        
+        paginaActual = 1;
+        ActualizarPaginacion();
     }
 
+    private void ActualizarPaginacion()
+    {
+        var skip = (paginaActual - 1) * elementosPorPagina;
+        usuariosPaginados = usuariosFiltrados
+            .Skip(skip)
+            .Take(elementosPorPagina)
+            .ToList();
+    }
+
+    private void IrAPrimeraPagina()
+    {
+        if (paginaActual != 1)
+        {
+            paginaActual = 1;
+            ActualizarPaginacion();
+        }
+    }
+
+    private void IrAPaginaAnterior()
+    {
+        if (paginaActual > 1)
+        {
+            paginaActual--;
+            ActualizarPaginacion();
+        }
+    }
+
+    private void IrAPaginaSiguiente()
+    {
+        if (paginaActual < totalPaginas)
+        {
+            paginaActual++;
+            ActualizarPaginacion();
+        }
+    }
+
+    private void IrAUltimaPagina()
+    {
+        if (paginaActual != totalPaginas)
+        {
+            paginaActual = totalPaginas;
+            ActualizarPaginacion();
+        }
+    }
+
+    private void IrAPagina(int numeroPagina)
+    {
+        if (numeroPagina >= 1 && numeroPagina <= totalPaginas)
+        {
+            paginaActual = numeroPagina;
+            ActualizarPaginacion();
+        }
+    }
+
+    private List<int> ObtenerPaginasVisibles()
+    {
+        var paginas = new List<int>();
+        var rangoVisible = 3;
+        
+        var inicio = Math.Max(1, paginaActual - rangoVisible / 2);
+        var fin = Math.Min(totalPaginas, inicio + rangoVisible - 1);
+        
+        if (fin - inicio < rangoVisible - 1)
+        {
+            inicio = Math.Max(1, fin - rangoVisible + 1);
+        }
+        
+        for (int i = inicio; i <= fin; i++)
+        {
+            paginas.Add(i);
+        }
+        
+        return paginas;
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            BuscarUsuarios();
+        }
+    }
+
+    private void NewUser()
+    {
+        Navigation.NavigateTo("/paneladmin/usuario");
+    }
+
+    private void EditUser(string usuarioId)
+    {
+        Navigation.NavigateTo($"/paneladmin/usuario/{usuarioId}");
+    }
 }

@@ -16,4 +16,5 @@ public interface IUserRepository
     Task<List<UserDto>>? GetAllUserAsync();
 
     Task<string> CreateUserAsync(UserDto dto);
+    Task<string> UpdateUserAsync(UserDto dto);
 }
