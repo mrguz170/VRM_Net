@@ -7,6 +7,7 @@ using VRM_Plugin.Blazor.Server.Security;
 using VRM_Plugin.Core.Abstractions.Data.DTOs;
 using VRM_Plugin.Core.Abstractions.Data.Repositories;
 using VRM_Plugin.Core.Abstractions.Services;
+using VRM_Plugin.Module.PanelAdmin.Components;
 using VRM_Plugin.Module.PanelAdmin.Data.DTOs;
 using VRM_Plugin.Module.PanelAdmin.Data.Repositories;
 using VRM_Plugin.Module.PanelAdmin.Domain;
@@ -49,10 +50,10 @@ public class UsuarioService : IUsuarioService
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task<Usuario?> GetUserByIdAsync(int id)
+    public async Task<Usuario?> GetUserByIdAsync(string id)
     {
         var list = await GetAllUserAsync();
-        return list.FirstOrDefault(x => x.Id == id.ToString());
+        return list.FirstOrDefault(x => x.Id == id);
     } 
     /// <summary>
     /// Crear un nuevo usuario
@@ -63,7 +64,9 @@ public class UsuarioService : IUsuarioService
     {
         var dto = MapDomainToDto(usuario);
 
-        dto.created_user_id = await _authProvider.GetUserIdAsync(); 
+        dto.created_user_id = await _authProvider.GetUserIdAsync();
+        dto.Password = PasswordHasher.GenerateAndHashDefaultPassword(dto.Nombre, dto.ApellidoPaterno).HashedPassword;
+        dto.IsActive = false; // Nuevo usuario inactivo por defecto
 
         var userId = await _repo.CreateUserAsync(dto);
         usuario.Id = userId;
@@ -73,19 +76,39 @@ public class UsuarioService : IUsuarioService
     /// <summary>    
     /// Actualiza un usuario existente
     /// </summary>
-    /// <param name="dto"></param>
+    /// <param name="usuario"></param>
     /// <returns></returns>
-    public async Task<Usuario> UpdateUserAsync(Usuario dto)
+    public async Task<Usuario> UpdateUserAsync(Usuario usuario)
     {
-        // Mapear directamente el DTO a Usuario
-        return new Usuario();
+        var dto = MapDomainToDto(usuario);
+        
+        // Obtener el usuario que está actualizando
+        dto.updated_user_id = await _authProvider.GetUserIdAsync();
+        
+        // Verificar si se debe regenerar la contraseña
+        if (usuario.RegenerarPassword)
+        {
+            // Generar nueva contraseña por defecto (igual que en creación)
+            dto.Password = PasswordHasher.GenerateAndHashDefaultPassword(dto.Nombre, dto.ApellidoPaterno).HashedPassword;
+        }
+        else
+        {
+            // NO actualizar la contraseña (mantener la existente)
+            dto.Password = null;
+        }
+        
+        // Llamar al repositorio para actualizar
+        var userId = await _repo.UpdateUserAsync(dto);
+        usuario.Id = userId;
+        
+        return usuario;
     }
     /// <summary>
     /// Inactiva o elimina un usuario por ID
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task<bool> DeleteUserAsync(int id)
+    public async Task<bool> DeleteUserAsync(string id)
     {
         
         return await Task.FromResult(false);
@@ -108,8 +131,10 @@ public class UsuarioService : IUsuarioService
             NombreCompleto = u.NombreCompleto ?? string.Empty,
             Email = u.Email ?? string.Empty,
             Role = u.Role ?? string.Empty,
+            RoleId = u.RoleId ?? string.Empty,
             Status = u.IsActive ? "Activo" : "Inactivo",
-            FechaModificacion = u.UpdatedDate
+            FechaModificacion = u.UpdatedDate,
+            
         };
     }
 
@@ -128,7 +153,7 @@ public class UsuarioService : IUsuarioService
             NombreCompleto = u.NombreCompleto,                    
             Email = u.Email,
             Role = u.Role,                                         
-            RoleId = u.Role,                                       
+            RoleId = u.RoleId,                                       
             IsActive = u.Status == "Activo",
             UpdatedDate = u.FechaModificacion                      
         };

@@ -90,22 +90,29 @@ public class UserRepository : IUserRepository
                 "sp_get_all_user"));
     }
 
+    /// <summary>
+    /// Crea un nuevo usuario
+    /// Llama al SP: sp_set_user con opc=1
+    /// </summary>
     public async Task<string> CreateUserAsync(UserDto dto)
     {
         return await Task.Run(() =>
         {
             var parameters = new Dictionary<string, object>
-        {
-            { "email_user", dto.Email },
-            { "username", dto.Username },
-            { "role_user_id", dto.RoleId },
-            { "name_user", dto.Nombre },
-            { "last_name_user", dto.ApellidoPaterno },
-            { "second_last_name_user", dto.ApellidoMaterno },
-            { "password_user", dto.Password },
-            { "is_active_user", dto.IsActive },
-            { "creator_user", dto.created_user_id }
-        };
+            {
+                { "opc", 1 },  // 1 = Crear
+                { "user_id_param", DBNull.Value },  // NULL para creación
+                { "email_user", dto.Email },
+                { "username", dto.Username },
+                { "role_user_id", dto.RoleId },
+                { "name_user", dto.Nombre },
+                { "last_name_user", dto.ApellidoPaterno },
+                { "second_last_name_user", dto.ApellidoMaterno },
+                { "password_user", dto.Password },
+                { "is_active_user", dto.IsActive },
+                { "creator_user", dto.created_user_id },
+                { "updater_user", DBNull.Value }  // NULL para creación
+            };
 
             var dataTable = _db.ExecuteStoredProcedure("sp_set_user", parameters);
 
@@ -115,12 +122,86 @@ public class UserRepository : IUserRepository
                 return string.Empty;
             }
 
-            var newUserId = dataTable.Rows[0]["NewUserId"]?.ToString() ?? string.Empty;
+            var newUserId = dataTable.Rows[0]["UserId"]?.ToString() ?? string.Empty;
+            var operation = dataTable.Rows[0]["Operation"]?.ToString() ?? string.Empty;
 
-            _logger.LogInformation("Usuario creado con ID: {UserId}", newUserId);
+            _logger.LogInformation("Usuario creado con ID: {UserId}, Operación: {Operation}", newUserId, operation);
 
             return newUserId;
         });
     }
+    /// <summary>
+    /// Actualiza un usuario existente
+    /// Llama al SP: sp_set_user con opc=2
+    /// </summary>
+    public async Task<string> UpdateUserAsync(UserDto dto)
+    {
+        return await Task.Run(() =>
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "opc", 2 },  // 2 = Actualizar
+                { "user_id_param", dto.UserId },  // ID del usuario a actualizar
+                { "email_user", dto.Email },
+                { "username", dto.Username },
+                { "role_user_id", dto.RoleId },
+                { "name_user", dto.Nombre },
+                { "last_name_user", dto.ApellidoPaterno },
+                { "second_last_name_user", dto.ApellidoMaterno },
+                { "password_user", dto.Password ?? (object)DBNull.Value },  // NULL si no se actualiza password
+                { "is_active_user", dto.IsActive },
+                { "creator_user", DBNull.Value },  // NULL para actualización
+                { "updater_user", dto.updated_user_id }  // Usuario que actualiza
+            };
+
+            var dataTable = _db.ExecuteStoredProcedure("sp_set_user", parameters);
+
+            if (dataTable.Rows.Count == 0)
+            {
+                _logger.LogWarning("SP sp_set_user no devolvió resultados");
+                return string.Empty;
+            }
+
+            var userId = dataTable.Rows[0]["UserId"]?.ToString() ?? string.Empty;
+            var operation = dataTable.Rows[0]["Operation"]?.ToString() ?? string.Empty;
+
+            _logger.LogInformation("Usuario actualizado con ID: {UserId}, Operación: {Operation}", userId, operation);
+
+            return userId;
+        });
+    }
+
+    //public async Task<string> CreateUserAsync(UserDto dto)
+    //{
+    //    return await Task.Run(() =>
+    //    {
+    //        var parameters = new Dictionary<string, object>
+    //    {
+    //        { "email_user", dto.Email },
+    //        { "username", dto.Username },
+    //        { "role_user_id", dto.RoleId },
+    //        { "name_user", dto.Nombre },
+    //        { "last_name_user", dto.ApellidoPaterno },
+    //        { "second_last_name_user", dto.ApellidoMaterno },
+    //        { "password_user", dto.Password },
+    //        { "is_active_user", dto.IsActive },
+    //        { "creator_user", dto.created_user_id }
+    //    };
+
+    //        var dataTable = _db.ExecuteStoredProcedure("sp_set_user", parameters);
+
+    //        if (dataTable.Rows.Count == 0)
+    //        {
+    //            _logger.LogWarning("SP sp_set_user no devolvió resultados");
+    //            return string.Empty;
+    //        }
+
+    //        var newUserId = dataTable.Rows[0]["NewUserId"]?.ToString() ?? string.Empty;
+
+    //        _logger.LogInformation("Usuario creado con ID: {UserId}", newUserId);
+
+    //        return newUserId;
+    //    });
+    //}
 }
 

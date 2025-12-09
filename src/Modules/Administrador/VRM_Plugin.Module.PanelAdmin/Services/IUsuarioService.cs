@@ -12,9 +12,9 @@ namespace VRM_Plugin.Module.PanelAdmin.Services;
 public interface IUsuarioService
 {
     Task<List<Usuario>> GetAllUserAsync();
-    Task<Usuario?> GetUserByIdAsync(int id);
+    Task<Usuario?> GetUserByIdAsync(string id);
     Task<Usuario> CreateUserAsync(Usuario usuario); 
     Task<Usuario> UpdateUserAsync(Usuario usuario);
-    Task<bool> DeleteUserAsync(int id);
+    Task<bool> DeleteUserAsync(string id);
 
 }

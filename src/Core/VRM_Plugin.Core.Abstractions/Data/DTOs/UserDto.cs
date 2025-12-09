@@ -74,4 +74,9 @@ public class UserDto
     /// Ultima fecha de actualización 
     /// </summary>
     public string created_user_id { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Ultima fecha de actualización 
+    /// </summary>
+    public string updated_user_id { get; set; } = string.Empty;
 }
