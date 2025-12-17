@@ -1,36 +1,31 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Permissions;
 using System.Threading.Tasks;
-using VRM_Plugin.Blazor.Server.Authentication;
 using VRM_Plugin.Blazor.Server.Security;
 using VRM_Plugin.Core.Abstractions.Data.DTOs;
 using VRM_Plugin.Core.Abstractions.Data.Repositories;
 using VRM_Plugin.Core.Abstractions.Services;
-using VRM_Plugin.Module.PanelAdmin.Components;
-using VRM_Plugin.Module.PanelAdmin.Data.DTOs;
 using VRM_Plugin.Module.PanelAdmin.Data.Repositories;
 using VRM_Plugin.Module.PanelAdmin.Domain;
-using static MudBlazor.CategoryTypes;
 
 namespace VRM_Plugin.Module.PanelAdmin.Services;
 
 /// <summary>
 /// Implementación base del servicio de Usuario
-/// Cambia la implementación según las necesidades del componente.
 /// </summary>
 public class UsuarioService : IUsuarioService
 {
     private readonly IUserRepository? _repo;
-    private readonly VRMAuthenticationStateProvider _authProvider; 
+    private readonly ICurrentUserService _currentUserService;
 
     public UsuarioService(
        IUserRepository? repo = null,
-       VRMAuthenticationStateProvider authProvider = null) 
+       ICurrentUserService? currentUserService = null) 
     {
         _repo = repo;
-        _authProvider = authProvider;
+        _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
     }
+
     /// <summary>
     /// Obtiene todos los usuarios
     /// </summary>
@@ -64,7 +59,7 @@ public class UsuarioService : IUsuarioService
     {
         var dto = MapDomainToDto(usuario);
 
-        dto.created_user_id = await _authProvider.GetUserIdAsync();
+        dto.created_user_id = await _currentUserService.GetUserIdAsync() ?? "SYSTEM";
         dto.Password = PasswordHasher.GenerateAndHashDefaultPassword(dto.Nombre, dto.ApellidoPaterno).HashedPassword;
         dto.IsActive = false; // Nuevo usuario inactivo por defecto
 
@@ -83,7 +78,7 @@ public class UsuarioService : IUsuarioService
         var dto = MapDomainToDto(usuario);
         
         // Obtener el usuario que está actualizando
-        dto.updated_user_id = await _authProvider.GetUserIdAsync();
+        dto.updated_user_id = await _currentUserService.GetUserIdAsync() ?? "SYSTEM";
         
         // Verificar si se debe regenerar la contraseña
         if (usuario.RegenerarPassword)

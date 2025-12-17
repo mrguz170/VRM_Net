@@ -86,6 +86,9 @@ try
     builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
         provider.GetRequiredService<VRMAuthenticationStateProvider>());
 
+    // Registrar servicio de usuario actual
+    builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
     builder.Services.AddScoped<IModuleAuthorizationService, ModuleAuthorizationService>();
 
     // ==================== SERVICIOS DE DATOS ====================

@@ -15,58 +15,36 @@ namespace VRM_Plugin.Modules.Finanzas;
 /// </summary>
 public class FinanzasModule : IModule
 {
-    // ==================== CAMPOS PRIVADOS ====================
+    // ==================== PROPIEDADES PÚBLICAS ====================
     
-    // Datos inyectados por el Host (desde BD)
+    public int ModuleId { get; set; }
+    
+    /// <summary>
+    /// Identificador técnico INMUTABLE del módulo.
+    /// Se usa para buscar metadata en BD, NO debe cambiar.
+    /// </summary>
+    public string ModuleName { get; } = "Finanzas";
+    
+    public string DisplayName { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Version { get; set; } = string.Empty;
+
+    // ==================== DATOS INYECTADOS ====================
+    
     private List<ModuleComponentDto> _components = new();
     private List<ModuleActionDto> _actions = new();
-
-    // Metadata del módulo (se inyectan desde BD, valores vacíos por defecto)
-    private int _moduleId = 0;
-    private string _moduleName = "Finanzas";
-    private string _displayName = string.Empty;
-    private string _description = string.Empty;
-    private string _version = string.Empty;
-
-    // ==================== PROPIEDADES PÚBLICAS ====================
-
-    /// <summary>
-    /// ID numérico del módulo
-    /// </summary>
-    public int ModuleId { get; set; }
-    public string ModuleName => _moduleName;
-    public string DisplayName => _displayName;
-    public string Description => _description;
-    public string Version => _version;
     
     // ==================== MÉTODOS PÚBLICOS ====================
 
     /// <summary>
     /// Devuelve los componentes inyectados por el Host
     /// </summary>
-    public List<ModuleComponentDto> GetComponents()
-    {
-        if (_components.Count > 0)
-        {
-            return _components;
-        }
-
-        // Fallback: valores por defecto si no se cargaron desde BD
-        return new List<ModuleComponentDto>();
-    }
+    public List<ModuleComponentDto> GetComponents() => _components;
     
     /// <summary>
     /// Devuelve las acciones inyectadas por el Host
     /// </summary>
-    public List<ModuleActionDto> GetActions()
-    {
-        if (_actions.Count > 0)
-        {
-            return _actions;
-        }
-
-        return new List<ModuleActionDto>();
-    }
+    public List<ModuleActionDto> GetActions() => _actions;
         
     // ==================== MÉTODOS DE INYECCIÓN (Llamados por el Host) ====================
     
@@ -87,17 +65,17 @@ public class FinanzasModule : IModule
     }
 
     /// <summary>
-    /// El Host llama este método para inyectar metadata desde BD
+    /// El Host llama este método para inyectar metadata desde BD.
+    /// Nota: moduleName se ignora porque ModuleName es inmutable.
     /// </summary>    
     public void SetMetadata(int moduleId, string moduleName, string displayName, string description, string version)
     {
-        _moduleId = moduleId != 0 ? moduleId : _moduleId;
-        _moduleName = moduleName ?? _moduleName;
-        _displayName = displayName ?? _displayName;
-        _description = description ?? _description;
-        _version = version ?? _version;
+        ModuleId = moduleId;
+        // ModuleName NO se actualiza - es inmutable
+        DisplayName = displayName ?? DisplayName;
+        Description = description ?? Description;
+        Version = version ?? Version;
     }
-
 
     // ==================== CONFIGURACIÓN DE SERVICIOS ====================
 
@@ -108,18 +86,15 @@ public class FinanzasModule : IModule
     {
         //  Registrar repositorios del módulo (capa de datos)
         services.AddScoped<IFacturaRepository, FacturaRepository>();
-        services.AddScoped<IPagoRepository, PagoRepository>();
-        
+
         //  Registrar servicios de negocio del módulo
         services.AddScoped<IFacturaService, FacturaService>();
-        
-        
+
         //  Registrar el módulo como IModule para inyección en layouts/componentes
         services.AddSingleton<IModule>(this);
-        services.AddSingleton(this); 
+        services.AddSingleton(this);
     }
-    
-    
+
     public async Task OnModuleLoadedAsync()
     {
         Console.WriteLine($"[{ModuleName}] Módulo cargado - ModuleId: {ModuleId}");

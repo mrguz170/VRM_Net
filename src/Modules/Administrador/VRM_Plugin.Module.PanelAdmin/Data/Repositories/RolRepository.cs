@@ -55,6 +55,8 @@ public class RolRepository : IRolRepository
         {
             roles = _db.ExecuteStoredProcedure<RolDto>("sp_get_all_roles", new Dictionary<string, object>
             {
+                { "Opc", 1 },
+                { "action_key_id", 0 }
             });
             return Task.FromResult(roles);
         }
@@ -100,6 +102,57 @@ public class RolRepository : IRolRepository
         {
             return Task.FromResult(roles);
         }
+    }
 
+    /// <summary>
+    /// Actualiza los roles asignados a un componente específico
+    /// </summary>
+    public async Task<bool> UpdateComponentRoles(int componentId, List<int> roleIds, string userId)
+    {
+        try
+        {
+            var roleIdsCsv = string.Join(",", roleIds);
+
+            var parameters = new Dictionary<string, object>
+        {
+            { "p_component_id", componentId },
+            { "p_role_ids", roleIdsCsv },  
+            { "p_user_id", userId }
+        };
+
+            _db.ExecuteStoredProcedure("sp_set_component_roles", parameters);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Actualiza los roles asignados a un componente específico (versión asincrónica)
+    /// </summary>
+    public async Task<bool> UpdateComponentRolesAsync(int componentId, List<int> roleIds, string userId)
+    {
+        try
+        {
+            // Convertir lista a CSV: [1,2,3] → "1,2,3"
+            var roleIdsCsv = string.Join(",", roleIds);
+            
+            var parameters = new Dictionary<string, object>
+            {
+                { "p_component_id", componentId },
+                { "p_role_ids", roleIdsCsv },
+                { "p_user_id", userId }
+            };
+            
+            _db.ExecuteNonQuery("sp_set_component_roles", parameters);
+            return await Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al actualizar roles del componente {componentId}: {ex.Message}");
+            return await Task.FromResult(false);
+        }
     }
 }

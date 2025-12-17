@@ -7,9 +7,12 @@
 @using VRM_Plugin.Core.Abstractions
 @inject FinanzasModule CurrentModule
 
-<PageTitle>Facturas - Prueba de AuthorizeAction</PageTitle>
+@* <PageTitle>Facturas - Prueba de AuthorizeAction</PageTitle> *@
 
 <CascadingValue Value="@CurrentModule" Name="CurrentModule">
+
+    <PageHeader Title="@CurrentModule.DisplayName" pTitle="Facturas"></PageHeader>
+
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">

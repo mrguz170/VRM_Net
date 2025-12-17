@@ -240,12 +240,12 @@ public class ModuleManager : IModuleManager
             }
 
             // 2. Inyectar ModuleId desde BD al módulo
-            //module.ModuleId = metadata.ModuleId;
+            module.ModuleId = metadata.ModuleId;
 
-            //_logger.LogInformation(
-            //    "[ModuleManager] ✅ ModuleId={ModuleId} asignado a módulo '{ModuleName}'",
-            //    metadata.ModuleId,
-            //    module.ModuleName);
+            _logger.LogInformation(
+                "[ModuleManager] ✅ ModuleId={ModuleId} asignado a módulo '{ModuleName}'",
+                metadata.ModuleId,
+                module.ModuleName);
 
             // 3. Obtener componentes usando el ModuleId de BD
             var components = _metadataService.GetComponentsByModuleId(metadata.ModuleId);
@@ -304,5 +304,40 @@ public class ModuleManager : IModuleManager
     {
         return _loadedModules.AsReadOnly();
     }
- 
+
+    /// <summary>
+    /// Recarga metadata de todos los módulos desde BD (componentes y acciones con permisos actualizados)
+    /// </summary>
+    public async Task ReloadModuleMetadataAsync()
+    {
+        var startTime = DateTime.UtcNow;
+        
+        _logger.LogInformation("[ModuleManager] 🔄 Recargando metadata desde BD para {Count} módulos...", _loadedModules.Count);
+
+        foreach (var module in _loadedModules)
+        {
+            try
+            {
+                // Recargar componentes y acciones con permisos actualizados
+                await LoadModuleMetadataFromDatabase(module);
+                
+                _logger.LogDebug(
+                    "[ModuleManager] ✅ Metadata recargada para '{ModuleName}' (ID={ModuleId})",
+                    module.ModuleName,
+                    module.ModuleId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "[ModuleManager] ❌ Error al recargar metadata para '{ModuleName}'",
+                    module.ModuleName);
+            }
+        }
+
+        var elapsedMs = (DateTime.UtcNow - startTime).TotalMilliseconds;
+        
+        _logger.LogInformation(
+            "[ModuleManager] ✅ Metadata recargada en {ElapsedMs}ms",
+            elapsedMs);
+    }
 }

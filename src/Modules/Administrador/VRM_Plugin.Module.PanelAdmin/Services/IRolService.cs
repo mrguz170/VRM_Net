@@ -16,4 +16,9 @@ public interface IRolService
     Task<bool> CreateAsync(RolDto dto);
     Task<RolDto> UpdateAsync(RolDto dto);
     Task<bool> DeleteAsync(int id);
+    
+    /// <summary>
+    /// Actualiza permisos de componentes para múltiples componentes
+    /// </summary>
+    Task<bool> UpdateComponentPermissionsAsync(Dictionary<int, List<int>> componentRoles, string userId);
 }
