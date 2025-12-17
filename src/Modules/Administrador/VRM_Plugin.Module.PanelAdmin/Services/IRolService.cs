@@ -24,4 +24,5 @@ public interface IRolService
 
     Task<List<Rol>> GetActionByRole(ulong actionid);
 
+    Task<bool> UpdateComponentPermissionsAsync(Dictionary<int, List<int>> componentRoles, string userId);
 }

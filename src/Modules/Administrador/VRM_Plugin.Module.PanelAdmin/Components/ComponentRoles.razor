@@ -35,17 +35,20 @@
                 {
                     <div class="space-y-6">
                         <!-- Selector de Módulo -->
-                        <div class="space-y-2">
-                            <MudText Class="text-lg font-semibold">Seleccionar Módulo: <span class="text-red-500"></span></MudText>
-                            <select value="@moduloSeleccionadoId" 
-                                    @onchange="OnModuloSelectionChanged" 
-                                    class="form-select w-full">
+                        <div class="flex items-center gap-3">
+                            <MudText Class="text-lg font-semibold whitespace-nowrap">Seleccionar Módulo:</MudText>
+                            <select value="@moduloSeleccionadoId"
+                                    @onchange="OnModuloSelectionChanged"
+                                    class="form-select flex-1">
                                 <option value="0">-- Seleccione un módulo --</option>
                                 @foreach (var modulo in modulos)
                                 {
                                     <option value="@modulo.ModuleId">@modulo.DisplayName (@modulo.ModuleName)</option>
                                 }
                             </select>
+
+                            
+
                         </div>
 
                         @if (moduloSeleccionadoId > 0 && componentesConRoles.Any())
@@ -56,29 +59,26 @@
                                 
                                 @foreach (var comp in componentesConRoles.Values)
                                 {
-                                    <div class=" bg-info/10 text-info p-4 mt-4 border rounded-lg  dark:bg-darklight hover:shadow-md transition-shadow">
+                                    <div class=" p-4 bg-info/10 text-info mt-4 border rounded-lg  dark:bg-darklight hover:shadow-md transition-shadow">
                                         <!-- Header del componente -->
-                                        <div class="flex items-start justify-between mb-3">
+                                        <div class="px-4 flex items-start justify-between">
                                             <div>
-                                                <div class="flex items-center gap-2 mb-1">
-                                                    <i class="@comp.Icon text-4xl"></i>
-                                                    <MudText Typo="Typo.h4" Class="font-semibold">
-                                                        @comp.Name
-                                                    </MudText>
-                                                    <MudText Class="text-md text-purple">
-                                                    
-                                                        @* <i class="@comp.Icon w-5 text-2xl"></i> *@
-                                                        @if (@comp.Route != "")
-                                                        {
-                                                            
-                                                            <MudText Typo="Typo.h4" Class="font-semibold">
-                                                                Url:
-                                                                @comp.Route 
-                                                            </MudText>                                                            
-                                                        }
-
-                                                    </MudText>
-
+                                               <div class="flex items-center gap-2 mb-1">
+                                                    <i class="@comp.Icon text-4xl  flex-shrink-0"></i>
+                                                    <div class="flex-1 min-w-0">
+                                                        <MudText Typo="Typo.h4" Class="font-semibold truncate text-lg ">
+                                                            @comp.Name
+                                                        </MudText>
+                                                    </div>
+                                                    @if (!string.IsNullOrEmpty(comp.Route))
+                                                    {
+                                                        <span class="bg-purple" style="display: inline-block; width: 1px; height: 40px; margin: 0 12px;"></span>
+                                                        <div class="flex-1 min-w-0">
+                                                            <MudText Typo="Typo.body2" Class="text-purple">
+                                                                <span class="font-semibold">Url:</span> <span class="truncate">@comp.Route</span>
+                                                            </MudText>
+                                                        </div>
+                                                    }
                                                 </div>
                                             </div>
                                             
@@ -91,43 +91,46 @@
                                                 <span class="text-info text-sm">ℹ️ Solo 1 rol</span>
                                             }
                                         </div>
+                                        <span class="bg-purple" style="display: inline-block; width: -webkit-fill-available; height: 2px; margin: 0 12px;"></span>
+                                        <div class="px-4 pt-4  items-start justify-between ">
                                         
-                                        <!-- Roles asignados -->
-                                        <div class="mb-2">
-                                            <MudText Class="text-sm font-semibold text-black mb-2">Roles con acceso:</MudText>
-                                        </div>
+                                            <!-- Roles asignados -->
+                                            <div class="mb-2">
+                                                <MudText Class="text-sm font-semibold text-black mb-2">Roles con acceso:</MudText>
+                                            </div>
                                         
-                                        <div class="flex flex-wrap gap-2 items-center">
-                                            @if (comp.RolesConAcceso.Count == 0)
-                                            {
-                                                <span class="text-muted text-sm italic">(Ninguno)</span>
-                                            }
-                                            else
-                                            {
-                                                @foreach (var rol in comp.RolesConAcceso)
+                                            <div class="flex flex-wrap gap-2 items-center">
+                                                @if (comp.RolesConAcceso.Count == 0)
                                                 {
-                                                    @* <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple text-white text-sm bg-purple/10 text-purple border border-purple/20 hover:bg-purple/20 transition-colors">                                                        *@
-                                                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple text-white text-sm  border border-purple/20 hover:bg-purple/20 transition-colors">
-                                                            @rol.Nombre
-                                                        <button @onclick="() => RemoverRol(comp.ComponentId, rol.RolId)" 
-                                                                class="hover:text-danger transition-colors"
-                                                                title="Remover @rol.Nombre">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                            </svg>
-                                                        </button>
-                                                    </span>
+                                                    <span class="text-muted text-sm italic">(Ninguno)</span>
                                                 }
-                                            }
+                                                else
+                                                {
+                                                    @foreach (var rol in comp.RolesConAcceso)
+                                                    {
+                                                        @* <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple text-white text-sm bg-purple/10 text-purple border border-purple/20 hover:bg-purple/20 transition-colors">                                                        *@
+                                                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple text-white text-sm  border border-purple/20 hover:bg-purple/20 transition-colors">
+                                                                @rol.Nombre
+                                                            <button @onclick="() => RemoverRol(comp.ComponentId, rol.RolId)" 
+                                                                    class="hover:text-danger transition-colors"
+                                                                    title="Remover @rol.Nombre">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </span>
+                                                    }
+                                                }
                                             
-                                            <!-- Botón Agregar -->
-                                            <button @onclick="() => AbrirAgregarRol(comp.ComponentId)" 
-                                                    class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm  text-success border border-success hover:bg-success/20 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                                </svg>
-                                                Agregar
-                                            </button>
+                                                <!-- Botón Agregar -->
+                                                <button @onclick="() => AbrirAgregarRol(comp.ComponentId)" 
+                                                        class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-white text-success border border-success hover:bg-success/20 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                    </svg>
+                                                    Agregar
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 }
