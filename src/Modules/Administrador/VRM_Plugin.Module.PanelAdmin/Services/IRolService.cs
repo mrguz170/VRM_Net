@@ -12,7 +12,16 @@ namespace VRM_Plugin.Module.PanelAdmin.Services;
 public interface IRolService
 {
     Task<List<Rol>> GetAllAsync();
-    Task<Rol?> GetByIdAsync(int id);
-    Task<bool> CreateAsync(RolDto dto);
-    Task<RolDto> UpdateAsync(RolDto dto);
+    Task<Rol> GetByIdAsync(int id);
+    Task<bool> CreateAsync(RolDto dto, int opc);
+    Task<List<Modules>> GetModules();
+
+    Task<List<Component>> GetComponentById(int idMod);
+
+    Task<List<Actions>> GetAllActions(int modid);
+
+    Task<bool> SetActionRoles(ActionRoles action);
+
+    Task<List<Rol>> GetActionByRole(ulong actionid);
+
 }

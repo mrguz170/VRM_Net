@@ -1,4 +1,4 @@
-﻿@page "/paneladmin/crearrol"
+﻿@page "/paneladmin/crearrol/{rol_selected?}"
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject PanelAdminModule CurrentModule
@@ -10,7 +10,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @using Microsoft.AspNetCore.Components.Web
 
-<PageHeader Title="VRM" pTitle="Crear Rol"></PageHeader>
+<PageHeader Title="VRM" pTitle="@_title"></PageHeader>
 
 <CascadingValue Value="@CurrentModule" Name="CurrentModule">
 
@@ -33,12 +33,12 @@
 
         <!-- Nombre Rol -->
         <div class="space-y-2">
-            <MudText>Nombre Rol <span class="color:red; font-size:14px;">*</span></MudText>
+            <MudText Class="text-lg font-semibold">Nombre Rol <span class="color:red; font-size:14px;">*</span></MudText>
             <input id="rolname" 
                    type="text" 
                    class="form-input w-full" 
                    placeholder="Ingrese el nombre del rol"
-                   @bind="_nombreRol"
+                   @bind="_rolnew.Nombre"
                    @bind:event="oninput" />
             @if (!string.IsNullOrEmpty(_errorNombre))
             {
@@ -48,12 +48,12 @@
 
         <!-- Descripción -->
         <div class="space-y-2">
-            <MudText>Descripción <span class="color:red; font-size:14px;">*</span></MudText>
+            <MudText Class="text-lg font-semibold" >Descripción <span class="color:red; font-size:14px;">*</span></MudText>
             <input id="desc" 
                    type="text" 
                    class="form-input w-full" 
                    placeholder="Ingrese la descripción del rol"
-                   @bind="_descripcion"
+                   @bind="_rolnew.Descripcion"
                    @bind:event="oninput" />
             @if (!string.IsNullOrEmpty(_errorDescripcion))
             {
@@ -61,21 +61,46 @@
             }
             </div>
         <!-- Botones -->
-        <div class="space-y-2">
-            <MudButton type="button"
-                       Class="btn bg-light border-light text-black hover:bg-light/[0.85] hover:border-light/[0.85]"
-                       @onclick="Cancelar">
-                Cancelar
-            </MudButton>
-            <MudButton type="button" 
-                       Class="btn bg-purple border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]" 
-                       @onclick="Guardar">
-                Guardar
-            </MudButton>                  
-        </div>
+                                @if (esEdicion)
+                                {
+                                    <div class="card">
+                                        <div class="space-y-4">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <MudText Class="text-lg font-semibold">Estatus</MudText>
+                                                <div class="inline-block togglebutton">
+                                                    <label for="toggleEstatus" class="flex items-center cursor-pointer">
+                                                        <div class="relative">
+                                                            <InputCheckbox @bind-Value="_rolnew.Activo" id="toggleEstatus" class="sr-only" />
+                                                            <div class="block band bg-black/10 w-[54px] h-[29px] rounded-full dark:bg-dark"></div>
+                                                            <div class="dot absolute left-[3px] top-[2px] bg-white w-6 h-6 rounded-full transition"></div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="space-y-4">
+                                    </div>
+                                }
+                        
+
 
     </div>
-
+                            <div class="flex justify-end gap-3 m-2">
+                                <MudButton type="button"
+                                           Class="btn bg-light border-light text-black hover:bg-light/[0.85] hover:border-light/[0.85]"
+                                           @onclick="Cancelar">
+                                    Cancelar
+                                </MudButton>
+                                <MudButton type="button"
+                                           Class="btn bg-purple border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]"
+                                           @onclick="Guardar">
+                                    Guardar
+                                </MudButton>
+                            </div>
     <!-- Modal de éxito -->
     @if (_successMessage)
     {
@@ -103,8 +128,8 @@
                                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
 
-                            <MudText Typo="Typo.h6" Class="font-semibold mb-2">Rol creado exitosamente</MudText>
-                            <MudText Class="text-muted text-sm">El rol "<strong>@_rolDto.role_name</strong>" ha sido creado exitosamente en el sistema.</MudText>
+                            @* <MudText Typo="Typo.h6" Class="font-semibold mb-2">Rol creado exitosamente</MudText> *@
+                            <MudText Class="text-muted text-sm">El rol "<strong>@_rolDto.role_name</strong>" @_msjExito</MudText>
                         </div>
 
                         <div class="flex items-center justify-end gap-4 pt-4">
@@ -126,19 +151,27 @@
 </CascadingValue>
 
 @code {
+    [Parameter]
+    public string rol_selected { get; set; }
+
     private MudForm _form;
     private RolDto _rolDto = new();
+    private Rol _rolnew = new();
     private bool _formIsValid = false;
     private string? _errorMessage;
     private string? _errorNombre;
     private string? _errorDescripcion;
+    private string? _msjExito;
+    private string? _title;
     private bool _successMessage = false;
     // Propiedades para bind de inputs
     private string _nombreRol = string.Empty;
     private string _descripcion = string.Empty;
+
     // Información del usuario autenticado
     private string? _usuarioId;
     private string? _usuarioNombre;
+    private bool esEdicion => !string.IsNullOrWhiteSpace(rol_selected);
 
     protected override async Task OnInitializedAsync()
     {
@@ -146,9 +179,22 @@
         _rolDto.is_active = true;
         _rolDto.created_date = DateTime.Now;
         // Obtener información del usuario autenticado
+
+        if (esEdicion)
+        {
+            await CargarDatosRol();
+            _title = "Actualizar de Rol";
+        }
+        _title = "Crear Rol";
+
         await ObtenerUsuarioActual();
+
     }
 
+    private async Task CargarDatosRol()
+    {
+        _rolnew = await RolService.GetByIdAsync(Convert.ToInt32(rol_selected));
+    }
     /// <summary>
     /// Valida los campos del formulario
     /// </summary>
@@ -160,34 +206,34 @@
         bool esValido = true;
 
         // Validar Nombre
-        if (string.IsNullOrWhiteSpace(_nombreRol))
+        if (string.IsNullOrWhiteSpace(_rolnew.Nombre))
         {
             _errorNombre = "El nombre del rol es obligatorio";
             esValido = false;
         }
-        else if (_nombreRol.Length < 3)
+        else if (_rolnew.Nombre.Length < 3)
         {
             _errorNombre = "El nombre debe tener al menos 3 caracteres";
             esValido = false;
         }
-        else if (_nombreRol.Length > 100)
+        else if (_rolnew.Nombre.Length > 100)
         {
             _errorNombre = "El nombre no puede exceder 100 caracteres";
             esValido = false;
         }
 
         // Validar Descripción
-        if (string.IsNullOrWhiteSpace(_descripcion))
+        if (string.IsNullOrWhiteSpace(_rolnew.Descripcion))
         {
             _errorDescripcion = "La descripción es obligatoria";
             esValido = false;
         }
-        else if (_descripcion.Length < 5)
+        else if (_rolnew.Descripcion.Length < 5)
         {
             _errorDescripcion = "La descripción debe tener al menos 5 caracteres";
             esValido = false;
         }
-        else if (_descripcion.Length > 255)
+        else if (_rolnew.Descripcion.Length > 255)
         {
             _errorDescripcion = "La descripción no puede exceder 255 caracteres";
             esValido = false;
@@ -240,16 +286,22 @@
             _errorMessage = null;
 
             // Asignar valores al DTO
-            _rolDto.role_name = _nombreRol.Trim();
-            _rolDto.description = _descripcion.Trim();
+            _rolDto.role_name = _rolnew.Nombre.Trim();
+            _rolDto.description = _rolnew.Descripcion.Trim();
             _rolDto.create_user_id = _usuarioId ?? "SYSTEM";
-
+            _rolDto.is_active = esEdicion ? _rolnew.Activo : true;
+            int opc = esEdicion ? 2 : 1; // 1 = Crear, 2 = Editar
+            _rolDto.role_id = esEdicion ? _rolnew.Id : 0;
             // Llamar al servicio para crear el rol
-            var resultado = await RolService.CreateAsync(_rolDto);
+            var resultado = await RolService.CreateAsync(_rolDto, opc);
 
             if (resultado)
             {
                 _successMessage = true;
+                if (esEdicion)
+                    _msjExito = "ha sido actualizado exitosamente.";
+                    else
+                    _msjExito = "ha sido creado exitosamente.";
             }
             else
             {

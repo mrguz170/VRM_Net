@@ -1,0 +1,531 @@
+﻿@page "/paneladmin/actionrole"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject PanelAdminModule CurrentModule
+@using System.Threading.Tasks
+@using VRM_Plugin.Core.Shared.Components.Shared
+@using Microsoft.AspNetCore.Components.Web
+@using VRM_Plugin.Module.PanelAdmin.Domain
+@inject NavigationManager NavigationManager
+@inject IRolService RolService
+@inject AuthenticationStateProvider AuthStateProvider
+@using System.Security.Claims
+
+
+<PageHeader Title="VRM" pTitle="Permisos de Roles sobre Acciones" />
+
+<CascadingValue Value="@CurrentModule" Name="CurrentModule">
+
+    <div class="flex flex-col gap-4 min-h-[calc(100vh-212px)]">
+
+        <!-- PANEL PRINCIPAL -->
+        <div class="p-5 bg-white border rounded dark:bg-darklight dark:border-darkborder border-black/10">
+
+            <MudText Typo="Typo.h5" Class="mb-6 font-semibold">Asignar Permisos de Roles a Acciones</MudText>
+
+            <!-- SELECTORES -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+                <!-- MÓDULO -->
+                <div class="space-y-1">
+                    <label class="font-semibold text-sm">
+                        Módulo <span class="text-red-500">*</span>
+                    </label>
+
+                    <select class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm
+                               focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            value="@moduloSeleccionado"
+                            @onchange="OnModuloChange">
+
+                        <option value="0">-- Seleccionar --</option>
+
+                        @foreach (var item in listaModulos)
+                        {
+                            <option value="@item.Id">@item.Texto</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- COMPONENTE -->
+                <div class="space-y-1">
+                    <label class="font-semibold text-sm">
+                        Componente <span class="text-red-500">*</span>
+                    </label>
+
+                    <select class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm
+                               focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500
+                               disabled:bg-gray-100 disabled:text-gray-400"
+                            disabled="@(moduloSeleccionado == 0)"
+                            value="@componenteSeleccionado"
+                            @onchange="OnComponenteChange">
+
+                        <option value="0">-- Seleccionar --</option>
+
+                        @foreach (var item in listaComponentes)
+                        {
+                            <option value="@item.Id">@item.Texto</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- ACCIÓN -->
+                <div class="space-y-1">
+                    <label class="font-semibold text-sm">
+                        Acción <span class="text-red-500">*</span>
+                    </label>
+
+                    <select class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm
+                               focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500
+                               disabled:bg-gray-100 disabled:text-gray-400"
+                            disabled="@(componenteSeleccionado == 0)"
+                            value="@accionSeleccionada"
+                            @onchange="OnAccionChange">
+
+                        <option value="0">-- Seleccionar --</option>
+
+                        @foreach (var item in listaAcciones)
+                        {
+                            <option value="@item.Id">@item.Texto</option>
+                        }
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- RESUMEN -->
+            @if (accionSeleccionada > 0)
+            {
+                <br><br />
+                    <strong>ActionKey Seleccionada:</strong> @GetSeleccionado()
+                <br><br />
+            }
+
+        </div>
+
+        <!-- PANEL DE ROLES -->
+        @* @if (accionSeleccionada > 0 && listaCheckboxes.Any()) *@
+        @if (listaCheckboxes.Any())
+        {
+            <div class="p-5 bg-white border rounded dark:bg-darklight dark:border-darkborder border-black/10">
+
+                <MudText Typo="Typo.h6" Class="mb-4 font-semibold">
+                    Seleccionar Roles
+                </MudText>
+
+                <div class="space-y-2">
+                    @foreach (var checkbox in listaCheckboxes)
+                    {
+                        <div class="flex items-center px-3 py-2 border rounded
+                                    hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+
+                            <label class="flex items-center gap-2 cursor-pointer select-none flex-1">
+                                <input type="checkbox"
+                                       value="@checkbox.Id"
+                                       class="form-checkbox h-4 w-4"
+                                       @bind="checkbox.Seleccionado" />
+                                <span class="text-sm">@checkbox.Texto</span>
+                            </label>
+
+                        </div>
+                    }
+                </div>
+
+                <!-- BOTONES -->
+                <div class="flex justify-end gap-3 mt-6">
+
+                    <MudButton type="button"
+                               Class="btn bg-light border-light text-black
+                                      hover:bg-light/[0.85] hover:border-light/[0.85]"
+                               @onclick="OnLimpiar">
+                        Limpiar
+                    </MudButton>
+
+                    <MudButton type="button"
+                               Class="btn bg-purple border-purple text-white
+                                      hover:bg-purple/[0.85] hover:border-purple/[0.85]"
+                               @onclick="OnGuardar">
+                        Guardar
+                    </MudButton>
+
+                </div>
+
+            </div>
+        }
+        <!-- Modal de éxito -->
+        @if (guardado)
+        {
+            <div class="fixed inset-0 bg-black/80 z-[99999] overflow-y-auto dark:bg-dark/90" @onclick="OnLimpiar">
+                <div class="flex items-center justify-center min-h-screen px-4">
+                    <div class="relative w-full max-w-lg p-0 overflow-hidden bg-white border rounded-lg shadow-3xl border-black/10 dark:bg-darklight dark:border-darkborder" @onclick:stopPropagation>
+
+                        <!-- Modal header -->
+                        <div class="flex items-center justify-between px-5 py-3 bg-white border-b border-black/10 dark:bg-darklight dark:border-darkborder">
+                            <MudText Typo="Typo.h5" Class="text-lg font-semibold text-slate-800 dark:text-slate-100">¡Éxito!</MudText>
+                            <MudButton Class="text-muted hover:text-black dark:hover:text-white" @onclick="OnLimpiar">
+                                <svg class="w-5 h-5" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z" fill="currentcolor" />
+                                    <path d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z" fill="currentcolor" />
+                                </svg>
+                            </MudButton>
+                        </div>
+
+                        <!-- Modal content -->
+                        <div class="p-5 space-y-4">
+                            <div class="text-center py-4">
+                                <svg class="w-16 h-16 mx-auto mb-4"
+                                     fill="none" stroke="#22c55e" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+
+                                @* <MudText Typo="Typo.h6" Class="font-semibold mb-2">Rol creado exitosamente</MudText> *@
+                                <MudText Class="text-muted text-sm">@msjExito a la ActionKey "<strong>@actionkey</strong>"</MudText>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-4 pt-4">
+                                <MudButton Class="transition-all duration-300 border rounded-md btn text-purple border-purple hover:bg-purple hover:text-white" @onclick="OnLimpiar">
+                                    Aceptar
+                                </MudButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        @if(noguardado)      
+        {
+            <div class="fixed inset-0 bg-black/80 z-[99999] overflow-y-auto dark:bg-dark/90" @onclick="OnLimpiar">
+                <div class="flex items-center justify-center min-h-screen px-4">
+                    <div class="relative w-full max-w-lg p-0 overflow-hidden bg-white border rounded-lg shadow-3xl border-black/10 dark:bg-darklight dark:border-darkborder" @onclick:stopPropagation>
+
+                        <!-- Modal header -->
+                        <div class="flex items-center justify-between px-5 py-3 bg-white border-b border-black/10 dark:bg-darklight dark:border-darkborder">
+                            <MudText Typo="Typo.h5" Class="text-lg font-semibold text-slate-800 dark:text-slate-100">Ocurrio un problema</MudText>
+                            <MudButton Class="text-muted hover:text-black dark:hover:text-white" @onclick="OnLimpiar">
+                                <svg class="w-5 h-5" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z" fill="currentcolor" />
+                                    <path d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z" fill="currentcolor" />
+                                </svg>
+                            </MudButton>
+                        </div>
+
+                        <!-- Modal content -->
+                        <div class="p-5 space-y-4">
+                            <div class="text-center py-4">
+                                <svg class="w-16 h-16 mx-auto mb-4"
+                                     fill="none" stroke="#ef4444" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+
+                                @* <MudText Typo="Typo.h6" Class="font-semibold mb-2">Rol creado exitosamente</MudText> *@
+                                <MudText Class="text-muted text-sm"> @msjExito</MudText>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-4 pt-4">
+                                <MudButton Class="transition-all duration-300 border rounded-md btn text-purple border-purple hover:bg-purple hover:text-white" @onclick="OnLimpiar">
+                                    Aceptar
+                                </MudButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        }
+    </div>
+
+</CascadingValue>
+
+
+@code {
+
+    // ===== DATOS DE SELECCIÓN =====
+    private int moduloSeleccionado = 0;
+    private int componenteSeleccionado = 0;
+    private ulong accionSeleccionada = 0;
+    private string? _usuarioId;
+    private bool guardado = false;
+    private bool noguardado = false;
+    private string? msjExito = "";
+    private string? actionkey = "";
+
+    // ===== LISTAS DE ITEMS PARA LOS SELECTS =====
+    private List<SelectItem> listaModulos = new();
+    private List<SelectItem> listaComponentes = new();
+    private List<SelectItemAction> listaAcciones = new();
+
+    // ===== LISTA DE CHECKBOXES =====
+    private List<CheckboxItem> listaCheckboxes = new();
+    private ActionRoles actionRoles = new();
+
+    /// <summary>
+    /// Clase para items del Select (ID + Texto)
+    /// </summary>
+    private class SelectItem
+    {
+        public int Id { get; set; }
+        public string Texto { get; set; } = string.Empty;
+    }
+    private class SelectItemAction
+    {
+        public ulong Id { get; set; }
+        public string Texto { get; set; } = string.Empty;
+    }
+    /// <summary>
+    /// Clase para Checkbox (ID + Texto + Estado)
+    /// </summary>
+    private class CheckboxItem
+    {
+        public int Id { get; set; }
+        public string Texto { get; set; } = string.Empty;
+        public bool Seleccionado { get; set; }
+    }
+
+    // ===== MÉTODOS DE CARGA =====
+
+    /// <summary>
+    /// Carga los módulos disponibles
+    /// </summary>
+    private async Task CargarModulos()
+    {
+        listaCheckboxes.Clear();
+        var res = await RolService.GetModules();
+        foreach (var mod in res)
+        {
+            listaModulos.Add(new SelectItem { Id = mod.Moduleid, Texto = mod.ModuleName });
+        }
+    }   
+
+    /// <summary>
+    /// Carga los componentes según el módulo seleccionado
+    /// </summary>
+
+    private async Task CargarComponentesPorModulo(int idMod)
+    {
+        listaComponentes.Clear();
+        listaCheckboxes.Clear();
+
+        var res = await RolService.GetComponentById(idMod);
+        foreach (var mod in res)
+        {
+            if(mod.Parentid != 0)
+                listaComponentes.Add(new SelectItem { Id = mod.Componentid, Texto = mod.ComponentName });
+        }
+    }
+
+    /// <summary>
+    /// Carga las acciones según el componente seleccionado
+    /// </summary>
+    private async Task CargarAccionesPorComponente(int modid, int componentid)
+    {
+        listaAcciones.Clear();
+        listaCheckboxes.Clear();
+
+        var res = await RolService.GetAllActions(modid);
+
+
+        foreach (var mod in res)
+        {
+            if(componentid == mod.Componentid)
+                listaAcciones.Add(new SelectItemAction { Id = mod.Actionid, Texto = mod.Actionname });
+        }
+    }
+
+    /// <summary>
+    /// Carga los checkboxes según la acción seleccionada
+    /// </summary>
+    private async Task CargarCheckboxesPorAccion(ulong accionId)
+    {
+        listaCheckboxes.Clear();
+
+        var res = await RolService.GetActionByRole(accionId);
+
+        foreach (var rol in res)
+        {
+            listaCheckboxes.Add(new CheckboxItem
+            {
+                Id = rol.Id,
+                Texto = rol.Nombre,
+                Seleccionado = rol.Activo
+            });
+        }
+    }
+
+    // ===== MÉTODOS DE EVENTOS =====
+
+    /// <summary>
+    /// Se ejecuta al cambiar el módulo
+    /// </summary>
+    private async Task OnModuloChange(ChangeEventArgs e)
+    {
+        moduloSeleccionado = int.Parse(e.Value!.ToString()!);
+        await OnModuloChanged(moduloSeleccionado);
+    }
+
+    private async Task OnModuloChanged(int e)
+    {
+        moduloSeleccionado = e;
+        componenteSeleccionado = 0;
+        accionSeleccionada = 0;
+
+
+        if (moduloSeleccionado > 0)
+        {
+            await CargarComponentesPorModulo(moduloSeleccionado);
+        }
+        else
+        {
+            listaComponentes.Clear();
+            listaAcciones.Clear();
+            listaCheckboxes.Clear();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task OnComponenteChange(ChangeEventArgs e)
+    {
+        componenteSeleccionado = int.Parse(e.Value!.ToString()!);
+        await OnComponenteChanged(componenteSeleccionado);
+    }
+    /// <summary>
+    /// Se ejecuta al cambiar el componente
+    /// </summary>
+    private async Task OnComponenteChanged(int e)
+    {
+        componenteSeleccionado = e;
+        accionSeleccionada = 0;
+
+
+        if (componenteSeleccionado > 0)
+        {
+            await CargarAccionesPorComponente(moduloSeleccionado,componenteSeleccionado);
+        }
+        else
+        {
+            listaAcciones.Clear();
+            listaCheckboxes.Clear();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task OnAccionChange(ChangeEventArgs e)
+    {
+        accionSeleccionada = ulong.Parse(e.Value!.ToString()!);
+        await OnAccionChanged(accionSeleccionada);
+    }
+    /// <summary>
+    /// Se ejecuta al cambiar la acción
+    /// </summary>
+    private async Task OnAccionChanged(ulong e)
+    {
+        accionSeleccionada = e;
+
+        if (accionSeleccionada > 0)
+        {
+            await CargarCheckboxesPorAccion(accionSeleccionada);
+        }
+        else
+        {
+            listaCheckboxes.Clear();
+        }
+
+        StateHasChanged();
+    }
+
+    // ===== MÉTODOS AUXILIARES =====
+
+    /// <summary>
+    /// Retorna el ActionKey seleccionado en formato "Módulo.Componente.Acción"
+    /// </summary>
+    private string GetSeleccionado()
+    {
+        var modulo = listaModulos.FirstOrDefault(m => m.Id == moduloSeleccionado)?.Texto ?? "";
+        var componente = listaComponentes.FirstOrDefault(c => c.Id == componenteSeleccionado)?.Texto ?? "";
+        var accion = listaAcciones.FirstOrDefault(a => a.Id == accionSeleccionada)?.Texto ?? "";
+
+        actionkey = $"{modulo}.{componente}.{accion}";
+        return actionkey;
+    }
+
+    /// <summary>
+    /// Limpia todos los checkboxes
+    /// </summary>
+    private async Task OnLimpiar()
+    {
+        await Task.Delay(500);
+        NavigationManager.NavigateTo("/paneladmin/actionrole", forceLoad: true);
+    }
+
+    /// <summary>
+    /// Guarda los permisos seleccionados
+    /// </summary>
+    /// 
+    private async Task ObtenerUsuarioActual()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            // Obtener el NameIdentifier (UserId)
+            _usuarioId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+            // También puedes obtener otros datos si los necesitas
+            var rol = user.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+
+        }
+
+    }
+
+    private async Task OnGuardar()
+    {
+        var rolesSeleccionados = listaCheckboxes
+            .Select(c => new
+            {
+                c.Id,
+                c.Seleccionado,
+                c.Texto
+            })
+            .ToList();
+
+        foreach (var rolesSeleccionado in rolesSeleccionados)        
+        {
+            actionRoles = new ActionRoles
+            {
+                key_id = accionSeleccionada,
+                role_id = rolesSeleccionado.Id,
+                modificated_user = _usuarioId ?? "SYSTEM",
+                Activo = rolesSeleccionado.Seleccionado
+            };
+
+            if(!await RolService.SetActionRoles(actionRoles))
+            {
+                noguardado = true;
+                msjExito = "Error al guardar los permisos de : " + rolesSeleccionado.Texto;
+                break;
+            }
+            else
+            {
+                guardado = true;
+                msjExito = "Permisos guardados correctamente ";
+            }
+        }
+
+        await Task.CompletedTask;
+    }
+
+    // ===== INICIALIZACIÓN =====
+
+    /// <summary>
+    /// Inicializa el componente cargando los módulos
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {      
+        await CargarModulos();
+        await ObtenerUsuarioActual();
+        await Task.CompletedTask;
+    }
+}

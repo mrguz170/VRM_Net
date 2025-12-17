@@ -115,7 +115,8 @@ public class ModuleMetadataRepository : IModuleMetadataService
             var actions = _db.ExecuteStoredProcedure<ModuleActionDto>("sp_get_actions", 
                 new Dictionary<string, object>
                 {
-                    { "module_id", moduleId }
+                    { "module_id", moduleId },
+                    {"Opcion",1 }
                 });
             
             // Post-procesamiento: parsear roles de string a List<int>

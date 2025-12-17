@@ -21,7 +21,7 @@
                     <MudText Typo="Typo.h2" Class="text-base font-semibold capitalize text-slate-800 dark:text-slate-100">Lista de Roles</MudText>
                 </div>
 
-                <div class="flex justify-start mb-4">
+                <div class="flex justify-between gap-3 mb-4">
 
                     <button 
                             class="flex items-center gap-2 rounded-md
@@ -36,8 +36,20 @@
                         </p>
                     </button>
 
-                </div>
+                    <div class="space-y-2">
+                    </div>
 
+                    <div class="flex">
+                        <input @bind="terminoBusqueda" @bind:event="oninput" @onkeypress="HandleKeyPress" style="width:35vh;" class=" ltr:rounded-r-none rtl:rounded-l-none ltr:border-r-0 rtl:border-l-0 h-10 form-input" placeholder="Buscar..." type="text" />
+
+                        <MudButton OnClick="BuscarRol" type="button" Class="btn flex items-center gap-2 bg-purple h-10 border-purple ltr:rounded-l-none rtl:rounded-r-none ltr:rounded-r rtl:rounded-l text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]">
+                            <span class="mud-icon-root mud-icon-size-medium ri-search-2-line" aria-hidden="true" role="img"></span>
+                            @* Buscar *@
+                        </MudButton>
+                    </div>
+
+                </div>
+     
                 @if (isLoading)
                 {
                     <div class="flex items-center justify-center py-8">
@@ -51,9 +63,8 @@
                 else if (roles != null && roles.Any())
                 {
                     <div class="overflow-auto">
-                        <MudTable Class="min-w-[640px] text-left w-full" Items="@roles" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info">
-                            <HeaderContent>
-                                <Component />
+                        <MudTable Class="min-w-[640px] text-left w-full" Items="@listRolesPaginados" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info">
+                            <HeaderContent>                                
                                 <MudTh>ID</MudTh>
                                 <MudTh>Nombre</MudTh>
                                 <MudTh>Descripción</MudTh>
@@ -84,7 +95,7 @@
                                 <MudTd DataLabel="Fecha de Creación">@context.Fecha</MudTd>
                                 <MudTd DataLabel="Acción">
                                     <div class="flex items-center gap-3">
-                                        <button class="transition duration-200 ease-linear text-muted hover:text-purple" @onclick="() => EditarRol(context)" title="Editar">
+                                        <button class="transition duration-200 ease-linear text-muted hover:text-purple" @onclick="() => EditarRol(context.Id)" title="Editar">
                                             <i class="ri-edit-line"></i>
                                         </button>
                                     </div>
@@ -92,14 +103,79 @@
                             </RowTemplate>
                         </MudTable>
                     </div>
-                    <div class="flex items-center gap-3 mt-4">
-                        <MudText Class="text-muted grow">Mostrando <b>@roles.Count</b> resultados</MudText>
-                    </div>
                 }
                 else
                 {
                     <MudAlert Severity="Severity.Warning">No hay roles disponibles en el sistema.</MudAlert>
                 }
+
+
+                @if (!listRolesFiltrados.Any())
+                {
+                    <div class="flex flex-col items-center justify-center py-8 text-muted">
+                        <span class="ri-search-line text-4xl mb-2"></span>
+                        <MudText Class="text-lg">No se encontraron resultados para "@terminoBusqueda"</MudText>
+                    </div>
+                }
+
+                <div class="flex items-center gap-3 mt-4">
+                    <MudText Class="text-muted grow">Mostrando <b>@listRolesPaginados.Count</b> de <b>@listRolesFiltrados.Count</b> Resultados</MudText>
+                    <ul class="inline-flex items-center gap-1 shrink-0">
+                        <li>
+                            <button type="button"
+                                    @onclick="IrAPrimeraPagina"
+                                    disabled="@(paginaActual == 1)"
+                                    class="flex justify-center px-2 py-2 transition border rounded @(paginaActual == 1 ? "text-purple/50 cursor-not-allowed border-purple/5 bg-purple/5" : "text-purple hover:text-white hover:bg-purple border-purple/5 hover:border-purple bg-purple/10")">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 mx-auto rtl:rotate-180">
+                                    <path d="M4.83594 12.0001L11.043 18.2072L12.4573 16.793L7.66436 12.0001L12.4573 7.20718L11.043 5.79297L4.83594 12.0001ZM10.4858 12.0001L16.6929 18.2072L18.1072 16.793L13.3143 12.0001L18.1072 7.20718L16.6929 5.79297L10.4858 12.0001Z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button"
+                                    @onclick="IrAPaginaAnterior"
+                                    disabled="@(paginaActual == 1)"
+                                    class="flex justify-center px-2 py-2 transition border rounded @(paginaActual == 1 ? "text-purple/50 cursor-not-allowed border-purple/5 bg-purple/5" : "text-purple hover:text-white hover:bg-purple border-purple/5 hover:border-purple bg-purple/10")">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 mx-auto rtl:rotate-180">
+                                    <path d="M10.8284 12.0007L15.7782 16.9504L14.364 18.3646L8 12.0007L14.364 5.63672L15.7782 7.05093L10.8284 12.0007Z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </li>
+
+                        @foreach (var numeroPagina in ObtenerPaginasVisibles())
+                        {
+                            var pagina = numeroPagina;
+                            <li>
+                                <button type="button"
+                                        @onclick="() => IrAPagina(pagina)"
+                                        class="flex justify-center px-3.5 py-2 rounded transition @(paginaActual == pagina ? "text-white bg-purple border border-purple" : "text-purple hover:text-white hover:bg-purple border border-purple/5 hover:border-purple bg-purple/10")">
+                                    @pagina
+                                </button>
+                            </li>
+                        }
+
+                        <li>
+                            <button type="button"
+                                    @onclick="IrAPaginaSiguiente"
+                                    disabled="@(paginaActual == totalPaginas)"
+                                    class="flex justify-center px-2 py-2 transition border rounded @(paginaActual == totalPaginas ? "text-purple/50 cursor-not-allowed border-purple/5 bg-purple/5" : "text-purple hover:text-white hover:bg-purple border-purple/5 hover:border-purple bg-purple/10")">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 mx-auto rtl:rotate-180">
+                                    <path d="M13.1714 12.0007L8.22168 7.05093L9.63589 5.63672L15.9999 12.0007L9.63589 18.3646L8.22168 16.9504L13.1714 12.0007Z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button"
+                                    @onclick="IrAUltimaPagina"
+                                    disabled="@(paginaActual == totalPaginas)"
+                                    class="flex justify-center px-2 py-2 transition border rounded @(paginaActual == totalPaginas ? "text-purple/50 cursor-not-allowed border-purple/5 bg-purple/5" : "text-purple hover:text-white hover:bg-purple border-purple/5 hover:border-purple bg-purple/10")">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 mx-auto rtl:rotate-180">
+                                    <path d="M19.1643 12.0001L12.9572 5.79297L11.543 7.20718L16.3359 12.0001L11.543 16.793L12.9572 18.2072L19.1643 12.0001ZM13.5144 12.0001L7.30728 5.79297L5.89307 7.20718L10.686 12.0001L5.89307 16.793L7.30728 18.2072L13.5144 12.0001Z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </div>
             
         </div>
@@ -111,17 +187,28 @@
     private List<Rol>? roles;
     private bool isLoading = true;
     private string? errorMessage;
-    private int rol_selected;
+    private string _terminoBusqueda = string.Empty;
+    private List<Rol> listRoles = new List<Rol>();
+    private List<Rol> listRolesFiltrados = new List<Rol>();
+    private List<Rol> listRolesPaginados = new List<Rol>();
+
+
+    private int paginaActual = 1;
+    private const int elementosPorPagina = 12;
+    private int totalPaginas => (int)Math.Ceiling((double)listRolesFiltrados.Count / elementosPorPagina);
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             isLoading = true;
+            errorMessage = null;
 
             // Cargar todos los roles
             roles = await RolService.GetAllAsync();
-
+            listRoles = roles;
+            listRolesFiltrados = listRoles;
+            ActualizarPaginacion();
         }
         catch (Exception ex)
         {
@@ -133,13 +220,129 @@
         }
     }
 
-    private void EditarRol(Rol rol)
+    private void EditarRol(int rol)
     {
-        // TODO: Implementar lógica de edición
+        string rol_selected = rol.ToString();   
+        NavigationManager.NavigateTo($"/paneladmin/crearrol/{rol_selected}");
     }
 
     private void Crear()
     {
         NavigationManager.NavigateTo("/paneladmin/crearrol");
+    }
+
+    private void BuscarRol()
+    {
+        if (string.IsNullOrWhiteSpace(terminoBusqueda))
+        {
+            listRolesFiltrados = listRoles;
+        }
+        else
+        {
+            var busqueda = terminoBusqueda.Trim().ToLower();
+
+            listRolesFiltrados = listRoles.Where(u =>
+                (!string.IsNullOrEmpty(u.Nombre) && u.Nombre.ToLower().Contains(busqueda))
+            ).ToList();
+        }
+
+        paginaActual = 1;
+        ActualizarPaginacion();
+    }
+
+    private void ActualizarPaginacion()
+    {
+        var skip = (paginaActual - 1) * elementosPorPagina;
+        listRolesPaginados = listRolesFiltrados
+            .Skip(skip)
+            .Take(elementosPorPagina)
+            .ToList();
+    }
+
+    private void IrAPrimeraPagina()
+    {
+        if (paginaActual != 1)
+        {
+            paginaActual = 1;
+            ActualizarPaginacion();
+        }
+    }
+
+    private void IrAPaginaAnterior()
+    {
+        if (paginaActual > 1)
+        {
+            paginaActual--;
+            ActualizarPaginacion();
+        }
+    }
+
+    private void IrAPaginaSiguiente()
+    {
+        if (paginaActual < totalPaginas)
+        {
+            paginaActual++;
+            ActualizarPaginacion();
+        }
+    }
+
+    private void IrAUltimaPagina()
+    {
+        if (paginaActual != totalPaginas)
+        {
+            paginaActual = totalPaginas;
+            ActualizarPaginacion();
+        }
+    }
+
+    private void IrAPagina(int numeroPagina)
+    {
+        if (numeroPagina >= 1 && numeroPagina <= totalPaginas)
+        {
+            paginaActual = numeroPagina;
+            ActualizarPaginacion();
+        }
+    }
+
+    private List<int> ObtenerPaginasVisibles()
+    {
+        var paginas = new List<int>();
+        var rangoVisible = 3;
+
+        var inicio = Math.Max(1, paginaActual - rangoVisible / 2);
+        var fin = Math.Min(totalPaginas, inicio + rangoVisible - 1);
+
+        if (fin - inicio < rangoVisible - 1)
+        {
+            inicio = Math.Max(1, fin - rangoVisible + 1);
+        }
+
+        for (int i = inicio; i <= fin; i++)
+        {
+            paginas.Add(i);
+        }
+
+        return paginas;
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            BuscarRol();
+        }
+    }
+
+    private string terminoBusqueda
+    {
+        get => _terminoBusqueda;
+        set
+        {
+            if (_terminoBusqueda != value)
+            {
+                _terminoBusqueda = value;
+                BuscarRol();
+            }
+        }
     }
 }
