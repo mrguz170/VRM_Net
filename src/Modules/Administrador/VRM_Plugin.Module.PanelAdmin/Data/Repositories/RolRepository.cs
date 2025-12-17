@@ -170,7 +170,7 @@ public class RolRepository : IRolRepository
         }
         catch (Exception ex)
         {
-            return Task.FromResult(roles);
+            return await Task.FromResult(new List<RolDto>());
         }
     }
 
