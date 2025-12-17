@@ -1,4 +1,5 @@
 ﻿@rendermode InteractiveServer
+@implements IDisposable
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.JSInterop
 @using VRM_Plugin.Core.Abstractions
@@ -63,6 +64,7 @@
                                 var children = _visibleComponents.Where(c => c.ParentId == rootComponent.ComponentId && !string.IsNullOrEmpty(c.Route)).ToList();
                                 var menuId = $"module_{rootComponent.ComponentId}";
                                 
+                                @* Mostrar dropdown si hay hijos visibles *@
                                 @if (children.Any())
                                 {
                                     <li class="menu nav-item">
@@ -89,7 +91,6 @@
                                                 <li>
                                                     <NavLink href="@child.Route">
                                                         <div class="flex items-center">
-                                                            @* ✅ Mostrar icono SOLO si ShowAllIcons = true *@
                                                             @if (_showAllIcons && !string.IsNullOrEmpty(child.Icon))
                                                             {
                                                                 <i class="@child.Icon w-5 text-lg mr-2"></i>
@@ -102,6 +103,7 @@
                                         </ul>
                                     </li>
                                 }
+                                @* Mostrar como item simple si tiene Route propio *@
                                 else if (!string.IsNullOrEmpty(rootComponent.Route))
                                 {
                                     <li class="menu nav-item">
@@ -111,6 +113,19 @@
                                                 <span class="ltr:pl-1.5 rtl:pr-1.5">@rootComponent.Name</span>
                                             </div>
                                         </NavLink>
+                                    </li>
+                                }
+                                @* Mostrar padre sin dropdown si NO tiene Route pero tiene permiso (caso FINANZAS sin hijos visibles) *@
+                                else
+                                {
+                                    <li class="menu nav-item">
+                                        <div class="nav-link group opacity-60 cursor-not-allowed" title="Sin componentes accesibles">
+                                            <div class="flex items-center">
+                                                <i class="@rootComponent.Icon w-5 text-2xl"></i>
+                                                <span class="ltr:pl-1.5 rtl:pr-1.5">@rootComponent.Name</span>
+                                                <span class="ml-2 text-xs text-muted">(sin submenús)</span>
+                                            </div>
+                                        </div>
                                     </li>
                                 }
                             }
@@ -264,79 +279,95 @@
     private List<ModuleComponentDto>? _visibleComponents;
     private bool _isLoading = true;
     private string? _currentUser;
+    private bool _showAllIcons = true;
 
-    // Bandera de configuración para visibilidad de iconos 
-    private bool _showAllIcons = true; // Por defecto: mostrar todos los iconos
+    protected override void OnInitialized()
+    {
+        // Suscribirse a cambios de autenticación
+        AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+    }
+
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        await InvokeAsync(async () =>
+        {
+            _isLoading = true;
+            StateHasChanged();
+            
+            // Recargar metadata cuando cambia autenticación (login/logout)
+            await ModuleManager.ReloadModuleMetadataAsync();
+            
+            await LoadVisibleComponentsAsync();
+            
+            _isLoading = false;
+            StateHasChanged();
+        });
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        var startTime = DateTime.UtcNow;
-        
         try
         {
-            _isLoading = true;
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
 
-            // Obtener usuario actual para logging
+            // Si el usuario ya está autenticado (login previo), recargar metadata
+            if (isAuthenticated)
+            {
+                await ModuleManager.ReloadModuleMetadataAsync();
+            }
+            
+            await LoadVisibleComponentsAsync();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadVisibleComponentsAsync()
+    {
+        try
+        {
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
             _currentUser = user.Identity?.Name ?? "Anonymous";
 
-            // Logger.LogInformation(
-            //     "[Sidebar] Iniciando carga de componentes visibles para usuario: {User}",
-            //     _currentUser);
-
-            // ✅ Obtener componentes visibles usando el servicio inyectado
+            // Solo obtener componentes filtrados (sin recargar desde BD)
             _visibleComponents = await ModuleAuth.GetVisibleComponentsAsync();
-
-            var componentsCount = _visibleComponents?.Count ?? 0;
-            var rootCount = _visibleComponents?.Count(c => c.ParentId == null) ?? 0;
-            var childCount = _visibleComponents?.Count(c => c.ParentId != null) ?? 0;
-
-            // Logger.LogInformation(
-            //     "[Sidebar] Componentes cargados para usuario {User}: Total={TotalCount}, Raíz={RootCount}, Hijos={ChildCount}, Tiempo={ElapsedMs}ms",
-            //     _currentUser,
-            //     componentsCount,
-            //     rootCount,
-            //     childCount,
-            //     (DateTime.UtcNow - startTime).TotalMilliseconds);
-
-            
 
             if (!_visibleComponents?.Any() ?? true)
             {
                 Logger.LogWarning(
-                    "[Sidebar] No se encontraron componentes visibles para usuario {User}. " +
-                    "Verificar permisos o configuración de módulos.",
+                    "[Sidebar] No se encontraron componentes visibles para usuario {User}",
                     _currentUser);
             }
-
-            _isLoading = false;
         }
         catch (UnauthorizedAccessException ex)
         {
             Logger.LogWarning(ex,
-                "[Sidebar] Usuario {User} no tiene permisos para acceder a componentes",
+                "[Sidebar] Usuario {User} no tiene permisos",
                 _currentUser ?? "Unknown");
             
             _visibleComponents = new List<ModuleComponentDto>();
-            _isLoading = false;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex,
-                "[Sidebar] Error crítico al cargar componentes visibles para usuario {User}. " +
-                "Tiempo transcurrido: {ElapsedMs}ms",
-                _currentUser ?? "Unknown",
-                (DateTime.UtcNow - startTime).TotalMilliseconds);
+                "[Sidebar] Error al cargar componentes para usuario {User}",
+                _currentUser ?? "Unknown");
             
             _visibleComponents = new List<ModuleComponentDto>();
-            _isLoading = false;
             
-            // Re-throw si es un error crítico del sistema
             if (ex is OutOfMemoryException || ex is StackOverflowException)
             {
                 throw;
             }
         }
+    }
+
+    public void Dispose()
+    {
+        AuthStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
 }

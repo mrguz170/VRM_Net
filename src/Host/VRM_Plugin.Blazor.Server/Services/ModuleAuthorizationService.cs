@@ -27,7 +27,7 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
     }
 
     /// <summary>
-    /// Comprueba si el usuario actual puede ejecutar <paramref name="actionKey"/> en <paramref name="module"/>.
+    /// Comprueba si el usuario actual puede ejecutar una acción en un módulo
     /// </summary>
     public async Task<bool> CanExecuteActionAsync(IModule module, string actionKey)
     {
@@ -36,45 +36,39 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
             if (module == null || string.IsNullOrWhiteSpace(actionKey))
                 return false;
 
-            var authState = await _authStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            if (!user.Identity?.IsAuthenticated ?? true)
+            var (isAuthenticated, userPermissionIds, userName) = await GetUserPermissionsAsync();
+            
+            if (!isAuthenticated || !userPermissionIds.Any())
             {
-                _logger.LogDebug("Usuario no autenticado para acción {ActionKey}", actionKey);
-                return false;
-            }
-
-            var userPermissionIds = GetUserPermissionIds(user);
-            if (!userPermissionIds.Any())
-            {
-                _logger.LogDebug("Usuario {UserName} no tiene permisos para acción {ActionKey}", user.Identity?.Name, actionKey);
+                _logger.LogDebug("Usuario {User} no autenticado o sin permisos para {ActionKey}", userName, actionKey);
                 return false;
             }
 
             var actions = module.GetActions();
             var action = actions.FirstOrDefault(a => a.ActionKey.Equals(actionKey, StringComparison.OrdinalIgnoreCase) && a.IsActive);
+            
             if (action == null)
             {
-                _logger.LogDebug("Acción {ActionKey} no encontrada en módulo {ModuleName}", actionKey, module.ModuleName);
+                _logger.LogDebug("Acción {ActionKey} no encontrada en {Module}", actionKey, module.ModuleName);
                 return false;
             }
 
-            var has = action.RequiredPermissionIds.Any(req => userPermissionIds.Contains(req));
-            if (!has)
+            var hasPermission = action.RequiredPermissionIds.Any(req => userPermissionIds.Contains(req));
+            
+            if (!hasPermission)
             {
-                _logger.LogWarning("Usuario {User} sin permisos para {ActionKey}. UserPerms=[{UserPerms}] Required=[{Req}]",
-                    user.Identity?.Name,
-                    actionKey,
+                _logger.LogWarning(
+                    "Usuario {User} sin permisos para {ActionKey}. UserPerms=[{UserPerms}] Required=[{Req}]",
+                    userName, actionKey,
                     string.Join(", ", userPermissionIds),
                     string.Join(", ", action.RequiredPermissionIds));
             }
 
-            return has;
+            return hasPermission;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error verificando permiso para {ActionKey} en módulo {Module}", actionKey, module?.ModuleName);
+            _logger.LogError(ex, "Error verificando permiso {ActionKey} en {Module}", actionKey, module?.ModuleName);
             return false;
         }
     }
@@ -86,93 +80,120 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
     {
         try
         {
-            var authState = await _authStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            if (!user.Identity?.IsAuthenticated ?? true)
+            var (isAuthenticated, userPermissionIds, userName) = await GetUserPermissionsAsync();
+            
+            if (!isAuthenticated)
             {
-                _logger.LogWarning("Usuario no autenticado intentó acceder a IdComponent={IdComponent}", idComponent);
+                _logger.LogWarning("Usuario no autenticado intentó acceder a componente {ComponentId}", idComponent);
                 return false;
             }
-
-            var userPermissionIds = GetUserPermissionIds(user);
 
             if (!userPermissionIds.Any())
             {
-                _logger.LogWarning("Usuario {UserName} no tiene permisos asignados", user.Identity.Name);
+                _logger.LogWarning("Usuario {User} no tiene permisos asignados", userName);
                 return false;
             }
 
-            // Buscar el componente en todos los módulos
+            // Buscar componente en todos los módulos
             foreach (var module in _moduleManager.GetAllModules())
             {
-                var component = module.GetComponents()
-                    .FirstOrDefault(c => c.ComponentId == idComponent && c.IsActive);
+                var allComponents = module.GetComponents();
+                var component = allComponents.FirstOrDefault(c => c.ComponentId == idComponent && c.IsActive);
 
                 if (component != null)
                 {
-                    return CheckComponentPermission(component, userPermissionIds, module.GetComponents());
+                    return CheckComponentPermission(component, userPermissionIds, allComponents);
                 }
             }
 
-            _logger.LogWarning("Componente {IdComponent} no encontrado", idComponent);
+            _logger.LogWarning("Componente {ComponentId} no encontrado", idComponent);
             return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al verificar acceso a componente {IdComponent}", idComponent);
+            _logger.LogError(ex, "Error verificando acceso a componente {ComponentId}", idComponent);
             return false;
         }
     }
 
     /// <summary>
-    /// Implementación de permisos para componentes IFM
+    /// Obtiene componentes visibles para el usuario actual según sus permisos
     /// </summary>
     public async Task<List<ModuleComponentDto>> GetVisibleComponentsAsync()
     {
         try
         {
-            var authState = await _authStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            if (!user.Identity?.IsAuthenticated ?? true)
+            var (isAuthenticated, userPermissionIds, userName) = await GetUserPermissionsAsync();
+            
+            if (!isAuthenticated)
+            {
+                _logger.LogDebug("Usuario no autenticado - lista vacía");
                 return new List<ModuleComponentDto>();
+            }
 
-            var userPermissionIds = GetUserPermissionIds(user);
+            if (!userPermissionIds.Any())
+            {
+                _logger.LogWarning("Usuario {User} sin roles asignados", userName);
+                return new List<ModuleComponentDto>();
+            }
+
             var visibleComponents = new List<ModuleComponentDto>();
 
             foreach (var module in _moduleManager.GetAllModules())
             {
-                var components = module.GetComponents();
+                var allComponents = module.GetComponents();
+                var menuComponents = allComponents.Where(c => c.IsActive && c.ShowInMenu);
 
-                foreach (var component in components.Where(c => c.IsActive && c.ShowInMenu))
+                foreach (var component in menuComponents)
                 {
-                    if (CheckComponentPermission(component, userPermissionIds, components))
+                    if (CheckComponentPermission(component, userPermissionIds, allComponents))
                     {
                         visibleComponents.Add(component);
                     }
                 }
             }
 
+            _logger.LogDebug(
+                "Usuario {User} con roles [{Roles}] ? {Count} componentes",
+                userName,
+                string.Join(", ", userPermissionIds),
+                visibleComponents.Count);
+
             return visibleComponents.OrderBy(c => c.MenuOrder).ToList();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al obtener componentes visibles");
+            _logger.LogError(ex, "Error obteniendo componentes visibles");
             return new List<ModuleComponentDto>();
         }
     }
 
-    
-
     // ==================== MÉTODOS PRIVADOS ====================
 
     /// <summary>
-    /// Extrae los IDs de permisos del usuario desde sus claims
+    /// Obtiene usuario autenticado y sus permisos (centralizado)
+    /// </summary>
+    private async Task<(bool isAuthenticated, List<int> permissionIds, string userName)> GetUserPermissionsAsync()
+    {
+        var authState = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            return (false, new List<int>(), "Anonymous");
+        }
+
+        var userName = user.Identity.Name ?? "Unknown";
+        var permissionIds = GetUserPermissionIds(user);
+
+        return (true, permissionIds, userName);
+    }
+
+    /// <summary>
+    /// Extrae los IDs de roles del usuario desde claims
     /// </summary>
     private List<int> GetUserPermissionIds(ClaimsPrincipal user)
     {
-        // Opción 1: Si los permisos están en claims como "Permission"
         var permissionClaims = user.Claims
             .Where(c => c.Type == "RoleId")
             .Select(c => c.Value)
@@ -185,27 +206,30 @@ public class ModuleAuthorizationService : IModuleAuthorizationService
     }
 
     /// <summary>
-    /// Verifica permisos de componente con herencia desde el padre
+    /// Verifica permisos de componente sin herencia del padre
     /// </summary>
     private bool CheckComponentPermission(ModuleComponentDto component, List<int> userPermissionIds, List<ModuleComponentDto> allComponents)
     {
-        // Si el componente tiene permisos definidos, usarlos
-        if (component.RequiredPermissionIds.Any())
+        // Componente público (sin restricciones)
+        if (component.RequiredPermissionIds == null)
         {
-            return component.RequiredPermissionIds.Any(reqPermId => userPermissionIds.Contains(reqPermId));
+            return true;
         }
 
-        // Si no tiene permisos y tiene padre, heredar del padre
-        if (component.ParentId.HasValue)
+        // Sin roles asignados ? denegado
+        if (!component.RequiredPermissionIds.Any())
         {
-            var parent = allComponents.FirstOrDefault(c => c.ComponentId == component.ParentId.Value);
-            if (parent != null)
-            {
-                return CheckComponentPermission(parent, userPermissionIds, allComponents);
-            }
+            return false;
         }
 
-        // Si no tiene permisos ni padre, es público
-        return true;
+        // ? Usuario tiene al menos uno de los roles requeridos
+        if (component.RequiredPermissionIds.Any(reqPermId => userPermissionIds.Contains(reqPermId)))
+        {
+            return true;
+        }
+
+        // ? NO heredar del padre - cada componente es independiente
+        // Si el componente tiene permisos explícitos pero el usuario no los cumple ? DENEGAR
+        return false;
     }
 }

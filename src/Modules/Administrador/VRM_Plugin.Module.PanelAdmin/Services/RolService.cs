@@ -156,5 +156,34 @@ public class RolService : IRolService
             created_user_id = u.modificated_user,
             Activo = u.Activo
         };
+
+
+    /// <summary>
+    /// Actualiza permisos de componentes (múltiples a la vez)
+    /// </summary>
+    public async Task<bool> UpdateComponentPermissionsAsync(Dictionary<int, List<int>> componentRoles, string userId)
+    {
+        try
+        {
+            foreach (var kvp in componentRoles)
+            {
+                var componentId = kvp.Key;
+                var roleIds = kvp.Value;
+                
+                var resultado = await _repo.UpdateComponentRolesAsync(componentId, roleIds, userId);
+                
+                if (!resultado)
+                {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al actualizar permisos: {ex.Message}");
+            return false;
+        }
     }
 }

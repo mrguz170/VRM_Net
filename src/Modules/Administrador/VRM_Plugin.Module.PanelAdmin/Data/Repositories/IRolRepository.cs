@@ -46,5 +46,6 @@ public interface IRolRepository
     /// </summary>
     Task<List<RolDto>> GetRolesByActionAsync(ulong actionKeyId);
 
+    Task<List<RolDto>> Getall();
 }
  

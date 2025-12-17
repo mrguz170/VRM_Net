@@ -1,0 +1,656 @@
+﻿@page "/paneladmin/componentroles"
+@using VRM_Plugin.Core.Abstractions.Data.DTOs
+@using VRM_Plugin.Core.Abstractions.Services
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject PanelAdminModule CurrentModule
+@inject IRolService RolService
+@inject IModuleManager ModuleManager
+@inject IModuleMetadataService MetadataService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ICurrentUserService CurrentUserService
+
+
+<CascadingValue Value="@CurrentModule" Name="CurrentModule">
+
+    <PageHeader Title="@CurrentModule.DisplayName" pTitle="Permisos Componentes-Roles"></PageHeader>
+
+    <div class="flex flex-col gap-4 min-h-[calc(100vh-212px)]">
+        <div class="grid grid-cols-1 gap-4">
+            <div class="col-span-12 gap-6 p-5 bg-white border rounded dark:bg-darklight dark:border-darkborder border-black/10">
+
+                @if (isLoading)
+                {
+                    <div class="flex items-center justify-center py-8">
+                        <MudProgressCircular Color="Color.Info" Indeterminate="true"></MudProgressCircular>
+                        <MudText Class="ml-3">Cargando datos...</MudText>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+                }
+                else
+                {
+                    <div class="space-y-6">
+                        <!-- Selector de Módulo -->
+                        <div class="space-y-2">
+                            <MudText Class="text-lg font-semibold">Seleccionar Módulo: <span class="text-red-500"></span></MudText>
+                            <select value="@moduloSeleccionadoId" 
+                                    @onchange="OnModuloSelectionChanged" 
+                                    class="form-select w-full">
+                                <option value="0">-- Seleccione un módulo --</option>
+                                @foreach (var modulo in modulos)
+                                {
+                                    <option value="@modulo.ModuleId">@modulo.DisplayName (@modulo.ModuleName)</option>
+                                }
+                            </select>
+                        </div>
+
+                        @if (moduloSeleccionadoId > 0 && componentesConRoles.Any())
+                        {
+                            <!-- Cards de Componentes con Tags -->
+                            <MudText Typo="Typo.h6" Class="mt-4 text-lg font-semibold col-span-full">Asignar permisos por componente:</MudText>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                
+                                @foreach (var comp in componentesConRoles.Values)
+                                {
+                                    <div class=" bg-info/10 text-info p-4 mt-4 border rounded-lg  dark:bg-darklight hover:shadow-md transition-shadow">
+                                        <!-- Header del componente -->
+                                        <div class="flex items-start justify-between mb-3">
+                                            <div>
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <i class="@comp.Icon text-4xl"></i>
+                                                    <MudText Typo="Typo.h4" Class="font-semibold">
+                                                        @comp.Name
+                                                    </MudText>
+                                                    <MudText Class="text-md text-purple">
+                                                    
+                                                        @* <i class="@comp.Icon w-5 text-2xl"></i> *@
+                                                        @if (@comp.Route != "")
+                                                        {
+                                                            
+                                                            <MudText Typo="Typo.h4" Class="font-semibold">
+                                                                Url:
+                                                                @comp.Route 
+                                                            </MudText>                                                            
+                                                        }
+
+                                                    </MudText>
+
+                                                </div>
+                                            </div>
+                                            
+                                            @if (comp.RolesConAcceso.Count == 0)
+                                            {
+                                                <span class="text-warning text-sm">⚠️ Sin acceso</span>
+                                            }
+                                            else if (comp.RolesConAcceso.Count == 1)
+                                            {
+                                                <span class="text-info text-sm">ℹ️ Solo 1 rol</span>
+                                            }
+                                        </div>
+                                        
+                                        <!-- Roles asignados -->
+                                        <div class="mb-2">
+                                            <MudText Class="text-sm font-semibold text-black mb-2">Roles con acceso:</MudText>
+                                        </div>
+                                        
+                                        <div class="flex flex-wrap gap-2 items-center">
+                                            @if (comp.RolesConAcceso.Count == 0)
+                                            {
+                                                <span class="text-muted text-sm italic">(Ninguno)</span>
+                                            }
+                                            else
+                                            {
+                                                @foreach (var rol in comp.RolesConAcceso)
+                                                {
+                                                    @* <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple text-white text-sm bg-purple/10 text-purple border border-purple/20 hover:bg-purple/20 transition-colors">                                                        *@
+                                                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple text-white text-sm  border border-purple/20 hover:bg-purple/20 transition-colors">
+                                                            @rol.Nombre
+                                                        <button @onclick="() => RemoverRol(comp.ComponentId, rol.RolId)" 
+                                                                class="hover:text-danger transition-colors"
+                                                                title="Remover @rol.Nombre">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                }
+                                            }
+                                            
+                                            <!-- Botón Agregar -->
+                                            <button @onclick="() => AbrirAgregarRol(comp.ComponentId)" 
+                                                    class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm  text-success border border-success hover:bg-success/20 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                                Agregar
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Botones de Acción -->
+                            <div class="flex justify-end gap-3 mt-6">
+                                <MudButton type="button" 
+                                           Class="btn bg-light border-light text-black hover:bg-light/[0.85] hover:border-light/[0.85]" 
+                                           OnClick="ToggleModalCancelar">
+                                    Cancelar
+                                </MudButton>
+                                <MudButton type="button" 
+                                           Class="btn bg-purple border-purple text-white hover:bg-purple/[0.85] hover:border-purple/[0.85]" 
+                                           OnClick="ToggleModalGuardar">
+                                    Guardar Cambios
+                                </MudButton>
+                            </div>
+                        }
+                        else if (moduloSeleccionadoId > 0 && !componentesConRoles.Any())
+                        {
+                            <MudAlert Severity="Severity.Info">
+                                El módulo seleccionado no tiene componentes registrados.
+                            </MudAlert>
+                        }
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Agregar Rol -->
+    @if (modalAgregarRolOpen)
+    {
+        <div class="fixed inset-0 bg-black/80 z-[99999] overflow-y-auto dark:bg-dark/90" @onclick="CerrarModalAgregarRol">
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="relative w-full max-w-lg p-0 my-8 overflow-hidden bg-white border rounded-lg border-black/10 dark:bg-darklight dark:border-darkborder" @onclick:stopPropagation>
+
+                    <div class="flex items-center justify-between px-5 py-3 bg-white border-b border-black/10 dark:bg-darklight dark:border-darkborder">
+                        <MudText Typo="Typo.h5" Class="text-lg font-semibold">Agregar Rol</MudText>
+                        <MudButton Class="text-muted hover:text-black dark:hover:text-white" OnClick="CerrarModalAgregarRol">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </MudButton>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <!-- Buscador -->
+                        <input type="text" 
+                               @bind="searchRol" 
+                               @bind:event="oninput"
+                               placeholder="🔍 Buscar rol..."
+                               class="form-input w-full" />
+                        
+                        <!-- Lista de roles disponibles -->
+                        <div class="max-h-64 overflow-y-auto space-y-2">
+                            @foreach (var rol in ObtenerRolesDisponibles())
+                            {
+                                <label class="flex items-center gap-3 p-3 rounded hover:bg-gray-100 dark:hover:bg-darklight cursor-pointer transition-colors">
+                                    <input type="checkbox" 
+                                           checked="@rolesSeleccionadosTemp.Contains(rol.Id)"
+                                           @onchange="@((e) => ToggleRolSeleccionado(rol.Id, (bool)e.Value!))"
+                                           class="w-5 h-5" />
+                                    <span>@rol.Nombre</span>
+                                </label>
+                            }
+                        </div>
+                        
+                        @if (!ObtenerRolesDisponibles().Any())
+                        {
+                            <MudText Class="text-muted text-center py-4">
+                                @(string.IsNullOrWhiteSpace(searchRol) ? "Todos los roles ya están asignados" : "No se encontraron roles")
+                            </MudText>
+                        }
+                        
+                        <div class="flex items-center justify-end gap-4 pt-4 border-t border-black/10 dark:border-darkborder">
+                            <MudButton Class="btn bg-light border-light text-black hover:bg-light/[0.85]" 
+                                       OnClick="CerrarModalAgregarRol">
+                                Cancelar
+                            </MudButton>
+                            <MudButton Class="btn bg-purple border-purple text-white hover:bg-purple/[0.85]" 
+                                       OnClick="ConfirmarAgregarRoles"
+                                       Disabled="@(!rolesSeleccionadosTemp.Any())">
+                                Agregar (@rolesSeleccionadosTemp.Count)
+                            </MudButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Modal: Cancelar cambios -->
+    @if (modalCancelarOpen)
+    {
+        <div class="fixed inset-0 bg-black/80 z-[99999] overflow-y-auto dark:bg-dark/90">
+            <div class="flex items-center justify-center min-h-screen px-4" @onclick="CloseModalCancelar">
+                <div class="relative w-full max-w-lg p-0 my-8 overflow-hidden bg-white border rounded-lg border-black/10 dark:bg-darklight dark:border-darkborder" @onclick:stopPropagation>
+                    <div class="flex items-center justify-between px-5 py-3 bg-white border-b border-black/10 dark:bg-darklight dark:border-darkborder">
+                        <MudText Typo="Typo.h5" Class="text-lg font-semibold text-slate-800 dark:text-slate-100">Descartar cambios</MudText>
+                        <MudButton type="button" Class="text-muted hover:text-black dark:hover:text-white" OnClick="CloseModalCancelar">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </MudButton>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <MudText Class="text-muted">Si continúas, se perderán los cambios realizados en los permisos</MudText>
+                        <div class="flex items-center justify-end gap-4">
+                            <MudButton type="button" Class="btn text-danger border-danger hover:bg-danger hover:text-white"
+                                       OnClick="CloseModalCancelar">
+                                Volver
+                            </MudButton>
+                            <MudButton type="button" Class="btn text-purple border-purple hover:bg-purple hover:text-white"
+                                       OnClick="Cancelar">
+                                Descartar
+                            </MudButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Modal: Confirmar guardado -->
+    @if (modalGuardarOpen)
+    {
+        <div class="fixed inset-0 bg-black/80 z-[99999] overflow-y-auto dark:bg-dark/90">
+            <div class="flex items-center justify-center min-h-screen px-4" @onclick="CloseModalGuardar">
+                <div class="relative w-full max-w-lg p-0 my-8 overflow-hidden bg-white border rounded-lg border-black/10 dark:bg-darklight dark:border-darkborder" @onclick:stopPropagation>
+                    <div class="flex items-center justify-between px-5 py-3 bg-white border-b border-black/10 dark:bg-darklight dark:border-darkborder">
+                        <MudText Typo="Typo.h5" Class="text-lg font-semibold">Confirmar cambios</MudText>
+                        <MudButton Class="text-muted hover:text-black dark:hover:text-white" OnClick="CloseModalGuardar">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </MudButton>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <MudText Class="text-muted">¿Está seguro de guardar los cambios en los permisos de componentes?</MudText>
+                        <div class="flex items-center justify-end gap-4">
+                            <MudButton Class="btn text-danger border-danger hover:bg-danger hover:text-white" 
+                                       OnClick="CloseModalGuardar">
+                                Cancelar
+                            </MudButton>
+                            <MudButton Class="btn text-purple border-purple hover:bg-purple hover:text-white" 
+                                       OnClick="GuardarCambios" Disabled="@guardandoCambios">
+                                @if (guardandoCambios)
+                                {
+                                    <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
+                                    <span>Guardando...</span>
+                                }
+                                else
+                                {
+                                    <span>Confirmar</span>
+                                }
+                            </MudButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Modal: Éxito -->
+    @if (modalExitoOpen)
+    {
+        <div class="fixed inset-0 bg-black/80 z-[99999] overflow-y-auto dark:bg-dark/90">
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="relative w-full max-w-lg p-0 my-8 overflow-hidden bg-white border rounded-lg border-black/10 dark:bg-darklight dark:border-darkborder">
+                    <div class="flex items-center justify-between px-5 py-3 bg-success/10 border-b border-success/20">
+                        <MudText Typo="Typo.h5" Class="text-lg font-semibold text-success">¡Éxito!</MudText>
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-success text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <MudText Class="text-muted text-center">Los permisos de componentes se han actualizado correctamente.</MudText>
+                        <div class="flex items-center justify-end gap-4 pt-4 border-t border-black/10 dark:border-darkborder">
+                            <MudButton Class="btn bg-success text-white border-success hover:bg-success/[0.85]" 
+                                       OnClick="CerrarModalExito">
+                                Aceptar
+                            </MudButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</CascadingValue>
+
+@code {
+    private bool isLoading = true;
+    private string? errorMessage;
+    
+    private List<ModuleDto> modulos = new();
+    private List<Rol> rolesActivos = new();
+    
+    private int moduloSeleccionadoId = 0;
+    
+    // Nueva estructura: Componentes con info de roles
+    private Dictionary<int, ComponenteConPermisos> componentesConRoles = new();
+    private Dictionary<int, List<int>> permisosOriginales = new();
+    
+    // Modal agregar rol
+    private bool modalAgregarRolOpen = false;
+    private int componenteIdActual = 0;
+    private string searchRol = string.Empty;
+    private HashSet<int> rolesSeleccionadosTemp = new();
+    
+    private bool modalCancelarOpen = false;
+    private bool modalGuardarOpen = false;
+    private bool modalExitoOpen = false;
+    private bool guardandoCambios = false;
+
+    // Clase auxiliar
+    public class ComponenteConPermisos
+    {
+        public int ComponentId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Route { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public List<RolInfo> RolesConAcceso { get; set; } = new();
+    }
+
+    public class RolInfo
+    {
+        public int RolId { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+
+            var modulosFromManager = ModuleManager.GetAllModules();
+            modulos = modulosFromManager
+                .Where(m => m.ModuleId > 0)
+                .Select(m => new ModuleDto
+                {
+                    ModuleId = m.ModuleId,
+                    ModuleName = m.ModuleName,
+                    DisplayName = m.DisplayName
+                }).ToList();
+
+            var rolesFromDb = await RolService.GetAllAsync();
+            rolesActivos = rolesFromDb.Where(r => r.Activo).ToList();
+            
+            if (!modulos.Any())
+            {
+                errorMessage = "No se encontraron módulos con ID asignado.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar datos: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnModuloSelectionChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int selectedId))
+        {
+            moduloSeleccionadoId = selectedId;
+            await OnModuloChanged();
+        }
+    }
+
+    private async Task OnModuloChanged()
+    {
+        if (moduloSeleccionadoId <= 0)
+        {
+            componentesConRoles.Clear();
+            permisosOriginales.Clear();
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+            
+            errorMessage = null;
+
+            var componentesDto = MetadataService.GetComponentsByModuleId(moduloSeleccionadoId);
+
+            componentesConRoles.Clear();
+            permisosOriginales.Clear();
+            
+            foreach (var comp in componentesDto)
+            {
+                var rolesConAcceso = comp.RequiredPermissionIds ?? new List<int>();
+                
+                var componenteInfo = new ComponenteConPermisos
+                {
+                    ComponentId = comp.ComponentId,
+                    Name = comp.Name,
+                    Route = comp.Route,
+                    Icon = comp.Icon,
+                    RolesConAcceso = rolesActivos
+                        .Where(r => rolesConAcceso.Contains(r.Id))
+                        .Select(r => new RolInfo
+                        {
+                            RolId = r.Id,
+                            Nombre = r.Nombre
+                        })
+                        .ToList()
+                };
+                
+                componentesConRoles[comp.ComponentId] = componenteInfo;
+                permisosOriginales[comp.ComponentId] = new List<int>(rolesConAcceso);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar componentes: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void AbrirAgregarRol(int componenteId)
+    {
+        componenteIdActual = componenteId;
+        rolesSeleccionadosTemp.Clear();
+        searchRol = string.Empty;
+        modalAgregarRolOpen = true;
+    }
+
+    private void CerrarModalAgregarRol()
+    {
+        modalAgregarRolOpen = false;
+        componenteIdActual = 0;
+        rolesSeleccionadosTemp.Clear();
+        searchRol = string.Empty;
+    }
+
+    private List<Rol> ObtenerRolesDisponibles()
+    {
+        if (!componentesConRoles.ContainsKey(componenteIdActual))
+            return new List<Rol>();
+
+        var rolesAsignados = componentesConRoles[componenteIdActual].RolesConAcceso
+            .Select(r => r.RolId)
+            .ToHashSet();
+
+        var disponibles = rolesActivos.Where(r => !rolesAsignados.Contains(r.Id)).ToList();
+
+        if (!string.IsNullOrWhiteSpace(searchRol))
+        {
+            var busqueda = searchRol.ToLower();
+            disponibles = disponibles.Where(r => r.Nombre.ToLower().Contains(busqueda)).ToList();
+        }
+
+        return disponibles;
+    }
+
+    private void ToggleRolSeleccionado(int rolId, bool isChecked)
+    {
+        if (isChecked)
+            rolesSeleccionadosTemp.Add(rolId);
+        else
+            rolesSeleccionadosTemp.Remove(rolId);
+    }
+
+    private void ConfirmarAgregarRoles()
+    {
+        if (!componentesConRoles.ContainsKey(componenteIdActual))
+            return;
+
+        var comp = componentesConRoles[componenteIdActual];
+        
+        foreach (var rolId in rolesSeleccionadosTemp)
+        {
+            var rol = rolesActivos.FirstOrDefault(r => r.Id == rolId);
+            if (rol != null && !comp.RolesConAcceso.Any(r => r.RolId == rolId))
+            {
+                comp.RolesConAcceso.Add(new RolInfo
+                {
+                    RolId = rol.Id,
+                    Nombre = rol.Nombre
+                });
+            }
+        }
+
+        CerrarModalAgregarRol();
+        Snackbar.Add($"{rolesSeleccionadosTemp.Count} rol(es) agregado(s)", Severity.Success);
+    }
+
+    private void RemoverRol(int componenteId, int rolId)
+    {
+        if (!componentesConRoles.ContainsKey(componenteId))
+            return;
+
+        var comp = componentesConRoles[componenteId];
+        var rol = comp.RolesConAcceso.FirstOrDefault(r => r.RolId == rolId);
+        
+        if (rol != null)
+        {
+            comp.RolesConAcceso.Remove(rol);
+            Snackbar.Add($"Rol '{rol.Nombre}' removido", Severity.Info);
+        }
+    }
+
+    private bool HayCambiosPendientes()
+    {
+        foreach (var kvp in componentesConRoles)
+        {
+            var componenteId = kvp.Key;
+            var nuevosRoles = kvp.Value.RolesConAcceso.Select(r => r.RolId).ToList();
+            
+            if (!permisosOriginales.ContainsKey(componenteId))
+                return true;
+            
+            var originales = permisosOriginales[componenteId];
+            
+            if (nuevosRoles.Count != originales.Count)
+                return true;
+            
+            if (nuevosRoles.Except(originales).Any() || originales.Except(nuevosRoles).Any())
+                return true;
+        }
+        
+        return false;
+    }
+
+    private void ToggleModalCancelar()
+    {
+        if (HayCambiosPendientes())
+            modalCancelarOpen = true;
+        else
+            Cancelar();
+    }
+
+    private void CloseModalCancelar() => modalCancelarOpen = false;
+
+    private void Cancelar()
+    {
+        Navigation.NavigateTo("/paneladmin/componentroles", true);
+    }
+
+    private void ToggleModalGuardar()
+    {
+        if (!HayCambiosPendientes())
+        {
+            Snackbar.Add("No hay cambios pendientes", Severity.Info);
+            return;
+        }
+        
+        modalGuardarOpen = true;
+    }
+
+    private void CloseModalGuardar() => modalGuardarOpen = false;
+
+    private async Task GuardarCambios()
+    {
+        try
+        {
+            guardandoCambios = true;
+
+            // Construir diccionario de cambios
+            var cambios = componentesConRoles.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.RolesConAcceso.Select(r => r.RolId).ToList()
+            );
+
+            // Obtener ID del usuario autenticado
+            var userId = await CurrentUserService.GetUserIdAsync() ?? "NA";
+            
+            // Guardar en BD
+            var resultado = await RolService.UpdateComponentPermissionsAsync(cambios, userId);
+
+            if (resultado)
+            {
+                // Recargar metadata para que Sidebar vea cambios
+                await ModuleManager.ReloadModuleMetadataAsync();
+                
+                modalGuardarOpen = false;
+                modalExitoOpen = true;
+
+                // Actualizar originales
+                permisosOriginales = componentesConRoles.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.RolesConAcceso.Select(r => r.RolId).ToList()
+                );
+            }
+            else
+            {
+                errorMessage = "Error al guardar cambios en la base de datos";
+                Snackbar.Add("Error al guardar", Severity.Error);
+                modalGuardarOpen = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error inesperado: {ex.Message}";
+            Snackbar.Add("Error al guardar", Severity.Error);
+            modalGuardarOpen = false;
+        }
+        finally
+        {
+            guardandoCambios = false;
+        }
+    }
+
+    private void CerrarModalExito()
+    {
+        modalExitoOpen = false;
+        // ✅ Forzar recarga completa de la página (equivalente a F5) para actualizar Sidebar
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+}

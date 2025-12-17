@@ -19,6 +19,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Abstractions\VRM_Plugin.Core.Abstractions.csproj" />
     <ProjectReference Include="..\..\..\Core\VRM_Plugin.Core.Shared\VRM_Plugin.Core.Shared.csproj" />
-    <ProjectReference Include="..\..\..\Host\VRM_Plugin.Blazor.Server\VRM_Plugin.Blazor.Server.csproj" />
   </ItemGroup>
 </Project>

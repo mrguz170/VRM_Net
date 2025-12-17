@@ -12,5 +12,9 @@ public interface IModuleManager
     /// Obtiene todos los módulos cargados
     /// </summary>
     IReadOnlyList<IModule> GetAllModules();
-        
+    
+    /// <summary>
+    /// Recarga metadata (componentes y acciones) desde BD sin reiniciar la aplicación
+    /// </summary>
+    Task ReloadModuleMetadataAsync();
 }

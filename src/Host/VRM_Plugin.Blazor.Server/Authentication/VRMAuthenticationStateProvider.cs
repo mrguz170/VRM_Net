@@ -262,16 +262,4 @@ public class VRMAuthenticationStateProvider : AuthenticationStateProvider, IDisp
         _subscription.Dispose();
     }
 
-    /// <summary>
-    /// Obtiene el UserId del usuario autenticado (versión asíncrona)
-    /// </summary>
-    public async Task<string?> GetUserIdAsync()
-    {
-        var authState = await GetAuthenticationStateAsync();
-        if (authState.User.Identity?.IsAuthenticated ?? false)
-        {
-            return authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        }
-        return null;
-    }
 }
