@@ -156,7 +156,7 @@ public class RolService : IRolService
             created_user_id = u.modificated_user,
             Activo = u.Activo
         };
-
+    }
 
     /// <summary>
     /// Actualiza permisos de componentes (múltiples a la vez)
